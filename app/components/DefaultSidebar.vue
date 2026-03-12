@@ -6,7 +6,7 @@ const route = useRoute()
 </script>
 
 <template>
-  <aside :class="['h-screen bg-[var(--color-secondary-950)] text-white flex flex-col gap-5 transition-all duration-300 overflow-hidden', isCollapsed ? 'w-12 py-5 px-2' : 'w-60 py-5 px-5']">
+  <aside :class="['fixed h-screen bg-[var(--color-secondary-950)] text-white flex flex-col gap-5 transition-all duration-300 overflow-hidden', isCollapsed ? 'w-12 py-5 px-2' : 'w-60 py-5 px-5']">
 
     <!-- Logo -->
     <NuxtLink to="/">
