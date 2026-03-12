@@ -16,18 +16,19 @@ const route = useRoute()
       </div>
     </NuxtLink>
 
-    <!-- Knop begin met schetsen -->
-    <NuxtLink to="/schetsen" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
-      <PrimaryButton>Begin met schetsen</PrimaryButton>
-    </NuxtLink>
-
-    <NuxtLink v-if="isCollapsed" to="/schetsen" class="flex justify-center">
-      <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/schetsen' ? 'var(--color-primary-500)' : 'white'" />
-    </NuxtLink>
-
     <!-- Navigatie -->
     <nav class="flex flex-col gap-4 flex-1">
 
+      <!-- Begin met schetsen -->
+      <NuxtLink to="/schetsen" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
+        <PrimaryButton tabindex="-1"              >Begin met schetsen</PrimaryButton>
+      </NuxtLink>
+
+      <NuxtLink v-if="isCollapsed" to="/schetsen" class="flex justify-center">
+        <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/schetsen' ? 'var(--color-primary-500)' : 'white'" />
+      </NuxtLink>
+
+      <!-- Links -->
       <NuxtLink to="/projecten" :class="['sidebar-link', { 'justify-center w-full' : isCollapsed }]">
         <FolderOpen :size="20" v-if="isCollapsed" class="shrink-0 h-6 w-6" :color="route.path === '/projecten' ? 'var(--color-primary-500)' : 'white'"/>
         <span v-if="!isCollapsed">Projecten<span class="text-[var(--color-primary-500)]">.</span></span>
