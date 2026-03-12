@@ -1,12 +1,12 @@
 <script setup lang="ts">
-import { FolderOpen, PencilLine, ChevronLeft, ChevronRight } from 'lucide-vue-next'
+import { FolderOpen, FolderLock, PencilLine, ChevronLeft } from 'lucide-vue-next'
 
 const { isCollapsed, toggle } = useSidebar()
 const route = useRoute()
 </script>
 
 <template>
-  <aside :class="['h-screen bg-[var(--color-secondary-950)] text-white flex flex-col gap-5 transition-all duration-300 overflow-hidden', isCollapsed ? 'w-12 p-2' : 'w-60 p-5']">
+  <aside :class="['h-screen bg-[var(--color-secondary-950)] text-white flex flex-col gap-5 transition-all duration-300 overflow-hidden', isCollapsed ? 'w-12 py-5 px-2' : 'w-60 py-5 px-5']">
 
     <!-- Logo -->
     <NuxtLink to="/">
@@ -15,9 +15,14 @@ const route = useRoute()
         <img v-if="isCollapsed" src="/images/cbyte-logo-sm.jpg" alt="CB" class="h-8" />
       </div>
     </NuxtLink>
-    <!-- Knop -->
-    <NuxtLink to="/schetsen" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }">
+
+    <!-- Knop begin met schetsen -->
+    <NuxtLink to="/schetsen" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
       <PrimaryButton>Begin met schetsen</PrimaryButton>
+    </NuxtLink>
+
+    <NuxtLink v-if="isCollapsed" to="/schetsen" class="flex justify-center">
+      <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/schetsen' ? 'var(--color-primary-500)' : 'white'" />
     </NuxtLink>
 
     <!-- Navigatie -->
@@ -29,7 +34,7 @@ const route = useRoute()
       </NuxtLink>
 
       <NuxtLink to="/mijn-schetsen" :class="['sidebar-link', { 'justify-center w-full' : isCollapsed }]">
-        <PencilLine :size="20" v-if="isCollapsed" class="shrink-0 h-6 w-6" :color="route.path === '/mijn-schetsen' ? 'var(--color-primary-500)' : 'white'"/>
+        <FolderLock :size="20" v-if="isCollapsed" class="shrink-0 h-6 w-6" :color="route.path === '/mijn-schetsen' ? 'var(--color-primary-500)' : 'white'"/>
         <span v-if="!isCollapsed">Mijn Schetsen<span class="text-[var(--color-primary-500)]">.</span></span>
       </NuxtLink>
 
@@ -37,8 +42,7 @@ const route = useRoute()
 
     <!-- Toggle knop -->
     <button @click="toggle" :class="['flex items-center gap-2 cursor-pointer text-white', { 'justify-center w-full' : isCollapsed }]">
-      <ChevronLeft v-if="!isCollapsed" :size="24" />
-      <ChevronRight v-if="isCollapsed" :size="24" />
+      <ChevronLeft :size="24" class="toggle-icon" :class="{ 'toggle-icon--collapsed': isCollapsed }" />
       <span v-if="!isCollapsed" class="text-small">Inklappen</span>
     </button>
 
@@ -79,6 +83,14 @@ const route = useRoute()
   max-height: 0;
   opacity: 0;
   pointer-events: none;
+}
+
+.toggle-icon {
+  transition: transform 0.3s ease;
+}
+
+.toggle-icon--collapsed {
+  transform: rotate(180deg);
 }
 
 </style>
