@@ -1,20 +1,21 @@
+<script setup lang="ts">
+</script>
 <template>
   <div class="app-layout">
 
-    <header>
-      <nav>
-        <NuxtLink to="/">MyApp</NuxtLink>
-        <NuxtLink to="/health">API Health</NuxtLink>
-      </nav>
-    </header>
+    <div class="flex">
+      <DefaultSidebar />
+      <main class="p-5">
+        <slot />
+      </main>
+    </div>
 
-    <main>
-      <slot />
-    </main>
 
-    <footer>
-      <p>Wat een mooie footer</p>
-    </footer>
-
+<!--    <header>-->
+<!--      <nav>-->
+<!--        <NuxtLink to="/">MyApp</NuxtLink>-->
+<!--        <NuxtLink to="/health">API Health</NuxtLink>-->
+<!--      </nav>-->
+<!--    </header>-->
   </div>
 </template>
