@@ -19,7 +19,7 @@ const route = useRoute()
     <!-- Navigatie -->
     <nav class="flex flex-col gap-4 flex-1">
 
-      <!-- Begin met schetsen -->
+      <!-- Start sketching -->
       <NuxtLink to="/schetsen" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
         <PrimaryButton tabindex="-1">Begin met schetsen</PrimaryButton>
       </NuxtLink>
@@ -41,7 +41,7 @@ const route = useRoute()
 
     </nav>
 
-    <!-- Toggle knop -->
+    <!-- Toggle button -->
     <button @click="toggle" :class="['flex items-center gap-2 cursor-pointer text-white', { 'justify-center w-full' : isCollapsed }]">
       <ChevronLeft :size="24" class="toggle-icon" :class="{ 'toggle-icon--collapsed': isCollapsed }" />
       <span v-if="!isCollapsed" class="text-small">Inklappen</span>
