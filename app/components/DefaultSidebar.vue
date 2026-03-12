@@ -21,7 +21,7 @@ const route = useRoute()
 
       <!-- Begin met schetsen -->
       <NuxtLink to="/schetsen" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
-        <PrimaryButton tabindex="-1"              >Begin met schetsen</PrimaryButton>
+        <PrimaryButton tabindex="-1">Begin met schetsen</PrimaryButton>
       </NuxtLink>
 
       <NuxtLink v-if="isCollapsed" to="/schetsen" class="flex justify-center">
