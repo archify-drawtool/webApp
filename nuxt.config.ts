@@ -10,4 +10,6 @@ export default defineNuxtConfig({
       apiBaseUrl: 'http://localhost:8000',
     },
   },
+
+  modules: ['@nuxt/eslint'],
 })
