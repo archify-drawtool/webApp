@@ -5,6 +5,6 @@ export default withNuxt({
     rules: {
         'no-console': 'warn',                   // prevents forgotten console.logs
         'no-unused-vars': 'error',              // keeps code clean
-        'vue/require-default-prop': 'error',    // betere component documentatie
+        'vue/require-default-prop': 'error',    // beter component documentation
     }}
 )
