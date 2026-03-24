@@ -11,8 +11,8 @@ const route = useRoute()
     <!-- Logo -->
     <NuxtLink to="/">
       <div class="flex items-center overflow-hidden">
-        <img v-if="!isCollapsed" src="/images/cbyte-logo.png" alt="CBYTE digital" class="h-8" />
-        <img v-if="isCollapsed" src="/images/cbyte-logo-sm.jpg" alt="CB" class="h-8" />
+        <img v-if="!isCollapsed" src="/images/cbyte-logo.png" alt="CBYTE digital" class="h-8" >
+        <img v-if="isCollapsed" src="/images/cbyte-logo-sm.jpg" alt="CB" class="h-8" >
       </div>
     </NuxtLink>
 
@@ -30,19 +30,19 @@ const route = useRoute()
 
       <!-- Links -->
       <NuxtLink to="/projecten" :class="['sidebar-link', { 'justify-center w-full' : isCollapsed }]">
-        <FolderOpen :size="20" v-if="isCollapsed" class="shrink-0 h-6 w-6" :color="route.path === '/projecten' ? 'var(--color-primary-500)' : 'white'"/>
+        <FolderOpen v-if="isCollapsed" :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/projecten' ? 'var(--color-primary-500)' : 'white'"/>
         <span v-if="!isCollapsed">Projecten<span class="text-[var(--color-primary-500)]">.</span></span>
       </NuxtLink>
 
       <NuxtLink to="/mijn-schetsen" :class="['sidebar-link', { 'justify-center w-full' : isCollapsed }]">
-        <FolderLock :size="20" v-if="isCollapsed" class="shrink-0 h-6 w-6" :color="route.path === '/mijn-schetsen' ? 'var(--color-primary-500)' : 'white'"/>
+        <FolderLock v-if="isCollapsed" :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/mijn-schetsen' ? 'var(--color-primary-500)' : 'white'"/>
         <span v-if="!isCollapsed">Mijn Schetsen<span class="text-[var(--color-primary-500)]">.</span></span>
       </NuxtLink>
 
     </nav>
 
     <!-- Toggle button -->
-    <button @click="toggle" :class="['flex items-center gap-2 cursor-pointer text-white', { 'justify-center w-full' : isCollapsed }]">
+    <button :class="['flex items-center gap-2 cursor-pointer text-white', { 'justify-center w-full' : isCollapsed }]" @click="toggle">
       <ChevronLeft :size="24" class="toggle-icon" :class="{ 'toggle-icon--collapsed': isCollapsed }" />
       <span v-if="!isCollapsed" class="text-small">Inklappen</span>
     </button>
