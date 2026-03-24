@@ -6,23 +6,23 @@
       <div>
         <label for="email">E-mailadres</label>
         <input
-          class="border"
           id="email"
           v-model="credentials.email"
+          class="border"
           type="email"
           required
-        />
+        >
       </div>
 
       <div>
         <label for="password">Wachtwoord</label>
         <input
-          class="border"
           id="password"
           v-model="credentials.password"
+          class="border"
           type="password"
           required
-        />
+        >
       </div>
 
       <PrimaryButton type="submit" :disabled="pending">
@@ -35,9 +35,9 @@
 </template>
 
 <script setup lang="ts">
-definePageMeta({ layout: "auth" });
-
 import type { LoginCredentials } from "~/types/Auth";
+
+definePageMeta({ layout: "auth" });
 
 const { login } = useAuth();
 
