@@ -1,0 +1,42 @@
+name: Test CI
+
+on:
+  push:
+    branches: [ Test ]
+  pull_request:
+    branches: [ Test ]
+
+jobs:
+  nuxt-checks:
+    runs-on: ubuntu-latest
+    environment: test
+
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run linting
+        run: npm run lint
+
+      - name: Run tests
+        run: npm run test
+
+      - name: Build
+        run: npm run build
+
+  docker-build:
+    needs: nuxt-checks
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Build Docker image
+        run: docker build -t laravel-frontend .
