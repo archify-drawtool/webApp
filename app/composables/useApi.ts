@@ -1,6 +1,10 @@
 export const useApi = () => {
   const config = useRuntimeConfig();
   const baseURL = config.public.apiBaseUrl;
+  const token = useCookie<string | null>('auth_token');
+  const authHeader = computed((): Record<string, string> =>
+    token.value ? { Authorization: `Bearer ${token.value}` } : {}
+  );
 
   const handleError = (error: unknown): never => {
     const err = error as {
@@ -27,6 +31,7 @@ export const useApi = () => {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          ...authHeader.value,
         },
         ...options,
       });
@@ -46,6 +51,7 @@ export const useApi = () => {
         headers: {
           Accept: "application/json",
           "Content-Type": "application/json",
+          ...authHeader.value,
           ...headers,
         },
         body,

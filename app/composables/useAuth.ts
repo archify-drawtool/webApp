@@ -20,7 +20,7 @@ export const useAuth = () => {
 
   const logout = async (): Promise<void> => {
     try {
-      await post("/api/logout", {}, { Authorization: `Bearer ${token.value}` });
+      await post("/api/logout", {});
     } finally {
       token.value = null;
       user.value = null;
