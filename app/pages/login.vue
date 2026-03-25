@@ -40,7 +40,7 @@
       <p class="text-small text-center text-white/70">
         Nog geen account?
         <a
-          href="mailto:info@cbyte.digital"
+          href="mailto:team@cbyte.nl"
           class="text-primary-500 hover:text-primary-900"
           >Neem contact op</a
         >
