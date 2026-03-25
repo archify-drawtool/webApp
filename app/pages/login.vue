@@ -26,7 +26,7 @@
           required
         >
           <template #right-label>
-            <a href="#" class="text-small text-primary-500 hover:text-primary-900"
+            <a href="#" class="text-small font-bold text-primary-500 hover:text-primary-900"
               >Wachtwoord vergeten?</a
             >
           </template>
@@ -41,7 +41,7 @@
         Nog geen account?
         <a
           href="mailto:team@cbyte.nl"
-          class="text-primary-500 hover:text-primary-900"
+          class="font-bold text-primary-500 hover:text-primary-900"
           >Neem contact op</a
         >
       </p>

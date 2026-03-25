@@ -18,7 +18,9 @@ const route = useRoute()
 
     <!-- Navigatie -->
     <nav class="flex flex-col gap-4 flex-1">
-      <LogoutButton />
+      <div class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }">
+        <LogoutButton />
+      </div>
 
       <!-- Start sketching -->
       <NuxtLink to="/schetsen" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
