@@ -5,8 +5,8 @@
     <div class="w-full flex flex-col gap-6">
       <h1 class="text-center">Login op Archify</h1>
 
-      <p v-if="error" class="text-red-400 text-sm text-center">
-        Fout: {{ errorMessage }}
+      <p v-if="error" class="text-sm px-4 py-2 bg-error-bg text-error-text">
+        {{ errorMessage }}
       </p>
 
       <form class="flex flex-col gap-4" @submit.prevent="submit">
