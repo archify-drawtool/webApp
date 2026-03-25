@@ -1,36 +1,51 @@
 <template>
-  <div>
-    <h1>Inloggen</h1>
+  <div class="w-full max-w-sm flex flex-col items-center gap-8">
+    <img src="/images/cbyte-logo.png" alt="CBYTE Digital" class="h-12" >
 
-    <form @submit.prevent="submit">
-      <div>
-        <label for="email">E-mailadres</label>
-        <input
+    <div class="w-full flex flex-col gap-6">
+      <h1 class="text-center">Login op Archify</h1>
+
+      <p v-if="error" class="text-red-400 text-sm text-center">
+        Fout: {{ errorMessage }}
+      </p>
+
+      <form class="flex flex-col gap-4" @submit.prevent="submit">
+        <AuthInput
           id="email"
           v-model="credentials.email"
-          class="border"
+          label="E-mailadres"
           type="email"
           required
-        >
-      </div>
+        />
 
-      <div>
-        <label for="password">Wachtwoord</label>
-        <input
+        <AuthInput
           id="password"
           v-model="credentials.password"
-          class="border"
+          label="Wachtwoord"
           type="password"
           required
         >
-      </div>
+          <template #right-label>
+            <a href="#" class="text-sm text-primary-500 hover:text-primary-900"
+              >Wachtwoord vergeten?</a
+            >
+          </template>
+        </AuthInput>
 
-      <PrimaryButton type="submit" :disabled="pending">
-        {{ pending ? "Bezig..." : "Inloggen" }}
-      </PrimaryButton>
-    </form>
+        <PrimaryButton type="submit" :disabled="pending" class="w-full mt-2">
+          {{ pending ? "Bezig..." : "Inloggen" }}
+        </PrimaryButton>
+      </form>
 
-    <p v-if="error">Fout: {{ errorMessage }}</p>
+      <p class="text-sm text-center text-white/70">
+        Nog geen account?
+        <a
+          href="mailto:info@cbyte.digital"
+          class="text-primary-500 hover:text-primary-900"
+          >Neem contact op</a
+        >
+      </p>
+    </div>
   </div>
 </template>
 
