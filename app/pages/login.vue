@@ -5,7 +5,7 @@
     <div class="w-full flex flex-col gap-6">
       <h1 class="text-center">Login op Archify</h1>
 
-      <p v-if="error" class="text-sm px-4 py-2 bg-error-bg text-error-text">
+      <p v-if="error" class="text-small px-4 py-2 bg-error-bg text-error-text">
         {{ errorMessage }}
       </p>
 
@@ -26,7 +26,7 @@
           required
         >
           <template #right-label>
-            <a href="#" class="text-sm text-primary-500 hover:text-primary-900"
+            <a href="#" class="text-small text-primary-500 hover:text-primary-900"
               >Wachtwoord vergeten?</a
             >
           </template>
@@ -37,7 +37,7 @@
         </PrimaryButton>
       </form>
 
-      <p class="text-sm text-center text-white/70">
+      <p class="text-small text-center text-white/70">
         Nog geen account?
         <a
           href="mailto:info@cbyte.digital"
