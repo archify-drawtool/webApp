@@ -2,7 +2,7 @@
 import type { Project } from '~/types/Project';
 import { User } from 'lucide-vue-next';
 
-const props = defineProps<{
+defineProps<{
   project: Project;
 }>();
 
