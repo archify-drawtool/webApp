@@ -1,19 +1,19 @@
 import {useApi} from "~/composables/useApi";
 import type {HealthResponse} from "~/types/Health";
 
-// Export gebruiken als je in ander classes deze methode wilt bereiken
+// Use export when you want to access this method in other classes
 export const useHealth = () => {
     /**
-        De { get } wordt hier gebruikt om alleen de get methode te halen uit useApi
+         The { get } is used here to retrieve only the get method from useApi.
 
-        Dit zou hetzelfde resultaat opleveren als je meerdere methodes nodig hebt zoals post of delete:
-            const api = useApi()
-            api.get<HealthResponse>('/api/health')
-            api.delete('/api/users/1')
+         This would produce the same result if you need multiple methods like post or delete:
+         const api = useApi()
+         api.get<HealthResponse>('/api/health')
+         api.delete('/api/users/1')
 
-        Maar door de deconstruction (omdat we hier alleen get nodig hebben) gebruiken we:
-            const { get } = useApi()
-            get<HealthResponse>('/api/health')
+         But because of the deconstruction (because we only need get here), we use:
+         const { get } = useApi()
+         get<HealthResponse>('/api/health')
      */
     const { get } = useApi()
 
