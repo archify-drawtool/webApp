@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Project } from '~/types/Project';
+import { Pencil } from 'lucide-vue-next';
 
 defineProps<{
   projects: Project[];
@@ -20,10 +21,10 @@ defineProps<{
     <!-- New project card -->
     <NuxtLink
         to="/projecten/nieuw"
-        class="flex items-center justify-center gap-2 border-2 border-dashed border-grey-400 rounded-lg p-4 h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer"
+        class="flex items-center justify-center gap-2 border-2 border-dashed border-grey-400 rounded-lg p-4 h-full hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer"
     >
       <span class="font-heading text-h3">Begin met schetsen</span>
-      <span>✏️</span>
+      <Pencil :size="20" />
     </NuxtLink>
 
     <!-- Project cards -->

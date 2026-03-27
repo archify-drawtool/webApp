@@ -1,5 +1,6 @@
 <script setup lang="ts">
 import type { Project } from '~/types/Project';
+import { User } from 'lucide-vue-next';
 
 const props = defineProps<{
   project: Project;
@@ -38,8 +39,8 @@ const timeAgo = (dateString: string): string => {
       class="block bg-primary-50 rounded-lg p-4 hover:bg-primary-100 transition-colors cursor-pointer"
   >
     <h3>{{ project.title }}</h3>
-    <p v-if="project.creator" class="text-primary-500 text-small mt-1">
-      <span>👤</span> {{ project.creator.name }}
+    <p v-if="project.creator" class="text-primary-500 text-small mt-1 flex items-center gap-1">
+      <User :size="14" /> {{ project.creator.name }}
     </p>
     <p class="text-grey-600 text-small mt-1">
       Laatst bijgewerkt: {{ timeAgo(project.updated_at) }}
