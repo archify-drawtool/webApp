@@ -23,12 +23,12 @@ const route = useRoute()
       </div>
 
       <!-- Start sketching -->
-      <NuxtLink to="/schetsen/nieuw" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
+      <NuxtLink to="/projecten/nieuw/schetsen/nieuw" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
         <PrimaryButton tabindex="-1">Begin met schetsen</PrimaryButton>
       </NuxtLink>
 
-      <NuxtLink v-if="isCollapsed" to="/schetsen/nieuw" class="flex justify-center">
-        <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/schetsen/nieuw' ? 'var(--color-primary-500)' : 'white'" />
+      <NuxtLink v-if="isCollapsed" to="/projecten/nieuw/schetsen/nieuw" class="flex justify-center">
+        <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/projecten/nieuw/schetsen/nieuw' ? 'var(--color-primary-500)' : 'white'" />
       </NuxtLink>
 
       <!-- Links -->

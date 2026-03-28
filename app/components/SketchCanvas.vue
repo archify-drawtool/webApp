@@ -2,11 +2,12 @@
 import { VueFlow } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
+import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 </script>
 
 <template>
   <VueFlow
-    id="sketch-canvas"
+    :id="SKETCH_CANVAS_ID"
     class="w-full h-full"
     :default-viewport="{ zoom: 1 }"
     :min-zoom="0.1"
