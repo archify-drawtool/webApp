@@ -11,21 +11,20 @@ const timeAgo = (dateString: string): string => {
   const now = new Date();
   const diffInSeconds = Math.floor((now.getTime() - date.getTime()) / 1000);
 
-  const intervals: { label: string; seconds: number }[] = [
-    { label: 'jaar', seconds: 31536000 },
-    { label: 'maand', seconds: 2592000 },
-    { label: 'week', seconds: 604800 },
-    { label: 'dag', seconds: 86400 },
-    { label: 'uur', seconds: 3600 },
-    { label: 'minuut', seconds: 60 },
+  const intervals: { singular: string; plural: string; seconds: number }[] = [
+    { singular: 'jaar', plural: 'jaren', seconds: 31536000 },
+    { singular: 'maand', plural: 'maanden', seconds: 2592000 },
+    { singular: 'week', plural: 'weken', seconds: 604800 },
+    { singular: 'dag', plural: 'dagen', seconds: 86400 },
+    { singular: 'uur', plural: 'uren', seconds: 3600 },
+    { singular: 'minuut', plural: 'minuten', seconds: 60 },
   ];
 
   for (const interval of intervals) {
     const count = Math.floor(diffInSeconds / interval.seconds);
     if (count >= 1) {
-      return count === 1
-          ? `${count} ${interval.label} geleden`
-          : `${count} ${interval.label}en geleden`;
+      const label = count === 1 ? interval.singular : interval.plural;
+      return `${count} ${label} geleden`;
     }
   }
 
