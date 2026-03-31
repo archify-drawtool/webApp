@@ -1,9 +1,9 @@
 <script setup lang="ts">
-import type { Project } from '~/types/Project';
+import type { Schets } from '~/types/Schets';
 import { User } from 'lucide-vue-next';
 
 defineProps<{
-  project: Project;
+  schets: Schets;
 }>();
 
 const timeAgo = (dateString: string): string => {
@@ -34,16 +34,13 @@ const timeAgo = (dateString: string): string => {
 </script>
 
 <template>
-  <NuxtLink
-      :to="`/projecten/${project.id}`"
-      class="block bg-primary-50 rounded-lg p-4 hover:bg-primary-100 transition-colors cursor-pointer"
-  >
-    <h3>{{ project.title }}</h3>
-    <p v-if="project.creator" class="text-primary-500 text-small mt-1 flex items-center gap-1">
-      <User :size="14" /> {{ project.creator.name }}
+  <div class="bg-white border border-primary-500 rounded-lg p-4 cursor-pointer hover:bg-primary-50 transition-colors">
+    <h3>{{ schets.title }}</h3>
+    <p v-if="schets.creator" class="text-primary-500 text-small mt-1 flex items-center gap-1">
+      <User :size="14" /> {{ schets.creator.name }}
     </p>
     <p class="text-grey-600 text-small mt-1">
-      Laatst bijgewerkt: {{ timeAgo(project.updated_at) }}
+      Laatst bewerkt: {{ timeAgo(schets.updated_at) }}
     </p>
-  </NuxtLink>
+  </div>
 </template>
