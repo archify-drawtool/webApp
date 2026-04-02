@@ -7,8 +7,11 @@ export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
   const { get } = useApi()
 
-  const fetchSketch = async (sketchId: string | number): Promise<Sketch | undefined> => {
-    const sketch = await get<Sketch>(`/api/sketches/${sketchId}`)
+  const fetchSketch = async (sketchId: string | number, projectId?: string | number): Promise<Sketch | undefined> => {
+    const endpoint = projectId
+      ? `/api/projects/${projectId}/sketches/${sketchId}`
+      : `/api/sketches/${sketchId}`
+    const sketch = await get<Sketch>(endpoint)
     if (sketch) {
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map(({ type: _, ...edge }) => edge))

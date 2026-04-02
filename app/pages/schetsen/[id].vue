@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'editor',
+  alias: ['/projecten/:projectId/schetsen/:id'],
 })
 
 const route = useRoute()
@@ -14,7 +15,7 @@ onUnmounted(clearCanvas)
 onMounted(async () => {
   try {
     await Promise.all([
-      fetchSketch(route.params.id as string),
+      fetchSketch(route.params.id as string, route.params.projectId as string | undefined),
       fetchNodeTypes(),
     ])
   } catch {
