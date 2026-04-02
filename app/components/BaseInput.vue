@@ -1,7 +1,7 @@
 <template>
   <div class="flex flex-col gap-1">
     <div class="flex justify-between items-center">
-      <label :for="id" style="font-family: var(--font-heading); font-size: 19px; font-weight: 700;">
+      <label :for="id" class="font-heading text-[19px] font-bold">
         {{ label }}<span v-if="required" class="text-primary-500">*</span>
       </label>
       <slot name="right-label" />
