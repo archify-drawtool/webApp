@@ -1,5 +1,5 @@
 <template>
-  <AppShell>
+  <AppShell full-height>
     <slot />
   </AppShell>
 </template>
