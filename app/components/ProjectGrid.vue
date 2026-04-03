@@ -20,7 +20,7 @@ defineProps<{
   >
     <!-- New project card -->
     <NuxtLink
-        to="/projecten/nieuw"
+        to="/projecten/aanmaken"
         class="flex items-center justify-center gap-2 border-2 border-dashed border-grey-400 rounded-lg p-4 h-full hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer"
     >
       <span class="font-heading text-h3">Begin met schetsen</span>
