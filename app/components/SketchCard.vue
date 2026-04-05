@@ -34,10 +34,10 @@ const timeAgo = (dateString: string): string => {
 </script>
 
 <template>
-  <div class="bg-white border border-primary-500 rounded-lg p-4 cursor-pointer hover:bg-primary-50 transition-colors">
+  <div class="bg-white border border-primary-500 p-4 cursor-pointer hover:bg-primary-50 transition-colors">
     <h3>{{ sketch.title }}</h3>
     <p v-if="sketch.creator" class="text-primary-500 text-small mt-1 flex items-center gap-1">
-      <User :size="14" /> {{ sketch.creator.name }}
+      <User :size="14" class="text-black" /> {{ sketch.creator.name }}
     </p>
     <p class="text-grey-600 text-small mt-1">
       Laatst bewerkt: {{ timeAgo(sketch.updated_at) }}
