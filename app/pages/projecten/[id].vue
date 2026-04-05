@@ -6,7 +6,7 @@ const route = useRoute();
 const projectId = Number(route.params.id);
 
 const { get } = useApi();
-const { schetsen, loading, error, getSchetsen } = useSchetsen();
+const { sketches, loading, error, fetchSketches } = useSketches();
 
 const project = ref<Project | null>(null);
 const projectError = ref<string | null>(null);
@@ -18,7 +18,7 @@ try {
     projectError.value = err?.statusMessage ?? 'Er is een onbekende fout opgetreden';
 }
 
-await getSchetsen(projectId);
+await fetchSketches(projectId);
 </script>
 
 <template>
@@ -46,10 +46,10 @@ await getSchetsen(projectId);
           <Pencil :size="20" />
         </NuxtLink>
 
-        <SchetsenCard
-            v-for="schets in schetsen"
-            :key="schets.id"
-            :schets="schets"
+        <SketchCard
+            v-for="sketch in sketches"
+            :key="sketch.id"
+            :sketch="sketch"
         />
       </BaseGrid>
     </template>

@@ -1,6 +1,6 @@
 import type { User } from '~/types/Auth';
 
-export interface Schets {
+export interface SketchSummary {
     id: number;
     title: string;
     project_id: number;
@@ -9,3 +9,4 @@ export interface Schets {
     created_at: string;
     updated_at: string;
 }
+
