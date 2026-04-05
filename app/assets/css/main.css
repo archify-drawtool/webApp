@@ -1,5 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Syne:wght@700&family=Nunito:wght@400&display=swap');
 @import "tailwindcss";
+@import "@vue-flow/core/dist/style.css";
+@import "@vue-flow/controls/dist/style.css";
 
 /* ===========================
    THEME
