@@ -1,7 +1,7 @@
 <template>
   <div>
     <h1 class="mb-4">Project aanmaken</h1>
-    <hr class="mb-6" style="border-color: #86858F;">
+    <hr class="mb-6 border-[#86858F]">
 
     <p v-if="error" class="text-small px-4 py-2 bg-error-bg text-error-text mb-4">
       {{ error }}
@@ -23,7 +23,7 @@
         <SecondaryButton ghost type="button" @click="navigateTo('/projecten')">
           Annuleer
         </SecondaryButton>
-        <PrimaryButton type="submit" :disabled="pending" style="background-color: #0D0A1F;">
+        <PrimaryButton type="submit" :disabled="pending" variant="secondary">
           {{ pending ? 'Bezig...' : 'Aanmaken' }}
         </PrimaryButton>
       </div>
