@@ -3,12 +3,17 @@ import { VueFlow } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
-import SketchNode from '~/components/SketchNode.vue'
+import SketchNode from '~/components/sketch/Node.vue'
+import SketchToolbar from '~/components/sketch/Toolbar.vue'
+import { markRaw } from 'vue'
 
-const { nodeTypes: apiNodeTypes } = useNodeTypes()
+const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
+await fetchNodeTypes()
+const { defaultEdgeOptions } = useEdgeTool()
 
+const rawSketchNode = markRaw(SketchNode)
 const nodeTypes = computed(() =>
-  Object.fromEntries(apiNodeTypes.value.map(t => [t.type, SketchNode]))
+  Object.fromEntries(apiNodeTypes.value.map(t => [t.type, rawSketchNode]))
 )
 </script>
 
@@ -17,7 +22,7 @@ const nodeTypes = computed(() =>
     :id="SKETCH_CANVAS_ID"
     :node-types="nodeTypes"
     class="w-full h-full"
-    :default-edge-options="{ type: 'smoothstep' }"
+    :default-edge-options="defaultEdgeOptions"
     :default-viewport="{ zoom: 1 }"
     :min-zoom="0.1"
     :max-zoom="4"
@@ -30,5 +35,6 @@ const nodeTypes = computed(() =>
       bg-color="transparent"
     />
     <Controls :show-interactive="false" />
+    <SketchToolbar />
   </VueFlow>
 </template>

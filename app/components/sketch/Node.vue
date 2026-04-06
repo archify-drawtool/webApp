@@ -1,8 +1,10 @@
 <script setup lang="ts">
+
 import { Handle, Position, type NodeProps } from '@vue-flow/core'
 import { Server, Database, LayoutDashboard, User, Square } from 'lucide-vue-next'
 
 const props = defineProps<NodeProps<{ label?: string }>>()
+defineEmits(['updateNodeInternals'])
 
 const { nodeTypes } = useNodeTypes()
 
