@@ -14,7 +14,8 @@ import {
 
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
-const { pendingNodeType, lastNodeType, activateNodeType, clearNodeType } = useNodeTool()
+type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
+const { selectedNodeType, setNodeType } = useNodeTool()
 
 const nodeDropdownOpen = ref(false)
 const edgeDropdownOpen = ref(false)
@@ -26,26 +27,31 @@ const iconComponents: Record<string, Component> = {
   'layout-dashboard': LayoutDashboard,
   user: User,
   square: Square,
-}
-
-const edgeIconComponents: Record<string, Component> = {
   'arrow-right': ArrowRight,
   'arrow-left-right': ArrowLeftRight,
   minus: Minus,
 }
 
 function iconFor(name: string): Component {
-  return iconComponents[name] ?? edgeIconComponents[name] ?? Square
+  return iconComponents[name] ?? Square
 }
 
-const activeNodeType = computed(() =>
-  nodeTypes.value.find(nt => nt.type === (lastNodeType.value ?? pendingNodeType.value)) ?? nodeTypes.value[0],
+const selectedNodeTypeObj = computed(() =>
+  nodeTypes.value.find(nt => nt.type === selectedNodeType.value) ?? nodeTypes.value[0],
 )
 
 const activeEdgeIcon = computed(() => {
   const tool = EDGE_TOOLS.find(t => t.id === activeEdgeTool.value)
   return iconFor(tool?.icon ?? 'arrow-right')
 })
+
+const nodeDropdownItems = computed(() =>
+  nodeTypes.value.map(nt => ({ key: nt.type, icon: iconFor(nt.icon), label: nt.name })),
+)
+
+const edgeDropdownItems = computed(() =>
+  EDGE_TOOLS.map(t => ({ key: t.id, icon: iconFor(t.icon), label: t.label })),
+)
 
 function toggleNodeDropdown() {
   edgeDropdownOpen.value = false
@@ -62,12 +68,8 @@ function closeAll() {
   edgeDropdownOpen.value = false
 }
 
-function selectNodeType(type: string) {
-  if (pendingNodeType.value === type) {
-    clearNodeType()
-  } else {
-    activateNodeType(type)
-  }
+function selectNodeType(key: string) {
+  setNodeType(key)
   nodeDropdownOpen.value = false
 }
 </script>
@@ -82,16 +84,13 @@ function selectNodeType(type: string) {
 
       <!-- Node tool section -->
       <div class="flex items-center">
-        <!-- Active node icon: click to toggle pending off -->
         <button
-          class="rounded-full p-2 hover:bg-secondary-700 transition-colors"
-          :class="pendingNodeType ? 'text-primary-500' : 'text-grey-200'"
-          :title="pendingNodeType ? 'Click canvas to place node (Esc to cancel)' : 'Select a node type'"
-          @click.stop="pendingNodeType ? clearNodeType() : (activeNodeType && activateNodeType(activeNodeType.type))"
+          class="rounded-full p-2 hover:bg-secondary-700 text-grey-200 transition-colors"
+          title="Select a node type"
+          @click.stop="toggleNodeDropdown"
         >
-          <component :is="iconFor(activeNodeType?.icon ?? 'square')" :size="18" />
+          <component :is="iconFor(selectedNodeTypeObj?.icon ?? 'square')" :size="18" />
         </button>
-        <!-- Dropdown toggle -->
         <button
           class="rounded-full p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
           @click.stop="toggleNodeDropdown"
@@ -117,40 +116,19 @@ function selectNodeType(type: string) {
       </div>
     </div>
 
-    <!-- Node dropdown -->
-    <div
+    <SketchToolbarDropdown
       v-if="nodeDropdownOpen"
-      class="absolute bottom-full mb-2 left-0 rounded-xl bg-secondary-900 border border-secondary-700 shadow-xl p-1 z-50"
-    >
-      <button
-        v-for="nt in nodeTypes"
-        :key="nt.type"
-        class="flex items-center gap-2 px-3 py-2 rounded-lg w-full hover:bg-primary-500 hover:text-white transition-colors"
-        :class="pendingNodeType === nt.type ? 'text-primary-500' : 'text-grey-100'"
-        @click.stop="selectNodeType(nt.type)"
-      >
-        <span class="w-3 text-xs">{{ pendingNodeType === nt.type ? '✓' : '' }}</span>
-        <component :is="iconFor(nt.icon)" :size="16" />
-        <span class="text-sm">{{ nt.name }}</span>
-      </button>
-    </div>
+      :items="nodeDropdownItems"
+      :selected-key="selectedNodeType"
+      @select="selectNodeType"
+    />
 
-    <!-- Edge dropdown -->
-    <div
+    <SketchToolbarDropdown
       v-if="edgeDropdownOpen"
-      class="absolute bottom-full mb-2 right-0 rounded-xl bg-secondary-900 border border-secondary-700 shadow-xl p-1 z-50"
-    >
-      <button
-        v-for="tool in EDGE_TOOLS"
-        :key="tool.id"
-        class="flex items-center gap-2 px-3 py-2 rounded-lg w-full hover:bg-primary-500 hover:text-white transition-colors"
-        :class="activeEdgeTool === tool.id ? 'text-primary-500' : 'text-grey-200'"
-        @click.stop="setEdgeTool(tool.id); edgeDropdownOpen = false"
-      >
-        <span class="w-3 text-xs">{{ activeEdgeTool === tool.id ? '✓' : '' }}</span>
-        <component :is="iconFor(tool.icon)" :size="16" />
-        <span class="text-sm">{{ tool.label }}</span>
-      </button>
-    </div>
+      :items="edgeDropdownItems"
+      :selected-key="activeEdgeTool"
+      align-right
+      @select="key => { setEdgeTool(key as EdgeToolId); edgeDropdownOpen = false }"
+    />
   </Panel>
 </template>
