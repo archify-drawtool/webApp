@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   User,
   Square,
+  Type,
 } from 'lucide-vue-next'
 
 const { nodeTypes } = useNodeTypes()
@@ -72,13 +73,12 @@ function selectNodeType(key: string) {
     <!-- Backdrop to close dropdowns on outside click -->
     <div v-if="anyOpen" class="fixed inset-0 z-40" @mousedown.stop="closeAll" />
 
-    <!-- Pill -->
     <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
       <!-- Node tool section -->
       <div class="flex items-center">
         <button
-          class="rounded-md p-2 hover:bg-secondary-700 text-grey-200 transition-colors"
+          class="rounded-md p-2 hover:bg-secondary-700 text-grey-200 transition-colors cursor-grab"
           title="Select a node type"
           @click.stop="toggle('node')"
         >
@@ -92,8 +92,13 @@ function selectNodeType(key: string) {
         </button>
       </div>
 
-      <!-- Divider -->
-      <div class="w-px h-5 bg-secondary-700" />
+      <!-- Text placement tool -->
+      <button
+        class="rounded-md p-2 hover:bg-secondary-700 text-grey-200 transition-colors"
+        title="Place text"
+      >
+        <Type :size="18" />
+      </button>
 
       <!-- Edge tool section -->
       <div class="flex items-center">
