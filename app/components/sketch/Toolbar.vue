@@ -14,7 +14,7 @@ import {
 
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
-const { pendingNodeType, activateNodeType, clearNodeType } = useNodeTool()
+const { pendingNodeType, lastNodeType, activateNodeType, clearNodeType } = useNodeTool()
 
 const nodeDropdownOpen = ref(false)
 const edgeDropdownOpen = ref(false)
@@ -39,7 +39,7 @@ function iconFor(name: string): Component {
 }
 
 const activeNodeType = computed(() =>
-  nodeTypes.value.find(nt => nt.type === pendingNodeType.value) ?? nodeTypes.value[0],
+  nodeTypes.value.find(nt => nt.type === (lastNodeType.value ?? pendingNodeType.value)) ?? nodeTypes.value[0],
 )
 
 const activeEdgeIcon = computed(() => {
@@ -87,7 +87,7 @@ function selectNodeType(type: string) {
           class="rounded-full p-2 hover:bg-secondary-700 transition-colors"
           :class="pendingNodeType ? 'text-primary-500' : 'text-grey-200'"
           :title="pendingNodeType ? 'Click canvas to place node (Esc to cancel)' : 'Select a node type'"
-          @click.stop="pendingNodeType ? clearNodeType() : toggleNodeDropdown()"
+          @click.stop="pendingNodeType ? clearNodeType() : (activeNodeType && activateNodeType(activeNodeType.type))"
         >
           <component :is="iconFor(activeNodeType?.icon ?? 'square')" :size="18" />
         </button>
@@ -125,10 +125,11 @@ function selectNodeType(type: string) {
       <button
         v-for="nt in nodeTypes"
         :key="nt.type"
-        class="flex items-center gap-2 px-3 py-2 rounded-lg w-full hover:bg-secondary-700 transition-colors"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg w-full hover:bg-primary-500 hover:text-white transition-colors"
         :class="pendingNodeType === nt.type ? 'text-primary-500' : 'text-grey-100'"
         @click.stop="selectNodeType(nt.type)"
       >
+        <span class="w-3 text-xs">{{ pendingNodeType === nt.type ? '✓' : '' }}</span>
         <component :is="iconFor(nt.icon)" :size="16" />
         <span class="text-sm">{{ nt.name }}</span>
       </button>
@@ -142,10 +143,11 @@ function selectNodeType(type: string) {
       <button
         v-for="tool in EDGE_TOOLS"
         :key="tool.id"
-        class="flex items-center gap-2 px-3 py-2 rounded-lg w-full hover:bg-secondary-700 transition-colors"
+        class="flex items-center gap-2 px-3 py-2 rounded-lg w-full hover:bg-primary-500 hover:text-white transition-colors"
         :class="activeEdgeTool === tool.id ? 'text-primary-500' : 'text-grey-200'"
         @click.stop="setEdgeTool(tool.id); edgeDropdownOpen = false"
       >
+        <span class="w-3 text-xs">{{ activeEdgeTool === tool.id ? '✓' : '' }}</span>
         <component :is="iconFor(tool.icon)" :size="16" />
         <span class="text-sm">{{ tool.label }}</span>
       </button>
