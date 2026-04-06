@@ -5,7 +5,7 @@ interface Item {
   label: string
 }
 
-const props = defineProps<{
+defineProps<{
   items: Item[]
   selectedKey: string | null
   alignRight?: boolean
@@ -18,7 +18,7 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="absolute bottom-full mb-2 rounded-xl bg-secondary-900 border border-secondary-700 shadow-xl p-1 z-50"
+    class="absolute bottom-full mb-2 rounded-xl bg-secondary-950 border border-secondary-700 shadow-xl p-1 z-50"
     :class="alignRight ? 'right-0' : 'left-0'"
   >
     <button
