@@ -9,13 +9,13 @@ export interface EdgeTool {
 }
 
 export const EDGE_TOOLS: EdgeTool[] = [
-  { id: 'mono', label: 'Monodirectional', icon: 'arrow-right' },
-  { id: 'bi', label: 'Bidirectional', icon: 'arrow-left-right' },
-  { id: 'none', label: 'No direction', icon: 'minus' },
+  { id: 'none', label: 'Lijn', icon: 'minus' },
+  { id: 'mono', label: 'Eenrichtingspijl', icon: 'arrow-right' },
+  { id: 'bi', label: 'tweerichtingspijl', icon: 'arrow-left-right' },
 ]
 
 export function useEdgeTool() {
-  const activeEdgeTool = useState<EdgeToolId>('edge-tool', () => 'mono')
+  const activeEdgeTool = useState<EdgeToolId>('edge-tool', () => 'none')
 
   const defaultEdgeOptions = computed(() => {
     if (activeEdgeTool.value === 'mono') {
