@@ -17,9 +17,9 @@ const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
 const { selectedNodeType, setNodeType } = useNodeTool()
 
-const nodeDropdownOpen = ref(false)
-const edgeDropdownOpen = ref(false)
-const anyOpen = computed(() => nodeDropdownOpen.value || edgeDropdownOpen.value)
+type DropdownId = 'node' | 'edge'
+const activeDropdown = ref<DropdownId | null>(null)
+const anyOpen = computed(() => activeDropdown.value !== null)
 
 const iconComponents: Record<string, Component> = {
   server: Server,
@@ -53,24 +53,17 @@ const edgeDropdownItems = computed(() =>
   EDGE_TOOLS.map(t => ({ key: t.id, icon: iconFor(t.icon), label: t.label })),
 )
 
-function toggleNodeDropdown() {
-  edgeDropdownOpen.value = false
-  nodeDropdownOpen.value = !nodeDropdownOpen.value
-}
-
-function toggleEdgeDropdown() {
-  nodeDropdownOpen.value = false
-  edgeDropdownOpen.value = !edgeDropdownOpen.value
+function toggle(id: DropdownId) {
+  activeDropdown.value = activeDropdown.value === id ? null : id
 }
 
 function closeAll() {
-  nodeDropdownOpen.value = false
-  edgeDropdownOpen.value = false
+  activeDropdown.value = null
 }
 
 function selectNodeType(key: string) {
   setNodeType(key)
-  nodeDropdownOpen.value = false
+  activeDropdown.value = null
 }
 </script>
 
@@ -80,20 +73,20 @@ function selectNodeType(key: string) {
     <div v-if="anyOpen" class="fixed inset-0 z-40" @mousedown.stop="closeAll" />
 
     <!-- Pill -->
-    <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 border border-secondary-700 shadow-lg px-3 py-2">
+    <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
       <!-- Node tool section -->
       <div class="flex items-center">
         <button
           class="rounded-md p-2 hover:bg-secondary-700 text-grey-200 transition-colors"
           title="Select a node type"
-          @click.stop="toggleNodeDropdown"
+          @click.stop="toggle('node')"
         >
           <component :is="iconFor(selectedNodeTypeObj?.icon ?? 'square')" :size="18" />
         </button>
         <button
           class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
-          @click.stop="toggleNodeDropdown"
+          @click.stop="toggle('node')"
         >
           <ChevronUp :size="14" />
         </button>
@@ -109,7 +102,7 @@ function selectNodeType(key: string) {
         </div>
         <button
           class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
-          @click.stop="toggleEdgeDropdown"
+          @click.stop="toggle('edge')"
         >
           <ChevronUp :size="14" />
         </button>
@@ -117,18 +110,18 @@ function selectNodeType(key: string) {
     </div>
 
     <SketchToolbarDropdown
-      v-if="nodeDropdownOpen"
+      v-if="activeDropdown === 'node'"
       :items="nodeDropdownItems"
       :selected-key="selectedNodeType"
       @select="selectNodeType"
     />
 
     <SketchToolbarDropdown
-      v-if="edgeDropdownOpen"
+      v-if="activeDropdown === 'edge'"
       :items="edgeDropdownItems"
       :selected-key="activeEdgeTool"
       align-right
-      @select="key => { setEdgeTool(key as EdgeToolId); edgeDropdownOpen = false }"
+      @select="key => { setEdgeTool(key as EdgeToolId); activeDropdown = null }"
     />
   </Panel>
 </template>
