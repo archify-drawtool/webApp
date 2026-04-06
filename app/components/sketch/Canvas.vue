@@ -3,8 +3,8 @@ import { VueFlow, useVueFlow } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
-import SketchNode from '~/components/SketchNode.vue'
-import SketchToolbar from '~/components/SketchToolbar.vue'
+import SketchNode from '~/components/sketch/Node.vue'
+import SketchToolbar from '~/components/sketch/Toolbar.vue'
 import { markRaw } from 'vue'
 
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
