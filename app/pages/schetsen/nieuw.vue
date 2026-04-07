@@ -1,10 +1,9 @@
 <script setup lang="ts">
+definePageMeta({
+  layout: 'editor',
+})
 </script>
 
 <template>
-  <h1>Mijn Schetsen</h1>
+  <SketchCanvas />
 </template>
-
-<style scoped>
-
-</style>
