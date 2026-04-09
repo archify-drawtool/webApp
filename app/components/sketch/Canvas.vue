@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VueFlow } from '@vue-flow/core'
+import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -10,11 +10,19 @@ import { markRaw } from 'vue'
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
+const { addEdges } = useVueFlow(SKETCH_CANVAS_ID)
 
 const rawSketchNode = markRaw(SketchNode)
 const nodeTypes = computed(() =>
   Object.fromEntries(apiNodeTypes.value.map(t => [t.type, rawSketchNode]))
 )
+
+const isValidConnection: ValidConnectionFunc = (connection) =>
+  connection.source !== connection.target
+
+function onConnect(params: Connection) {
+  addEdges([{ ...params, ...defaultEdgeOptions.value }])
+}
 </script>
 
 <template>
@@ -26,6 +34,8 @@ const nodeTypes = computed(() =>
     :default-viewport="{ zoom: 1 }"
     :min-zoom="0.1"
     :max-zoom="4"
+    :is-valid-connection="isValidConnection"
+    @connect="onConnect"
   >
     <Background
       :variant="BackgroundVariant.Dots"
