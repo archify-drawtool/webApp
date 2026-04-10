@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { VueFlow } from '@vue-flow/core'
+import { VueFlow, Panel } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -10,6 +10,17 @@ import { markRaw } from 'vue'
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
+const { saveStatus, saveError } = useSketchCanvas()
+
+const saveLabel = computed(() => {
+  switch (saveStatus.value) {
+    case 'pending': return { text: 'Onopgeslagen wijzigingen', error: false }
+    case 'saving':  return { text: 'Opslaan...', error: false }
+    case 'saved':   return { text: 'Opgeslagen', error: false }
+    case 'error':   return { text: saveError.value ?? 'Opslaan mislukt', error: true }
+    default:        return null
+  }
+})
 
 const rawSketchNode = markRaw(SketchNode)
 const nodeTypes = computed(() =>
@@ -19,22 +30,26 @@ const nodeTypes = computed(() =>
 
 <template>
   <VueFlow
-    :id="SKETCH_CANVAS_ID"
-    :node-types="nodeTypes"
-    class="w-full h-full"
-    :default-edge-options="defaultEdgeOptions"
-    :default-viewport="{ zoom: 1 }"
-    :min-zoom="0.1"
-    :max-zoom="4"
-  >
-    <Background
-      :variant="BackgroundVariant.Dots"
-      :gap="20"
-      :size="1.5"
-      pattern-color="#4b5563"
-      bg-color="transparent"
-    />
-    <Controls :show-interactive="false" />
-    <SketchToolbar />
+      :id="SKETCH_CANVAS_ID"
+      :node-types="nodeTypes"
+      class="w-full h-full"
+      :default-edge-options="defaultEdgeOptions"
+      :default-viewport="{ zoom: 1 }"
+      :min-zoom="0.1"
+      :max-zoom="4"
+    >
+      <Background
+        :variant="BackgroundVariant.Dots"
+        :gap="20"
+        :size="1.5"
+        pattern-color="#4b5563"
+        bg-color="transparent"
+      />
+      <Controls :show-interactive="false" />
+      <SketchToolbar />
+
+      <Panel v-if="saveLabel" position="bottom-right" class="pointer-events-none text-xs mb-1 mr-1">
+        <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
+      </Panel>
   </VueFlow>
 </template>
