@@ -5,7 +5,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { fetchSketch, clearCanvas } = useSketchCanvas()
+const { fetchSketch, clearCanvas, watchAndSave } = useSketchCanvas()
 const loading = ref(true)
 const error = ref(false)
 
@@ -13,9 +13,13 @@ onUnmounted(clearCanvas)
 
 onMounted(async () => {
   try {
-    await Promise.all([
-      fetchSketch(route.params.id as string, route.params.projectId as string | undefined),
-    ])
+    const sketch = await fetchSketch(
+      route.params.id as string,
+      route.params.projectId as string | undefined,
+    )
+    if (sketch) {
+      watchAndSave(sketch.id, sketch.project_id)
+    }
   } catch {
     error.value = true
   } finally {
