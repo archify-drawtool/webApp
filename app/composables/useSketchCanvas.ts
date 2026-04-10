@@ -3,9 +3,17 @@ import type { Sketch } from '~/types/Sketch'
 
 export const SKETCH_CANVAS_ID = 'sketch-canvas'
 
+export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error'
+
+const saveStatus = ref<SaveStatus>('idle')
+const saveError = ref<string | null>(null)
+let debounceTimer: ReturnType<typeof setTimeout> | null = null
+let pendingSave = false
+
 export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
-  const { get } = useApi()
+  const { get, put } = useApi()
+  const appConfig = useAppConfig() as { sketch?: { saveDebounceMs?: number } }
 
   const fetchSketch = async (sketchId: string | number, projectId?: string | number): Promise<Sketch | undefined> => {
     const endpoint = projectId
@@ -20,9 +28,45 @@ export function useSketchCanvas() {
   }
 
   const clearCanvas = () => {
+    saveStatus.value = 'idle'
+    saveError.value = null
     vueFlow.setNodes([])
     vueFlow.setEdges([])
   }
 
-  return { ...vueFlow, fetchSketch, clearCanvas }
+  const watchAndSave = (sketchId: string | number, projectId: string | number) => {
+    const endpoint = `/api/projects/${projectId}/sketches/${sketchId}`
+    const debounceMs = appConfig.sketch?.saveDebounceMs ?? 2000
+
+    const scheduleSave = () => {
+      pendingSave = true
+      saveStatus.value = 'pending'
+      if (debounceTimer) clearTimeout(debounceTimer)
+
+      debounceTimer = setTimeout(async () => {
+        if (!pendingSave) return
+        pendingSave = false
+
+        const state = vueFlow.toObject()
+        saveStatus.value = 'saving'
+        saveError.value = null
+
+        try {
+          await put(endpoint, { canvas_state: state })
+          saveStatus.value = 'saved'
+        } catch (e) {
+          const err = e as { statusMessage?: string; message?: string }
+          saveError.value = err?.statusMessage ?? err?.message ?? 'Opslaan mislukt'
+          saveStatus.value = 'error'
+          pendingSave = true
+        }
+      }, debounceMs)
+    }
+
+    vueFlow.onNodesChange(scheduleSave)
+    vueFlow.onEdgesChange(scheduleSave)
+    vueFlow.onNodeDragStop(scheduleSave)
+  }
+
+  return { ...vueFlow, fetchSketch, clearCanvas, watchAndSave, saveStatus, saveError }
 }
