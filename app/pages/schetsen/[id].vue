@@ -13,11 +13,12 @@ onUnmounted(clearCanvas)
 
 onMounted(async () => {
   try {
-    await Promise.all([
-      fetchSketch(route.params.id as string, route.params.projectId as string | undefined),
-    ])
-    if (route.params.projectId) {
-      watchAndSave(route.params.id as string, route.params.projectId as string)
+    const sketch = await fetchSketch(
+      route.params.id as string,
+      route.params.projectId as string | undefined,
+    )
+    if (sketch) {
+      watchAndSave(sketch.id, sketch.project_id)
     }
   } catch {
     error.value = true
