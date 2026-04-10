@@ -5,6 +5,7 @@ import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 import SketchNode from '~/components/sketch/Node.vue'
+import SketchEdge from '~/components/sketch/Edge.vue'
 import SketchToolbar from '~/components/sketch/Toolbar.vue'
 import { markRaw } from 'vue'
 
@@ -25,9 +26,12 @@ const saveLabel = computed(() => {
 })
 
 const rawSketchNode = markRaw(SketchNode)
+const rawSketchEdge = markRaw(SketchEdge)
+
 const nodeTypes = computed(() =>
   Object.fromEntries(apiNodeTypes.value.map(t => [t.type, rawSketchNode]))
 )
+const edgeTypes = { smoothstep: rawSketchEdge }
 
 const isValidConnection: ValidConnectionFunc = (connection) =>
   connection.source !== connection.target
@@ -41,6 +45,7 @@ function onConnect(params: Connection) {
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
+:edge-types="edgeTypes"
 class="w-full h-full"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
