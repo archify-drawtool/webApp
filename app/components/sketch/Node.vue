@@ -23,10 +23,27 @@ const icon = computed(() => {
 </script>
 
 <template>
-  <Handle type="target" :position="Position.Top" />
+  <Handle id="top-target" type="target" :position="Position.Top" />
+  <Handle id="top-source" type="source" :position="Position.Top" />
+  <Handle id="right-target" type="target" :position="Position.Right" />
+  <Handle id="right-source" type="source" :position="Position.Right" />
+  <Handle id="bottom-target" type="target" :position="Position.Bottom" />
+  <Handle id="bottom-source" type="source" :position="Position.Bottom" />
+  <Handle id="left-target" type="target" :position="Position.Left" />
+  <Handle id="left-source" type="source" :position="Position.Left" />
   <div class="flex flex-col items-center gap-2 p-3">
     <component :is="icon" :size="24" />
     <span v-if="data.label" class="text-xs">{{ data.label }}</span>
   </div>
-  <Handle type="source" :position="Position.Bottom" />
 </template>
+
+<style scoped>
+:deep(.vue-flow__handle) {
+  width: 10px;
+  height: 10px;
+  background-color: #E5097F;
+  border: 2px solid white;
+  border-radius: 50%;
+  opacity: 1;
+}
+</style>
