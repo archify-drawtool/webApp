@@ -1,7 +1,16 @@
 export function useNodeTool() {
   const selectedNodeType = useState<string | null>('selected-node-type', () => null)
+  const isPlacingNode = useState<boolean>('is-placing-node', () => false)
 
-  const setNodeType = (type: string) => { selectedNodeType.value = type }
+  function setNodeType(type: string) {
+    selectedNodeType.value = type
+    isPlacingNode.value = true
+  }
 
-  return { selectedNodeType, setNodeType }
+  function clearNodeType() {
+    selectedNodeType.value = null
+    isPlacingNode.value = false
+  }
+
+  return { selectedNodeType, isPlacingNode, setNodeType, clearNodeType }
 }

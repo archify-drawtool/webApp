@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel } from '@vue-flow/core'
+import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -11,7 +11,8 @@ import { markRaw } from 'vue'
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
-const { addEdges } = useVueFlow(SKETCH_CANVAS_ID)
+const { selectedNodeType, isPlacingNode, clearNodeType } = useNodeTool()
+const { addEdges, addNodes, screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError } = useSketchCanvas()
 
 const saveLabel = computed(() => {
@@ -35,19 +36,38 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
 function onConnect(params: Connection) {
   addEdges([{ ...params, ...defaultEdgeOptions.value }])
 }
+
+function onPaneClick(event: MouseEvent) {
+  if (!isPlacingNode.value || !selectedNodeType.value) return
+
+  const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
+  if (!nodeType) return
+
+  const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
+
+  addNodes([{
+    id: crypto.randomUUID(),
+    type: nodeType.type,
+    position,
+    data: { label: nodeType.name },
+  }])
+
+  clearNodeType()
+}
 </script>
 
 <template>
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
-class="w-full h-full"
+:class="['w-full h-full', isPlacingNode ? 'placing-node' : '']"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
 :min-zoom="0.1"
 :max-zoom="4"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
+@pane-click="onPaneClick"
 >
   <Background
     :variant="BackgroundVariant.Dots"
@@ -63,3 +83,9 @@ class="w-full h-full"
   </Panel>
   </VueFlow>
 </template>
+
+<style>
+.placing-node .vue-flow__pane {
+  cursor: crosshair;
+}
+</style>

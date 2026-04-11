@@ -16,7 +16,7 @@ import {
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
-const { selectedNodeType, setNodeType } = useNodeTool()
+const { selectedNodeType, isPlacingNode, setNodeType, clearNodeType } = useNodeTool()
 
 type DropdownId = 'node' | 'edge'
 const activeDropdown = ref<DropdownId | null>(null)
@@ -66,6 +66,27 @@ function selectNodeType(key: string) {
   setNodeType(key)
   activeDropdown.value = null
 }
+
+function togglePlacingMode() {
+  if (isPlacingNode.value) {
+    clearNodeType()
+  } else {
+    activeDropdown.value = activeDropdown.value === 'node' ? null : 'node'
+  }
+}
+
+function handleEscape(e: KeyboardEvent) {
+  if (e.key === 'Escape') {
+    if (isPlacingNode.value) {
+      clearNodeType()
+    } else {
+      closeAll()
+    }
+  }
+}
+
+onMounted(() => window.addEventListener('keydown', handleEscape))
+onUnmounted(() => window.removeEventListener('keydown', handleEscape))
 </script>
 
 <template>
@@ -78,9 +99,14 @@ function selectNodeType(key: string) {
       <!-- Node tool section -->
       <div class="flex items-center">
         <button
-          class="rounded-md p-2 hover:bg-secondary-700 text-grey-200 transition-colors cursor-grab"
-          title="Select a node type"
-          @click.stop="toggle('node')"
+          :class="[
+            'rounded-md p-2 transition-colors',
+            isPlacingNode
+              ? 'bg-primary-500 text-white cursor-crosshair'
+              : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
+          ]"
+          :title="isPlacingNode ? 'Klik op het canvas om een node te plaatsen (Escape om te annuleren)' : 'Selecteer een node type'"
+          @click.stop="togglePlacingMode"
         >
           <component :is="iconFor(selectedNodeTypeObj?.icon ?? 'square')" :size="18" />
         </button>
