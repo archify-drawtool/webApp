@@ -11,7 +11,7 @@ import { markRaw } from 'vue'
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
-const { selectedNodeType, isPlacingNode, clearNodeType } = useNodeTool()
+const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
 const { addEdges, addNodes, screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError } = useSketchCanvas()
 
@@ -52,7 +52,7 @@ function onPaneClick(event: MouseEvent) {
     data: { label: nodeType.name },
   }])
 
-  clearNodeType()
+  stopPlacing()
 }
 </script>
 

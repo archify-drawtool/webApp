@@ -16,7 +16,7 @@ import {
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
-const { selectedNodeType, isPlacingNode, setNodeType, clearNodeType } = useNodeTool()
+const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing, clearNodeType } = useNodeTool()
 
 type DropdownId = 'node' | 'edge'
 const activeDropdown = ref<DropdownId | null>(null)
@@ -69,16 +69,21 @@ function selectNodeType(key: string) {
 
 function togglePlacingMode() {
   if (isPlacingNode.value) {
-    clearNodeType()
+    stopPlacing()
   } else {
-    activeDropdown.value = activeDropdown.value === 'node' ? null : 'node'
+    // Zorg dat er altijd een type geselecteerd is (val terug op eerste beschikbare type)
+    if (!selectedNodeType.value && nodeTypes.value.length > 0) {
+      setNodeType(nodeTypes.value[0].type)
+    } else {
+      isPlacingNode.value = true
+    }
   }
 }
 
 function handleEscape(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     if (isPlacingNode.value) {
-      clearNodeType()
+      stopPlacing()
     } else {
       closeAll()
     }

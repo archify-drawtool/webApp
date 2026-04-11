@@ -7,10 +7,14 @@ export function useNodeTool() {
     isPlacingNode.value = true
   }
 
+  function stopPlacing() {
+    isPlacingNode.value = false
+  }
+
   function clearNodeType() {
     selectedNodeType.value = null
     isPlacingNode.value = false
   }
 
-  return { selectedNodeType, isPlacingNode, setNodeType, clearNodeType }
+  return { selectedNodeType, isPlacingNode, setNodeType, stopPlacing, clearNodeType }
 }
