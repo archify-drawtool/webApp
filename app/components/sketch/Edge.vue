@@ -73,7 +73,8 @@ class="text-xs text-center rounded px-1 outline-none min-w-16 border bg-white te
       >
       <span
         v-else-if="label"
-        class="text-xs px-1 py-0.5 rounded cursor-pointer bg-white text-gray-800"
+        class="text-xs px-1 py-0.5 rounded cursor-pointer bg-white text-gray-800 max-w-32 break-words text-center block"
+        @dblclick.stop="startEdit"
       >{{ label }}</span>
       <span
         v-else
