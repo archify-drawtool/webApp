@@ -59,7 +59,7 @@ function cancelEdit() {
       @mousedown.stop
       @dblclick.stop
     >
-    <span v-else class="text-xs">{{ data.label }}</span>
+    <span v-else class="text-xs max-w-24 break-words text-center block">{{ data.label }}</span>
   </div>
   <Handle type="source" :position="Position.Bottom" />
 </template>
