@@ -22,7 +22,10 @@ export function useSketchCanvas() {
     const sketch = await get<Sketch>(endpoint)
     if (sketch) {
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
-      vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map(({ type: _, ...edge }) => edge))
+      vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map(edge => ({
+        ...edge,
+        type: edge.type ?? 'smoothstep',
+      })))
     }
     return sketch
   }
