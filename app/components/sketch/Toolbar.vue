@@ -16,7 +16,7 @@ import {
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
-const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing, clearNodeType } = useNodeTool()
+const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing } = useNodeTool()
 
 type DropdownId = 'node' | 'edge'
 const activeDropdown = ref<DropdownId | null>(null)
