@@ -6,10 +6,15 @@ definePageMeta({
 
 const route = useRoute()
 const { fetchSketch, clearCanvas, watchAndSave } = useSketchCanvas()
+const { setTopbar, clearTopbar } = useSketchTopbar()
+
 const loading = ref(true)
 const error = ref(false)
 
-onUnmounted(clearCanvas)
+onUnmounted(() => {
+  clearCanvas()
+  clearTopbar()
+})
 
 onMounted(async () => {
   try {
@@ -19,6 +24,12 @@ onMounted(async () => {
     )
     if (sketch) {
       watchAndSave(sketch.id, sketch.project_id)
+
+      const projectId = route.params.projectId ?? sketch.project_id
+      setTopbar({
+        sketchTitle: sketch.title,
+        backTo: `/projecten/${projectId}`,
+      })
     }
   } catch {
     error.value = true
