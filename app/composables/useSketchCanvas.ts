@@ -22,10 +22,20 @@ export function useSketchCanvas() {
     const sketch = await get<Sketch>(endpoint)
     if (sketch) {
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
-      vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map(edge => ({
-        ...edge,
-        type: edge.type ?? 'smoothstep',
-      })))
+      vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
+        // Bouw het edge object opnieuw op zonder ongeldige markers.
+        // VueFlow genereert url('#') als markerEnd/markerStart aanwezig is maar geen geldig type heeft.
+        const { markerEnd, markerStart, ...rest } = edge
+        const normalized: typeof edge = {
+          ...rest,
+          type: edge.type ?? 'smoothstep',
+        }
+        const validMarkerEnd = markerEnd && (markerEnd as { type?: string }).type
+        const validMarkerStart = markerStart && (markerStart as { type?: string }).type
+        if (validMarkerEnd) normalized.markerEnd = markerEnd
+        if (validMarkerStart) normalized.markerStart = markerStart
+        return normalized
+      }))
     }
     return sketch
   }
