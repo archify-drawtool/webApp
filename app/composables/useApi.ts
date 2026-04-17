@@ -13,6 +13,12 @@ export const useApi = () => {
       message?: string;
     };
 
+    if (err?.status === 401) {
+      const authToken = useCookie<string | null>("auth_token");
+      authToken.value = null;
+      navigateTo("/login");
+    }
+
     const message =
       err?.data?.message ||
       err?.message ||
