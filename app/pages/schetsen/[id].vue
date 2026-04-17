@@ -11,7 +11,6 @@ const { fetchSketch, clearCanvas, watchAndSave } = useSketchCanvas()
 const { setTopbar, clearTopbar } = useSketchTopbar()
 
 const loading = ref(true)
-const error = ref(false)
 const error = ref<string | null>(null)
 const sketch = ref<Sketch | null>(null)
 
@@ -33,6 +32,8 @@ onMounted(async () => {
       setTopbar({
         sketchTitle: result.title,
         backTo: `/projecten/${projectId}`,
+        sketchId: result.id,
+        projectId: result.project_id,
       })
     }
 } catch (e) {
