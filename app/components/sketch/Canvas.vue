@@ -15,6 +15,9 @@ const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
 const { addEdges, addNodes, screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError } = useSketchCanvas()
+const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
+onMounted(mountDeleteNode)
+onUnmounted(unmountDeleteNode)
 
 const saveLabel = computed(() => {
   switch (saveStatus.value) {
