@@ -15,15 +15,19 @@ export function useSketchCanvas() {
   const { get, put } = useApi()
   const appConfig = useAppConfig() as { sketch?: { saveDebounceMs?: number } }
 
-  const fetchSketch = async (sketchId: string | number, projectId?: string | number): Promise<Sketch | undefined> => {
+  const fetchSketch = async (sketchId: string | number, projectId?: string | number): Promise<Sketch> => {
     const endpoint = projectId
       ? `/api/projects/${projectId}/sketches/${sketchId}`
       : `/api/sketches/${sketchId}`
     const sketch = await get<Sketch>(endpoint)
-    if (sketch) {
-      vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
-      vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map(({ type: _, ...edge }) => edge))
+    if (!sketch) {
+      throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
     }
+    vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
+    vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map(edge => ({
+      ...edge,
+      type: edge.type ?? 'smoothstep',
+    })))
     return sketch
   }
 
