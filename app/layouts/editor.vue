@@ -9,6 +9,8 @@ const { topbarState } = useSketchTopbar()
         v-if="topbarState"
         :sketch-title="topbarState.sketchTitle"
         :back-to="topbarState.backTo"
+        :sketch-id="topbarState.sketchId"
+        :project-id="topbarState.projectId"
       />
       <div class="flex-1 overflow-hidden">
         <slot />

@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Sketch } from '~/types/Sketch'
+
 definePageMeta({
   layout: 'editor',
   alias: ['/projecten/:projectId/schetsen/:id'],
@@ -10,6 +12,7 @@ const { setTopbar, clearTopbar } = useSketchTopbar()
 
 const loading = ref(true)
 const error = ref<string | null>(null)
+const sketch = ref<Sketch | null>(null)
 
 onUnmounted(() => {
   clearCanvas()
@@ -18,22 +21,26 @@ onUnmounted(() => {
 
 onMounted(async () => {
   try {
-    const sketch = await fetchSketch(
+    const result = await fetchSketch(
       route.params.id as string,
       route.params.projectId as string | undefined,
     )
-    watchAndSave(sketch.id, sketch.project_id)
-
-    const projectId = route.params.projectId ?? sketch.project_id
-    setTopbar({
-      sketchTitle: sketch.title,
-      backTo: `/projecten/${projectId}`,
-    })
-  } catch (e) {
-    const err = e as { statusMessage?: string; message?: string }
-    error.value = err?.statusMessage ?? err?.message ?? 'Schets kon niet worden geladen.'
-    clearCanvas()
-  } finally {
+    if (result) {
+      sketch.value = result
+      watchAndSave(result.id, result.project_id)
+      const projectId = route.params.projectId ?? result.project_id
+      setTopbar({
+        sketchTitle: result.title,
+        backTo: `/projecten/${projectId}`,
+        sketchId: result.id,
+        projectId: result.project_id,
+      })
+    }
+} catch (e) {
+  const err = e as { statusMessage?: string; message?: string }
+  error.value = err?.statusMessage ?? err?.message ?? 'Schets kon niet worden geladen.'
+  clearCanvas()
+} finally {
     loading.value = false
   }
 })
