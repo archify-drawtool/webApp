@@ -14,6 +14,9 @@ await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { addEdges } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError } = useSketchCanvas()
+const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
+onMounted(mountDeleteNode)
+onUnmounted(unmountDeleteNode)
 
 const saveLabel = computed(() => {
   switch (saveStatus.value) {
