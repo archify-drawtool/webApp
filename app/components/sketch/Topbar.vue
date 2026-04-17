@@ -97,7 +97,7 @@ async function exportMermaid() {
 
   <div
     v-if="error"
-    class="fixed top-12 left-1/2 -translate-x-1/2 mt-2 px-4 py-2 bg-error-bg text-error-text text-sm text-center rounded z-50"
+    class="fixed top-12 right-4 mt-2 px-4 py-2 bg-error-bg text-error-text text-sm text-right rounded z-50"
   >
     {{ error }}
   </div>
