@@ -35,6 +35,8 @@ function startEdit() {
 function confirmEdit() {
   if (!editing.value) return
   editing.value = false
+  const { snapshot } = useSketchHistory()
+  snapshot()
   updateNodeData(props.id, { label: editValue.value })
 }
 

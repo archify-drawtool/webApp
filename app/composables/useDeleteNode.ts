@@ -8,6 +8,9 @@ export function useDeleteNode() {
     const selected = getSelectedNodes.value
     if (!selected.length) return
 
+    const { snapshot } = useSketchHistory()
+    snapshot()
+
     const selectedIds = new Set(selected.map(n => n.id))
 
     const connectedEdgeIds = getEdges.value
@@ -24,6 +27,23 @@ export function useDeleteNode() {
   function onKeyDown(event: KeyboardEvent) {
     const tag = (event.target as HTMLElement)?.tagName
     if (tag === 'INPUT' || tag === 'TEXTAREA') return
+
+    const isMac = navigator.platform.toUpperCase().includes('MAC')
+    const modifier = isMac ? event.metaKey : event.ctrlKey
+
+    if (modifier && !event.shiftKey && event.key === 'z') {
+      event.preventDefault()
+      const { undo } = useSketchHistory()
+      undo()
+      return
+    }
+
+    if (modifier && (event.key === 'y' || (event.shiftKey && event.key === 'z'))) {
+      event.preventDefault()
+      const { redo } = useSketchHistory()
+      redo()
+      return
+    }
 
     if (event.key === 'Delete' || event.key === 'Backspace') {
       deleteSelectedNodes()

@@ -1,4 +1,4 @@
-import { useVueFlow } from '@vue-flow/core'
+import { useVueFlow, type NodeChange, type EdgeChange } from '@vue-flow/core'
 import type { Sketch } from '~/types/Sketch'
 
 export const SKETCH_CANVAS_ID = 'sketch-canvas'
@@ -9,6 +9,7 @@ const saveStatus = ref<SaveStatus>('idle')
 const saveError = ref<string | null>(null)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSave = false
+let scheduleSaveRef: (() => void) | null = null
 
 export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
@@ -36,6 +37,8 @@ export function useSketchCanvas() {
     saveError.value = null
     vueFlow.setNodes([])
     vueFlow.setEdges([])
+    const { clearHistory } = useSketchHistory()
+    clearHistory()
   }
 
   const watchAndSave = (sketchId: string | number, projectId: string | number) => {
@@ -67,10 +70,58 @@ export function useSketchCanvas() {
       }, debounceMs)
     }
 
-    vueFlow.onNodesChange(scheduleSave)
-    vueFlow.onEdgesChange(scheduleSave)
-    vueFlow.onNodeDragStop(scheduleSave)
+    scheduleSaveRef = scheduleSave
+
+    const { snapshot } = useSketchHistory()
+
+    vueFlow.onNodesChange((changes: NodeChange[]) => {
+      const isStructural = changes.some(c => c.type === 'add' || c.type === 'remove')
+      if (isStructural) scheduleSave()
+    })
+
+    vueFlow.onEdgesChange((changes: EdgeChange[]) => {
+      const isStructural = changes.some(c => c.type === 'add' || c.type === 'remove')
+      if (isStructural) scheduleSave()
+    })
+
+    vueFlow.onNodeDragStart(() => {
+      snapshot()
+    })
+
+    vueFlow.onNodeDragStop(() => {
+      scheduleSave()
+    })
   }
 
-  return { ...vueFlow, fetchSketch, clearCanvas, watchAndSave, saveStatus, saveError }
+  function addNodeWithHistory(...args: Parameters<typeof vueFlow.addNodes>) {
+    const { snapshot } = useSketchHistory()
+    snapshot()
+    vueFlow.addNodes(...args)
+  }
+
+  function addEdgeWithHistory(...args: Parameters<typeof vueFlow.addEdges>) {
+    const { snapshot } = useSketchHistory()
+    snapshot()
+    vueFlow.addEdges(...args)
+  }
+
+  function updateEdgeLabelWithHistory(id: string, label: string) {
+    const { snapshot } = useSketchHistory()
+    snapshot()
+    const edge = vueFlow.findEdge(id)
+    if (edge) edge.label = label
+    scheduleSaveRef?.()
+  }
+
+  return {
+    ...vueFlow,
+    fetchSketch,
+    clearCanvas,
+    watchAndSave,
+    saveStatus,
+    saveError,
+    addNodeWithHistory,
+    addEdgeWithHistory,
+    updateEdgeLabelWithHistory,
+  }
 }
