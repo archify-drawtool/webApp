@@ -11,7 +11,7 @@ const { setTopbar, clearTopbar } = useSketchTopbar()
 const loading = ref(true)
 const error = ref<string | null>(null)
 
-onUnmounted(() => {
+onBeforeRouteLeave(() => {
   clearCanvas()
   clearTopbar()
 })

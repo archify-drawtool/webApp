@@ -9,7 +9,7 @@ const saveStatus = ref<SaveStatus>('idle')
 const saveError = ref<string | null>(null)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSave = false
-let scheduleSaveRef: (() => void) | null = null
+export let scheduleSaveRef: (() => void) | null = null
 
 export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
