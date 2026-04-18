@@ -3,12 +3,13 @@ import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 
 export function useDeleteNode() {
   const { getSelectedNodes, removeNodes, getEdges, removeEdges } = useVueFlow(SKETCH_CANVAS_ID)
+  const { undo, redo } = useSketchCanvas()
+  const { snapshot } = useSketchHistory()
 
   function deleteSelectedNodes() {
     const selected = getSelectedNodes.value
     if (!selected.length) return
 
-    const { snapshot } = useSketchHistory()
     snapshot()
 
     const selectedIds = new Set(selected.map(n => n.id))
@@ -25,22 +26,23 @@ export function useDeleteNode() {
   }
 
   function onKeyDown(event: KeyboardEvent) {
-    const tag = (event.target as HTMLElement)?.tagName
+    const target = event.target as HTMLElement | null
+    const tag = target?.tagName
     if (tag === 'INPUT' || tag === 'TEXTAREA') return
+    if (target?.isContentEditable) return
 
     const isMac = navigator.platform.toUpperCase().includes('MAC')
     const modifier = isMac ? event.metaKey : event.ctrlKey
+    const key = event.key.toLowerCase()
 
-    if (modifier && !event.shiftKey && event.key === 'z') {
+    if (modifier && !event.shiftKey && key === 'z') {
       event.preventDefault()
-      const { undo } = useSketchHistory()
       undo()
       return
     }
 
-    if (modifier && (event.key === 'y' || (event.shiftKey && event.key === 'z'))) {
+    if (modifier && (key === 'y' || (event.shiftKey && key === 'z'))) {
       event.preventDefault()
-      const { redo } = useSketchHistory()
       redo()
       return
     }

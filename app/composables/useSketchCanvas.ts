@@ -10,7 +10,7 @@ const saveError = ref<string | null>(null)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSave = false
 let stopWatchers: (() => void) | null = null
-export const scheduleSave = { fn: null as (() => void) | null }
+let currentSave: (() => void) | null = null
 
 export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
@@ -36,7 +36,7 @@ export function useSketchCanvas() {
   const clearCanvas = () => {
     stopWatchers?.()
     stopWatchers = null
-    scheduleSave.fn = null
+    currentSave = null
     if (debounceTimer) clearTimeout(debounceTimer)
     debounceTimer = null
     pendingSave = false
@@ -49,6 +49,8 @@ export function useSketchCanvas() {
   }
 
   const watchAndSave = (sketchId: string | number, projectId: string | number) => {
+    stopWatchers?.()
+
     const endpoint = `/api/projects/${projectId}/sketches/${sketchId}`
     const debounceMs = appConfig.sketch?.saveDebounceMs ?? 2000
 
@@ -78,7 +80,7 @@ export function useSketchCanvas() {
       }, debounceMs)
     }
 
-    scheduleSave.fn = save
+    currentSave = save
 
     const { snapshot } = useSketchHistory()
 
@@ -125,7 +127,24 @@ export function useSketchCanvas() {
     snapshot()
     const edge = vueFlow.findEdge(id)
     if (edge) edge.label = label
-    scheduleSave.fn?.()
+    currentSave?.()
+  }
+
+  function updateNodeLabelWithHistory(id: string, label: string) {
+    const { snapshot } = useSketchHistory()
+    snapshot()
+    vueFlow.updateNodeData(id, { label })
+    currentSave?.()
+  }
+
+  function undo() {
+    const { undo: historyUndo } = useSketchHistory()
+    if (historyUndo()) currentSave?.()
+  }
+
+  function redo() {
+    const { redo: historyRedo } = useSketchHistory()
+    if (historyRedo()) currentSave?.()
   }
 
   return {
@@ -138,5 +157,8 @@ export function useSketchCanvas() {
     addNodeWithHistory,
     addEdgeWithHistory,
     updateEdgeLabelWithHistory,
+    updateNodeLabelWithHistory,
+    undo,
+    redo,
   }
 }

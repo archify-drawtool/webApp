@@ -1,5 +1,5 @@
 import { useVueFlow, type Node, type Edge } from '@vue-flow/core'
-import { SKETCH_CANVAS_ID, scheduleSave } from '~/composables/useSketchCanvas'
+import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 
 const MAX_HISTORY = 50
 
@@ -19,7 +19,10 @@ export function useSketchHistory() {
 
   function capture(): Snapshot {
     const { nodes, edges } = toObject()
-    return { nodes, edges }
+    return {
+      nodes: structuredClone(nodes),
+      edges: structuredClone(edges),
+    }
   }
 
   function snapshot() {
@@ -27,8 +30,8 @@ export function useSketchHistory() {
     future.value = []
   }
 
-  function undo() {
-    if (!canUndo.value) return
+  function undo(): boolean {
+    if (!canUndo.value) return false
 
     const previous = past.value[past.value.length - 1]
     past.value = past.value.slice(0, -1)
@@ -36,11 +39,11 @@ export function useSketchHistory() {
 
     setNodes(previous.nodes)
     setEdges(previous.edges)
-    scheduleSave.fn?.()
+    return true
   }
 
-  function redo() {
-    if (!canRedo.value) return
+  function redo(): boolean {
+    if (!canRedo.value) return false
 
     const next = future.value[0]
     future.value = future.value.slice(1)
@@ -48,7 +51,7 @@ export function useSketchHistory() {
 
     setNodes(next.nodes)
     setEdges(next.edges)
-    scheduleSave.fn?.()
+    return true
   }
 
   function clearHistory() {
