@@ -2,27 +2,39 @@ import { useVueFlow } from '@vue-flow/core'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 
 export function useDeleteNode() {
-  const { getSelectedNodes, removeNodes, getEdges, removeEdges } = useVueFlow(SKETCH_CANVAS_ID)
+  const {
+    getSelectedNodes,
+    getSelectedEdges,
+    removeNodes,
+    getEdges,
+    removeEdges,
+  } = useVueFlow(SKETCH_CANVAS_ID)
   const { undo, redo } = useSketchCanvas()
   const { snapshot } = useSketchHistory()
 
-  function deleteSelectedNodes() {
-    const selected = getSelectedNodes.value
-    if (!selected.length) return
+  function deleteSelection() {
+    const selectedNodes = getSelectedNodes.value
+    const selectedEdges = getSelectedEdges.value
+    if (!selectedNodes.length && !selectedEdges.length) return
 
     snapshot()
 
-    const selectedIds = new Set(selected.map(n => n.id))
+    const selectedNodeIds = new Set(selectedNodes.map(n => n.id))
 
-    const connectedEdgeIds = getEdges.value
-      .filter(e => selectedIds.has(e.source) || selectedIds.has(e.target))
-      .map(e => e.id)
-
-    if (connectedEdgeIds.length) {
-      removeEdges(connectedEdgeIds)
+    const edgeIdsToRemove = new Set<string>(selectedEdges.map(e => e.id))
+    for (const e of getEdges.value) {
+      if (selectedNodeIds.has(e.source) || selectedNodeIds.has(e.target)) {
+        edgeIdsToRemove.add(e.id)
+      }
     }
 
-    removeNodes(selected.map(n => n.id))
+    if (edgeIdsToRemove.size) {
+      removeEdges([...edgeIdsToRemove])
+    }
+
+    if (selectedNodeIds.size) {
+      removeNodes([...selectedNodeIds])
+    }
   }
 
   function onKeyDown(event: KeyboardEvent) {
@@ -48,7 +60,7 @@ export function useDeleteNode() {
     }
 
     if (event.key === 'Delete' || event.key === 'Backspace') {
-      deleteSelectedNodes()
+      deleteSelection()
     }
   }
 
@@ -60,5 +72,5 @@ export function useDeleteNode() {
     window.removeEventListener('keydown', onKeyDown)
   }
 
-  return { deleteSelectedNodes, mount, unmount }
+  return { deleteSelection, mount, unmount }
 }
