@@ -9,7 +9,8 @@ const saveStatus = ref<SaveStatus>('idle')
 const saveError = ref<string | null>(null)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSave = false
-export let scheduleSaveRef: (() => void) | null = null
+let stopWatchers: (() => void) | null = null
+export const scheduleSave = { fn: null as (() => void) | null }
 
 export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
@@ -33,6 +34,12 @@ export function useSketchCanvas() {
   }
 
   const clearCanvas = () => {
+    stopWatchers?.()
+    stopWatchers = null
+    scheduleSave.fn = null
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = null
+    pendingSave = false
     saveStatus.value = 'idle'
     saveError.value = null
     vueFlow.setNodes([])
@@ -45,7 +52,7 @@ export function useSketchCanvas() {
     const endpoint = `/api/projects/${projectId}/sketches/${sketchId}`
     const debounceMs = appConfig.sketch?.saveDebounceMs ?? 2000
 
-    const scheduleSave = () => {
+    const save = () => {
       pendingSave = true
       saveStatus.value = 'pending'
       if (debounceTimer) clearTimeout(debounceTimer)
@@ -54,7 +61,8 @@ export function useSketchCanvas() {
         if (!pendingSave) return
         pendingSave = false
 
-        const state = vueFlow.toObject()
+        const { nodes, edges, viewport } = vueFlow.toObject()
+        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport }
         saveStatus.value = 'saving'
         saveError.value = null
 
@@ -70,27 +78,34 @@ export function useSketchCanvas() {
       }, debounceMs)
     }
 
-    scheduleSaveRef = scheduleSave
+    scheduleSave.fn = save
 
     const { snapshot } = useSketchHistory()
 
-    vueFlow.onNodesChange((changes: NodeChange[]) => {
+    const { off: offNodesChange } = vueFlow.onNodesChange((changes: NodeChange[]) => {
       const isStructural = changes.some(c => c.type === 'add' || c.type === 'remove')
-      if (isStructural) scheduleSave()
+      if (isStructural) save()
     })
 
-    vueFlow.onEdgesChange((changes: EdgeChange[]) => {
+    const { off: offEdgesChange } = vueFlow.onEdgesChange((changes: EdgeChange[]) => {
       const isStructural = changes.some(c => c.type === 'add' || c.type === 'remove')
-      if (isStructural) scheduleSave()
+      if (isStructural) save()
     })
 
-    vueFlow.onNodeDragStart(() => {
+    const { off: offDragStart } = vueFlow.onNodeDragStart(() => {
       snapshot()
     })
 
-    vueFlow.onNodeDragStop(() => {
-      scheduleSave()
+    const { off: offDragStop } = vueFlow.onNodeDragStop(() => {
+      save()
     })
+
+    stopWatchers = () => {
+      offNodesChange()
+      offEdgesChange()
+      offDragStart()
+      offDragStop()
+    }
   }
 
   function addNodeWithHistory(...args: Parameters<typeof vueFlow.addNodes>) {
@@ -110,7 +125,7 @@ export function useSketchCanvas() {
     snapshot()
     const edge = vueFlow.findEdge(id)
     if (edge) edge.label = label
-    scheduleSaveRef?.()
+    scheduleSave.fn?.()
   }
 
   return {

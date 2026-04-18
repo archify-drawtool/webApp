@@ -1,5 +1,5 @@
 import { useVueFlow, type Node, type Edge } from '@vue-flow/core'
-import { SKETCH_CANVAS_ID, scheduleSaveRef } from '~/composables/useSketchCanvas'
+import { SKETCH_CANVAS_ID, scheduleSave } from '~/composables/useSketchCanvas'
 
 const MAX_HISTORY = 50
 
@@ -36,7 +36,7 @@ export function useSketchHistory() {
 
     setNodes(previous.nodes)
     setEdges(previous.edges)
-    scheduleSaveRef?.()
+    scheduleSave.fn?.()
   }
 
   function redo() {
@@ -48,7 +48,7 @@ export function useSketchHistory() {
 
     setNodes(next.nodes)
     setEdges(next.edges)
-    scheduleSaveRef?.()
+    scheduleSave.fn?.()
   }
 
   function clearHistory() {
