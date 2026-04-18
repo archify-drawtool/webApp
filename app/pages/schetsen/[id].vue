@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import type { Sketch } from '~/types/Sketch'
+
 definePageMeta({
   layout: 'editor',
   alias: ['/projecten/:projectId/schetsen/:id'],
@@ -10,19 +12,25 @@ const { setTopbar, clearTopbar } = useSketchTopbar()
 
 const loading = ref(true)
 const error = ref<string | null>(null)
+const sketch = ref<Sketch | null>(null)
 
 async function load(id: string, projectId: string | undefined) {
   loading.value = true
   error.value = null
   try {
-    const sketch = await fetchSketch(id, projectId)
-    watchAndSave(sketch.id, sketch.project_id)
+const result = await fetchSketch(id, projectId)
+    if (result) {
+      sketch.value = result
+      watchAndSave(result.id, result.project_id)
 
-    const resolvedProjectId = projectId ?? sketch.project_id
-    setTopbar({
-      sketchTitle: sketch.title,
-      backTo: `/projecten/${resolvedProjectId}`,
-    })
+      const resolvedProjectId = projectId ?? result.project_id
+      setTopbar({
+        sketchTitle: result.title,
+        backTo: `/projecten/${resolvedProjectId}`,
+        sketchId: result.id,
+        projectId: result.project_id,
+      })
+    }
   } catch (e) {
     const err = e as { statusMessage?: string; message?: string }
     error.value = err?.statusMessage ?? err?.message ?? 'Schets kon niet worden geladen.'
