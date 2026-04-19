@@ -15,10 +15,11 @@ const error = ref<string | null>(null)
 const sketch = ref<Sketch | null>(null)
 
 async function load(id: string, projectId: string | undefined) {
+  clearCanvas()
   loading.value = true
   error.value = null
   try {
-const result = await fetchSketch(id, projectId)
+    const result = await fetchSketch(id, projectId)
     if (result) {
       sketch.value = result
       watchAndSave(result.id, result.project_id)
