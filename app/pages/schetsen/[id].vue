@@ -14,35 +14,52 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const sketch = ref<Sketch | null>(null)
 
-onUnmounted(() => {
+async function load(id: string, projectId: string | undefined) {
   clearCanvas()
-  clearTopbar()
-})
-
-onMounted(async () => {
+  loading.value = true
+  error.value = null
   try {
-    const result = await fetchSketch(
-      route.params.id as string,
-      route.params.projectId as string | undefined,
-    )
+    const result = await fetchSketch(id, projectId)
     if (result) {
       sketch.value = result
       watchAndSave(result.id, result.project_id)
-      const projectId = route.params.projectId ?? result.project_id
+
+      const resolvedProjectId = projectId ?? result.project_id
       setTopbar({
         sketchTitle: result.title,
-        backTo: `/projecten/${projectId}`,
+        backTo: `/projecten/${resolvedProjectId}`,
         sketchId: result.id,
         projectId: result.project_id,
       })
     }
-} catch (e) {
-  const err = e as { statusMessage?: string; message?: string }
-  error.value = err?.statusMessage ?? err?.message ?? 'Schets kon niet worden geladen.'
-  clearCanvas()
-} finally {
+  } catch (e) {
+    const err = e as { statusMessage?: string; message?: string }
+    error.value = err?.statusMessage ?? err?.message ?? 'Schets kon niet worden geladen.'
+    clearCanvas()
+  } finally {
     loading.value = false
   }
+}
+
+onBeforeRouteLeave(() => {
+  clearCanvas()
+  clearTopbar()
+})
+
+onBeforeRouteUpdate((to, from) => {
+  if (
+    to.params.id === from.params.id
+    && to.params.projectId === from.params.projectId
+  ) return
+  clearCanvas()
+  void load(to.params.id as string, to.params.projectId as string | undefined)
+})
+
+onMounted(() => {
+  void load(
+    route.params.id as string,
+    route.params.projectId as string | undefined,
+  )
 })
 </script>
 

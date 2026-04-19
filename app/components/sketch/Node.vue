@@ -1,13 +1,12 @@
 <script setup lang="ts">
-import { Handle, Position, type NodeProps, useVueFlow } from '@vue-flow/core'
+import { Handle, Position, type NodeProps } from '@vue-flow/core'
 import { Server, Database, LayoutDashboard, User, Square } from 'lucide-vue-next'
-import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 
 const props = defineProps<NodeProps<{ label?: string }>>()
 defineEmits(['updateNodeInternals'])
 
 const { nodeTypes } = useNodeTypes()
-const { updateNodeData } = useVueFlow(SKETCH_CANVAS_ID)
+const { updateNodeLabelWithHistory } = useSketchCanvas()
 
 const iconComponents: Record<string, Component> = {
   server: Server,
@@ -35,7 +34,7 @@ function startEdit() {
 function confirmEdit() {
   if (!editing.value) return
   editing.value = false
-  updateNodeData(props.id, { label: editValue.value })
+  updateNodeLabelWithHistory(props.id, editValue.value)
 }
 
 function cancelEdit() {

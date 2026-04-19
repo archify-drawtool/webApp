@@ -1,10 +1,9 @@
 <script setup lang="ts">
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, useVueFlow, type EdgeProps } from '@vue-flow/core'
-import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
+import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@vue-flow/core'
 
 const props = defineProps<EdgeProps>()
 
-const { findEdge } = useVueFlow(SKETCH_CANVAS_ID)
+const { updateEdgeLabelWithHistory } = useSketchCanvas()
 
 const pathData = computed(() =>
   getSmoothStepPath({
@@ -30,8 +29,7 @@ function startEdit() {
 function confirmEdit() {
   if (!editing.value) return
   editing.value = false
-  const edge = findEdge(props.id)
-  if (edge) edge.label = editValue.value
+  updateEdgeLabelWithHistory(props.id, editValue.value)
 }
 
 function cancelEdit() {
