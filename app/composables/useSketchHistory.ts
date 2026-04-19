@@ -61,3 +61,23 @@ export function useSketchHistory() {
 
   return { snapshot, undo, redo, clearHistory, canUndo, canRedo }
 }
+
+export function useSketchHistoryWatcher() {
+  const { onNodeDragStart } = useVueFlow(SKETCH_CANVAS_ID)
+  const { snapshot } = useSketchHistory()
+
+  let off: (() => void) | null = null
+
+  function mount() {
+    if (off) return
+    const result = onNodeDragStart(() => snapshot())
+    off = result.off
+  }
+
+  function unmount() {
+    off?.()
+    off = null
+  }
+
+  return { mount, unmount }
+}

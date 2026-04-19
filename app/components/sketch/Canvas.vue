@@ -16,8 +16,15 @@ const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
 const { screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory } = useSketchCanvas()
 const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
-onMounted(mountDeleteNode)
-onUnmounted(unmountDeleteNode)
+const { mount: mountHistoryWatcher, unmount: unmountHistoryWatcher } = useSketchHistoryWatcher()
+onMounted(() => {
+  mountDeleteNode()
+  mountHistoryWatcher()
+})
+onUnmounted(() => {
+  unmountDeleteNode()
+  unmountHistoryWatcher()
+})
 
 const saveLabel = computed(() => {
   switch (saveStatus.value) {

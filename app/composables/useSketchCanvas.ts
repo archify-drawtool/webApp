@@ -82,8 +82,6 @@ export function useSketchCanvas() {
 
     currentSave = save
 
-    const { snapshot } = useSketchHistory()
-
     const { off: offNodesChange } = vueFlow.onNodesChange((changes: NodeChange[]) => {
       const isStructural = changes.some(c => c.type === 'add' || c.type === 'remove')
       if (isStructural) save()
@@ -94,10 +92,6 @@ export function useSketchCanvas() {
       if (isStructural) save()
     })
 
-    const { off: offDragStart } = vueFlow.onNodeDragStart(() => {
-      snapshot()
-    })
-
     const { off: offDragStop } = vueFlow.onNodeDragStop(() => {
       save()
     })
@@ -105,7 +99,6 @@ export function useSketchCanvas() {
     stopWatchers = () => {
       offNodesChange()
       offEdgesChange()
-      offDragStart()
       offDragStop()
     }
   }
