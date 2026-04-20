@@ -34,7 +34,10 @@ const timeAgo = (dateString: string): string => {
 </script>
 
 <template>
-  <div class="bg-white border border-primary-500 p-4 cursor-pointer hover:bg-primary-50 transition-colors">
+  <NuxtLink
+    :to="`/projecten/${sketch.project_id}/schetsen/${sketch.id}`"
+    class="block bg-white border border-primary-500 p-4 hover:bg-primary-50 transition-colors"
+  >
     <h3>{{ sketch.title }}</h3>
     <p v-if="sketch.creator" class="text-primary-500 text-small mt-1 flex items-center gap-1">
       <User :size="14" class="text-black" /> {{ sketch.creator.name }}
@@ -42,6 +45,6 @@ const timeAgo = (dateString: string): string => {
     <p class="text-grey-600 text-small mt-1">
       Laatst bewerkt: {{ timeAgo(sketch.updated_at) }}
     </p>
-  </div>
+  </NuxtLink>
 </template>
 
