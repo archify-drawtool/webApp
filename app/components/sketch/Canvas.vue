@@ -13,11 +13,18 @@ const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
-const { addEdges, addNodes, screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
-const { saveStatus, saveError } = useSketchCanvas()
+const { screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
+const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory } = useSketchCanvas()
 const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
-onMounted(mountDeleteNode)
-onUnmounted(unmountDeleteNode)
+const { mount: mountHistoryWatcher, unmount: unmountHistoryWatcher } = useSketchHistoryWatcher()
+onMounted(() => {
+  mountDeleteNode()
+  mountHistoryWatcher()
+})
+onUnmounted(() => {
+  unmountDeleteNode()
+  unmountHistoryWatcher()
+})
 
 const saveLabel = computed(() => {
   switch (saveStatus.value) {
@@ -41,7 +48,7 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
   connection.source !== connection.target
 
 function onConnect(params: Connection) {
-  addEdges([{ ...params, ...defaultEdgeOptions.value }])
+  addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
 }
 
 function onPaneClick(event: MouseEvent) {
@@ -52,7 +59,7 @@ function onPaneClick(event: MouseEvent) {
 
   const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
 
-  addNodes([{
+  addNodeWithHistory([{
     id: crypto.randomUUID(),
     type: nodeType.type,
     position,
@@ -73,6 +80,7 @@ function onPaneClick(event: MouseEvent) {
 :default-viewport="{ zoom: 1 }"
 :min-zoom="0.1"
 :max-zoom="4"
+:delete-key-code="null"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
 @pane-click="onPaneClick"
