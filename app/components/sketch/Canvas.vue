@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition } from '@vue-flow/core'
+import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -13,8 +13,31 @@ const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
-const { screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
-const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory } = useSketchCanvas()
+const { screenToFlowCoordinate, edges: flowEdges, setEdges } = useVueFlow(SKETCH_CANVAS_ID)
+const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory } = useSketchCanvas()
+
+let lastSelectedEdgeId: string | null = null
+watch(
+  () => flowEdges.value.map(e => ({ id: e.id, selected: !!e.selected })),
+  (next) => {
+    for (const { id, selected } of next) {
+      const edge = flowEdges.value.find(e => e.id === id)
+      if (edge && edge.updatable !== selected) edge.updatable = selected
+    }
+
+    const selectedIds = next.filter(e => e.selected).map(e => e.id)
+    const newlySelected = selectedIds.find(id => id !== lastSelectedEdgeId)
+    if (newlySelected) {
+      const current = flowEdges.value
+      const target = current.find(e => e.id === newlySelected)
+      if (target && current[current.length - 1]?.id !== newlySelected) {
+        setEdges([...current.filter(e => e.id !== newlySelected), target])
+      }
+    }
+    lastSelectedEdgeId = selectedIds[selectedIds.length - 1] ?? null
+  },
+  { deep: true },
+)
 const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
 const { mount: mountHistoryWatcher, unmount: unmountHistoryWatcher } = useSketchHistoryWatcher()
 onMounted(() => {
@@ -51,6 +74,11 @@ function onConnect(params: Connection) {
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
 }
 
+function onEdgeUpdate({ edge, connection }: { edge: GraphEdge, connection: Connection }) {
+  if (connection.source === connection.target) return
+  reconnectEdgeWithHistory(edge, connection)
+}
+
 function onPaneClick(event: MouseEvent) {
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
@@ -81,8 +109,10 @@ function onPaneClick(event: MouseEvent) {
 :min-zoom="0.1"
 :max-zoom="4"
 :delete-key-code="null"
+:edges-updatable="false"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
+@edge-update="onEdgeUpdate"
 @pane-click="onPaneClick"
 >
   <Background
