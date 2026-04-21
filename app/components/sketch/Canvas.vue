@@ -13,6 +13,7 @@ const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
+const { isDragToolActive } = useDragTool()
 const { screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory } = useSketchCanvas()
 const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
@@ -74,13 +75,15 @@ function onPaneClick(event: MouseEvent) {
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
-:class="['w-full h-full', isPlacingNode ? 'placing-node' : '']"
+:class="['w-full h-full', isPlacingNode ? 'placing-node' : isDragToolActive ? 'drag-tool-active' : '']"
 :edge-types="edgeTypes"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
 :min-zoom="0.1"
 :max-zoom="4"
 :delete-key-code="null"
+:pan-on-drag="isDragToolActive"
+:nodes-draggable="!isDragToolActive"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
 @pane-click="onPaneClick"
@@ -103,5 +106,13 @@ function onPaneClick(event: MouseEvent) {
 <style>
 .placing-node .vue-flow__pane {
   cursor: crosshair;
+}
+
+.drag-tool-active .vue-flow__pane {
+  cursor: grab;
+}
+
+.drag-tool-active .vue-flow__pane:active {
+  cursor: grabbing;
 }
 </style>
