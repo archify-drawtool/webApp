@@ -1,10 +1,14 @@
-import { describe, it, expect } from 'vitest'
-import { mountSuspended } from '@nuxt/test-utils/runtime'
+import { describe, it, expect, vi } from 'vitest'
+import { mockNuxtImport, mountSuspended } from '@nuxt/test-utils/runtime'
 import IndexPage from '../app/pages/index.vue'
 
+const navigateToMock = vi.fn()
+mockNuxtImport('navigateTo', () => navigateToMock)
+
 describe('Index pagina', () => {
-    it('kan worden geladen', async () => {
-        const wrapper = await mountSuspended(IndexPage)
-        expect(wrapper.html()).toContain('<div')
+    it('stuurt door naar de projecten pagina', async () => {
+        navigateToMock.mockClear()
+        await mountSuspended(IndexPage)
+        expect(navigateToMock).toHaveBeenCalledWith('/projecten', { replace: true })
     })
 })
