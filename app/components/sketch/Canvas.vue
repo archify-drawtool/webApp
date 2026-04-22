@@ -52,6 +52,7 @@ function onConnect(params: Connection) {
 }
 
 function onPaneClick(event: MouseEvent) {
+  if (event.button === 1) return
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
   const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
@@ -80,6 +81,7 @@ function onPaneClick(event: MouseEvent) {
 :default-viewport="{ zoom: 1 }"
 :min-zoom="0.1"
 :max-zoom="4"
+:pan-on-drag="isPlacingNode ? [1] : [0, 1]"
 :delete-key-code="null"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
