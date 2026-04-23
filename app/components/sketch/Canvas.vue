@@ -104,4 +104,14 @@ function onPaneClick(event: MouseEvent) {
 .placing-node .vue-flow__pane {
   cursor: crosshair;
 }
+
+.vue-flow__node.selected::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background-color: var(--color-primary-500);
+  opacity: 0.15;
+  border-radius: 4px;
+  pointer-events: none;
+}
 </style>
