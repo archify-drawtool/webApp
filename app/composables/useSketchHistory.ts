@@ -1,0 +1,83 @@
+import { useVueFlow, type Node, type Edge } from '@vue-flow/core'
+import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
+
+const MAX_HISTORY = 50
+
+interface Snapshot {
+  nodes: Node[]
+  edges: Edge[]
+}
+
+const past = ref<Snapshot[]>([])
+const future = ref<Snapshot[]>([])
+
+export function useSketchHistory() {
+  const { toObject, setNodes, setEdges } = useVueFlow(SKETCH_CANVAS_ID)
+
+  const canUndo = computed(() => past.value.length > 0)
+  const canRedo = computed(() => future.value.length > 0)
+
+  function capture(): Snapshot {
+    const { nodes, edges } = toObject()
+    return {
+      nodes: structuredClone(nodes),
+      edges: structuredClone(edges),
+    }
+  }
+
+  function snapshot() {
+    past.value = [...past.value.slice(-MAX_HISTORY + 1), capture()]
+    future.value = []
+  }
+
+  function undo(): boolean {
+    if (!canUndo.value) return false
+
+    const previous = past.value[past.value.length - 1]
+    past.value = past.value.slice(0, -1)
+    future.value = [capture(), ...future.value]
+
+    setNodes(previous.nodes)
+    setEdges(previous.edges)
+    return true
+  }
+
+  function redo(): boolean {
+    if (!canRedo.value) return false
+
+    const next = future.value[0]
+    future.value = future.value.slice(1)
+    past.value = [...past.value, capture()]
+
+    setNodes(next.nodes)
+    setEdges(next.edges)
+    return true
+  }
+
+  function clearHistory() {
+    past.value = []
+    future.value = []
+  }
+
+  return { snapshot, undo, redo, clearHistory, canUndo, canRedo }
+}
+
+export function useSketchHistoryWatcher() {
+  const { onNodeDragStart } = useVueFlow(SKETCH_CANVAS_ID)
+  const { snapshot } = useSketchHistory()
+
+  let off: (() => void) | null = null
+
+  function mount() {
+    if (off) return
+    const result = onNodeDragStart(() => snapshot())
+    off = result.off
+  }
+
+  function unmount() {
+    off?.()
+    off = null
+  }
+
+  return { mount, unmount }
+}

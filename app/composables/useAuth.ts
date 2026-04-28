@@ -10,7 +10,7 @@ export const useAuth = () => {
   const login = async (credentials: LoginCredentials): Promise<void> => {
     const response = await post<LoginResponse>(
       "/api/login",
-      credentials as Record<string, unknown>,
+        credentials as unknown as Record<string, unknown>,
     );
     if (response) {
       token.value = response.token;

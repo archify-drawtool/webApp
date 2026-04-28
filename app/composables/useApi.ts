@@ -13,6 +13,12 @@ export const useApi = () => {
       message?: string;
     };
 
+    if (err?.status === 401) {
+      const authToken = useCookie<string | null>("auth_token");
+      authToken.value = null;
+      navigateTo("/login");
+    }
+
     const message =
       err?.data?.message ||
       err?.message ||
@@ -61,5 +67,26 @@ export const useApi = () => {
     }
   };
 
-  return { get, post };
+  const put = async <T>(
+    endpoint: string,
+    body: Record<string, unknown> = {},
+    headers: Record<string, string> = {},
+  ) => {
+    try {
+      return await $fetch<T>(`${baseURL}${endpoint}`, {
+        method: "PUT",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...authHeader.value,
+          ...headers,
+        },
+        body,
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  return { get, post, put };
 };
