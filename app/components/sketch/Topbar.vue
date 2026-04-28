@@ -139,7 +139,7 @@ async function exportMermaid() {
             class="font-heading font-bold text-white text-base bg-transparent border-b border-primary-500 outline-none text-center min-w-0 max-w-[220px]"
             @keydown="onRenameKeydown"
             @blur="confirmRename"
-          />
+          >
         </template>
         <template v-else>
           <span class="font-heading font-bold text-white text-base truncate">
