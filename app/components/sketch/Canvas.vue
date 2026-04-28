@@ -114,7 +114,8 @@ function onPaneClick(event: MouseEvent) {
 
 .drag-tool-active .vue-flow__pane:active {
   cursor: grabbing;
-  
+}
+
 .vue-flow__node.selected::after {
   content: '';
   position: absolute;
