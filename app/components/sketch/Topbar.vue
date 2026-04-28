@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Download, ChevronDown, FileImage, GitBranch } from 'lucide-vue-next'
+import { ArrowLeft, Download, ChevronDown, FileImage, GitBranch, Pencil } from 'lucide-vue-next'
 
 const props = defineProps<{
   sketchTitle: string
@@ -10,10 +10,79 @@ const props = defineProps<{
 
 const config = useRuntimeConfig()
 const token = useCookie<string | null>('auth_token')
+const { patch } = useApi()
+const { updateTitle } = useSketchTopbar()
 
 const dropdownOpen = ref(false)
 const loading = ref(false)
 const error = ref<string | null>(null)
+
+// ── Rename state ──────────────────────────────────────────────
+const renaming = ref(false)
+const renameValue = ref('')
+const renameInput = ref<HTMLInputElement | null>(null)
+const renameError = ref<string | null>(null)
+
+function startRename() {
+  renameValue.value = props.sketchTitle
+  renameError.value = null
+  renaming.value = true
+  nextTick(() => {
+    renameInput.value?.select()
+  })
+}
+
+function cancelRename() {
+  renaming.value = false
+  renameError.value = null
+}
+
+async function confirmRename() {
+  if (!renaming.value) return
+
+  const newTitle = renameValue.value.trim()
+
+  if (!newTitle) {
+    renameError.value = 'De naam mag niet leeg zijn.'
+    return
+  }
+
+  if (newTitle === props.sketchTitle) {
+    renaming.value = false
+    return
+  }
+
+  if (!props.sketchId || !props.projectId) return
+
+  try {
+    await patch(
+      `/api/projects/${props.projectId}/sketches/${props.sketchId}/rename`,
+      { title: newTitle },
+    )
+    updateTitle(newTitle)
+    renaming.value = false
+    renameError.value = null
+  } catch (err: unknown) {
+    const apiErr = err as { data?: { errors?: { title?: string[] }; message?: string } }
+    const msg =
+      apiErr?.data?.errors?.title?.[0] ??
+      apiErr?.data?.message ??
+      'Opslaan mislukt. Probeer het opnieuw.'
+    renameError.value = msg
+    renameValue.value = props.sketchTitle
+    renaming.value = false
+  }
+}
+
+function onRenameKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    e.preventDefault()
+    confirmRename()
+  } else if (e.key === 'Escape') {
+    cancelRename()
+  }
+}
+// ─────────────────────────────────────────────────────────────
 
 async function exportMermaid() {
   if (!props.sketchId || !props.projectId) return
@@ -60,9 +129,35 @@ async function exportMermaid() {
       <span>Terug</span>
     </NuxtLink>
 
-    <span class="absolute left-1/2 -translate-x-1/2 font-heading font-bold text-white text-base truncate max-w-xs pointer-events-none">
-      {{ sketchTitle }}
-    </span>
+    <!-- Rename: bewerkbare schetsnaam -->
+    <div class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-0">
+      <div class="flex items-center gap-1.5 max-w-xs">
+        <template v-if="renaming">
+          <input
+            ref="renameInput"
+            v-model="renameValue"
+            class="font-heading font-bold text-white text-base bg-transparent border-b border-primary-500 outline-none text-center min-w-0 max-w-[220px]"
+            @keydown="onRenameKeydown"
+            @blur="confirmRename"
+          />
+        </template>
+        <template v-else>
+          <span class="font-heading font-bold text-white text-base truncate">
+            {{ sketchTitle }}
+          </span>
+          <button
+            class="text-grey-400 hover:text-white transition-colors shrink-0"
+            title="Naam aanpassen"
+            @click="startRename"
+          >
+            <Pencil :size="14" />
+          </button>
+        </template>
+      </div>
+      <p v-if="renameError" class="text-error-text text-xs whitespace-nowrap mt-0.5">
+        {{ renameError }}
+      </p>
+    </div>
 
     <div class="ml-auto relative z-50">
       <button
@@ -101,4 +196,5 @@ async function exportMermaid() {
   >
     {{ error }}
   </div>
+
 </template>

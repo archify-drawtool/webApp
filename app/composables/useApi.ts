@@ -88,5 +88,26 @@ export const useApi = () => {
     }
   };
 
-  return { get, post, put };
+  const patch = async <T>(
+    endpoint: string,
+    body: Record<string, unknown> = {},
+    headers: Record<string, string> = {},
+  ) => {
+    try {
+      return await $fetch<T>(`${baseURL}${endpoint}`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...authHeader.value,
+          ...headers,
+        },
+        body,
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  return { get, post, put, patch };
 };
