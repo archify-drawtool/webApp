@@ -14,6 +14,8 @@ interface ClipboardEdge {
   id: string
   source: string
   target: string
+  sourceHandle?: string | null
+  targetHandle?: string | null
   type?: string
   label?: string | unknown
   markerEnd?: unknown
@@ -60,6 +62,8 @@ export function useCopyPaste() {
         id: e.id,
         source: e.source,
         target: e.target,
+        sourceHandle: e.sourceHandle,
+        targetHandle: e.targetHandle,
         type: e.type,
         label: e.label,
         markerEnd: e.markerEnd,
@@ -96,6 +100,8 @@ export function useCopyPaste() {
         id: crypto.randomUUID(),
         source: idMap.get(e.source)!,
         target: idMap.get(e.target)!,
+        sourceHandle: e.sourceHandle ?? undefined,
+        targetHandle: e.targetHandle ?? undefined,
         type: e.type ?? 'smoothstep',
       }
       if (e.label !== undefined && e.label !== '') edge.label = e.label as string
