@@ -88,6 +88,21 @@ export const useApi = () => {
     }
   };
 
+  const del = async <T = void>(endpoint: string) => {
+    try {
+      return await $fetch<T>(`${baseURL}${endpoint}`, {
+        method: "DELETE",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...authHeader.value,
+        },
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   const patch = async <T>(
     endpoint: string,
     body: Record<string, unknown> = {},
@@ -109,5 +124,5 @@ export const useApi = () => {
     }
   };
 
-  return { get, post, put, patch };
+  return { get, post, put, patch, del };
 };
