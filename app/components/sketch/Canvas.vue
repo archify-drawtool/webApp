@@ -5,6 +5,7 @@ import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 import SketchNode from '~/components/sketch/Node.vue'
+import SketchNoteNode from '~/components/sketch/NoteNode.vue'
 import SketchEdge from '~/components/sketch/Edge.vue'
 import SketchToolbar from '~/components/sketch/Toolbar.vue'
 import { markRaw } from 'vue'
@@ -37,10 +38,16 @@ const saveLabel = computed(() => {
 })
 
 const rawSketchNode = markRaw(SketchNode)
+const rawSketchNoteNode = markRaw(SketchNoteNode)
 const rawSketchEdge = markRaw(SketchEdge)
 
 const nodeTypes = computed(() =>
-  Object.fromEntries(apiNodeTypes.value.map(t => [t.type, rawSketchNode]))
+  Object.fromEntries(
+    apiNodeTypes.value.map(t => [
+      t.type,
+      t.type === 'note' ? rawSketchNoteNode : rawSketchNode,
+    ])
+  )
 )
 const edgeTypes = { smoothstep: rawSketchEdge }
 
