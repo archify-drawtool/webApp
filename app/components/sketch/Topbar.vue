@@ -67,9 +67,10 @@ async function confirmRename() {
     renaming.value = false
     renameError.value = null
   } catch (err: unknown) {
-    const apiErr = err as { data?: { errors?: { title?: string[] }; message?: string } }
+    const apiErr = err as { data?: { data?: { errors?: { title?: string[] }; message?: string }; message?: string } }
     const msg =
-      apiErr?.data?.errors?.title?.[0] ??
+      apiErr?.data?.data?.errors?.title?.[0] ??
+      apiErr?.data?.data?.message ??
       apiErr?.data?.message ??
       'Opslaan mislukt. Probeer het opnieuw.'
     renameError.value = msg

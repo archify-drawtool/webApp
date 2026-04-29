@@ -9,7 +9,7 @@ export const useApi = () => {
   const handleError = (error: unknown): never => {
     const err = error as {
       status?: number;
-      data?: { message?: string };
+      data?: { message?: string; errors?: Record<string, string[]> };
       message?: string;
     };
 
@@ -27,6 +27,7 @@ export const useApi = () => {
     throw createError({
       statusCode: err?.status || 500,
       statusMessage: message,
+      data: err?.data,
     });
   };
 
