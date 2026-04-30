@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Handle, Position, type NodeProps } from '@vue-flow/core'
-import { Server, Database, LayoutDashboard, User, Square } from 'lucide-vue-next'
+import { Server, Database, LayoutDashboard, User, Square, StickyNote } from 'lucide-vue-next'
 
 const props = defineProps<NodeProps<{ label?: string }>>()
 defineEmits(['updateNodeInternals'])
@@ -14,6 +14,7 @@ const iconComponents: Record<string, Component> = {
   'layout-dashboard': LayoutDashboard,
   user: User,
   square: Square,
+  'sticky-note': StickyNote,
 }
 
 const icon = computed(() => {
