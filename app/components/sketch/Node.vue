@@ -7,6 +7,7 @@ defineEmits(['updateNodeInternals'])
 
 const { nodeTypes } = useNodeTypes()
 const { updateNodeLabelWithHistory } = useSketchCanvas()
+const { openMenu } = useNodeContextMenu()
 
 const iconComponents: Record<string, Component> = {
   server: Server,
@@ -41,6 +42,10 @@ function confirmEdit() {
 function cancelEdit() {
   editing.value = false
 }
+
+function onContextMenu(event: MouseEvent) {
+  openMenu(props.id, props.type, event.clientX, event.clientY)
+}
 </script>
 
 <template>
@@ -52,7 +57,7 @@ function cancelEdit() {
   <Handle id="bottom-source" type="source" :position="Position.Bottom" />
   <Handle id="left-target" type="target" :position="Position.Left" />
   <Handle id="left-source" type="source" :position="Position.Left" />
-  <div class="flex flex-col items-center gap-2 p-3" @dblclick.stop="startEdit">
+  <div class="flex flex-col items-center gap-2 p-3" @dblclick.stop="startEdit" @contextmenu.prevent.stop="onContextMenu">
     <component :is="icon" :size="24" />
     <input
       v-if="editing"

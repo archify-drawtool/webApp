@@ -105,6 +105,7 @@ function onPaneClick(event: MouseEvent) {
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
   </Panel>
   </VueFlow>
+  <SketchNodeContextMenu />
 </template>
 
 <style>

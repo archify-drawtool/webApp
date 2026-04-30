@@ -5,6 +5,7 @@ const props = defineProps<NodeProps<{ label?: string }>>()
 defineEmits(['updateNodeInternals'])
 
 const { updateNodeLabelWithHistory } = useSketchCanvas()
+const { openMenu } = useNodeContextMenu()
 
 const editing = ref(false)
 const editValue = ref('')
@@ -36,6 +37,10 @@ function confirmEdit() {
 function cancelEdit() {
   editing.value = false
 }
+
+function onContextMenu(event: MouseEvent) {
+  openMenu(props.id, props.type, event.clientX, event.clientY)
+}
 </script>
 
 <template>
@@ -48,7 +53,7 @@ function cancelEdit() {
   <Handle id="left-target" type="target" :position="Position.Left" />
   <Handle id="left-source" type="source" :position="Position.Left" />
 
-  <div class="note-wrapper" @dblclick.stop="startEdit">
+  <div class="note-wrapper" @dblclick.stop="startEdit" @contextmenu.prevent.stop="onContextMenu">
     <!-- Het gele notitieblok met afgesneden hoek -->
     <div class="note-body">
       <textarea

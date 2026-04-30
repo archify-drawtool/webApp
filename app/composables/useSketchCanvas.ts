@@ -142,6 +142,13 @@ export function useSketchCanvas() {
     currentSave?.()
   }
 
+  function changeNodeTypeWithHistory(id: string, newType: string) {
+    const { snapshot } = useSketchHistory()
+    snapshot()
+    vueFlow.updateNode(id, { type: newType })
+    currentSave?.()
+  }
+
   function undo() {
     const { undo: historyUndo } = useSketchHistory()
     if (historyUndo()) currentSave?.()
@@ -163,6 +170,7 @@ export function useSketchCanvas() {
     addEdgeWithHistory,
     updateEdgeLabelWithHistory,
     updateNodeLabelWithHistory,
+    changeNodeTypeWithHistory,
     undo,
     redo,
   }
