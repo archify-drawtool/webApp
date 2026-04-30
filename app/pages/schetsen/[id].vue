@@ -4,6 +4,7 @@ import type { Sketch } from '~/types/Sketch'
 definePageMeta({
   layout: 'editor',
   alias: ['/projecten/:projectId/schetsen/:id'],
+  ssr: false,
 })
 
 const route = useRoute()
