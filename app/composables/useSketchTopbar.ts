@@ -16,5 +16,11 @@ export function useSketchTopbar() {
     state.value = null
   }
 
-  return { topbarState: state, setTopbar, clearTopbar }
+  function updateTitle(title: string) {
+    if (state.value) {
+      state.value = { ...state.value, sketchTitle: title }
+    }
+  }
+
+  return { topbarState: state, setTopbar, clearTopbar, updateTitle }
 }
