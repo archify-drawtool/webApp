@@ -9,7 +9,7 @@ export const useApi = () => {
   const handleError = (error: unknown): never => {
     const err = error as {
       status?: number;
-      data?: { message?: string };
+      data?: { message?: string; errors?: Record<string, string[]> };
       message?: string;
     };
 
@@ -27,6 +27,7 @@ export const useApi = () => {
     throw createError({
       statusCode: err?.status || 500,
       statusMessage: message,
+      data: err?.data,
     });
   };
 
@@ -103,5 +104,26 @@ export const useApi = () => {
     }
   };
 
-  return { get, post, put, del };
+  const patch = async <T>(
+    endpoint: string,
+    body: Record<string, unknown> = {},
+    headers: Record<string, string> = {},
+  ) => {
+    try {
+      return await $fetch<T>(`${baseURL}${endpoint}`, {
+        method: "PATCH",
+        headers: {
+          Accept: "application/json",
+          "Content-Type": "application/json",
+          ...authHeader.value,
+          ...headers,
+        },
+        body,
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
+  return { get, post, put, patch, del };
 };
