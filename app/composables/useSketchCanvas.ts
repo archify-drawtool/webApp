@@ -146,7 +146,12 @@ export function useSketchCanvas() {
     const { snapshot } = useSketchHistory()
     snapshot()
     const updated = vueFlow.updateEdge(oldEdge, newConnection)
-    if (updated) currentSave?.()
+    if (updated) {
+      updated.type = oldEdge.type
+      updated.markerStart = oldEdge.markerStart
+      updated.markerEnd = oldEdge.markerEnd
+      currentSave?.()
+    }
     return updated
   }
 
