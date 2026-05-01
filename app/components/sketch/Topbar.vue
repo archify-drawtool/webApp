@@ -8,45 +8,21 @@ const props = defineProps<{
   projectId?: number
 }>()
 
-const config = useRuntimeConfig()
-const token = useCookie<string | null>('auth_token')
-
 const dropdownOpen = ref(false)
 const isExporting = ref(false)
 const dropdownRef = ref<HTMLElement | null>(null)
-const loading = ref(false)
 const error = ref<string | null>(null)
 
 const { exportAsPng } = useExport()
+const { exportAsMermaid } = useMermaidExport()
 
-async function exportMermaid() {
-  if (!props.sketchId || !props.projectId) return
-
+function exportMermaid() {
   dropdownOpen.value = false
-  loading.value = true
   error.value = null
-
   try {
-    const url = `${config.public.apiBaseUrl}/api/projects/${props.projectId}/sketches/${props.sketchId}/export/mermaid`
-
-    const text = await $fetch<string>(url, {
-      headers: { Authorization: `Bearer ${token.value}` },
-      responseType: 'text',
-    })
-
-    const blob = new Blob([text], { type: 'text/plain' })
-    const objectUrl = URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = objectUrl
-    anchor.download = `${props.sketchTitle || 'schets'}.mmd`
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
-    URL.revokeObjectURL(objectUrl)
+    exportAsMermaid(props.sketchTitle)
   } catch {
     error.value = 'Export mislukt. Probeer het opnieuw.'
-  } finally {
-    loading.value = false
   }
 }
 
@@ -98,11 +74,11 @@ onUnmounted(() => {
     <div ref="dropdownRef" class="ml-auto relative z-50">
       <button
         class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-500 hover:bg-primary-900 active:bg-primary-700 text-white font-heading font-bold text-sm transition-colors"
-        :disabled="loading"
+        :disabled="isExporting"
         @click="dropdownOpen = !dropdownOpen"
       >
         <Download :size="15" />
-        <span>{{ loading ? 'Exporteren...' : 'Exporteren' }}</span>
+        <span>{{ isExporting ? 'Exporteren...' : 'Exporteren' }}</span>
         <ChevronDown :size="14" class="transition-transform" :class="{ 'rotate-180': dropdownOpen }" />
       </button>
 
