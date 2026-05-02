@@ -79,7 +79,7 @@ function togglePlacingMode() {
     if (!selectedNodeType.value && nodeTypes.value.length > 0) {
       setNodeType(nodeTypes.value[0].type)
     } else {
-      isPlacingNode.value = true
+      setNodeType(selectedNodeType.value!)
     }
   }
 }

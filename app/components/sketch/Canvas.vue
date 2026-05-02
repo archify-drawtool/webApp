@@ -56,6 +56,7 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
   connection.source !== connection.target
 
 function onConnect(params: Connection) {
+  if (isDragToolActive.value) return
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
 }
 
