@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Handle, Position, type NodeProps } from '@vue-flow/core'
-import { Server, Database, LayoutDashboard, User, Square, StickyNote } from 'lucide-vue-next'
+import { resolveIcon } from '~/utils/lucideIcon'
 
 const props = defineProps<NodeProps<{ label?: string }>>()
 defineEmits(['updateNodeInternals'])
@@ -8,18 +8,9 @@ defineEmits(['updateNodeInternals'])
 const { nodeTypes } = useNodeTypes()
 const { updateNodeLabelWithHistory } = useSketchCanvas()
 
-const iconComponents: Record<string, Component> = {
-  server: Server,
-  database: Database,
-  'layout-dashboard': LayoutDashboard,
-  user: User,
-  square: Square,
-  'sticky-note': StickyNote,
-}
-
 const icon = computed(() => {
   const iconName = nodeTypes.value.find(t => t.type === props.type)?.icon
-  return iconComponents[iconName ?? ''] ?? Square
+  return resolveIcon(iconName ?? '')
 })
 
 const editing = ref(false)
