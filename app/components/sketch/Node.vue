@@ -7,6 +7,7 @@ defineEmits(['updateNodeInternals'])
 
 const { nodeTypes } = useNodeTypes()
 const { updateNodeLabelWithHistory } = useSketchCanvas()
+const { isDragToolActive } = useDragTool()
 
 const iconComponents: Record<string, Component> = {
   server: Server,
@@ -27,6 +28,7 @@ const editValue = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 
 function startEdit() {
+  if (isDragToolActive.value) return
   editValue.value = props.data.label ?? ''
   editing.value = true
   nextTick(() => inputRef.value?.focus())
