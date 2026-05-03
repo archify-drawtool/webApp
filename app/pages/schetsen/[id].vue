@@ -23,14 +23,12 @@ async function load(id: string, projectId: string | undefined) {
     const result = await fetchSketch(id, projectId)
     if (result) {
       sketch.value = result
-      watchAndSave(result.id, result.project_id)
+      watchAndSave(result.id)
 
-      const resolvedProjectId = projectId ?? result.project_id
       setTopbar({
         sketchTitle: result.title,
-        backTo: `/projecten/${resolvedProjectId}`,
+        backTo: result.project_id ? `/projecten/${result.project_id}` : '/mijn-schetsen',
         sketchId: result.id,
-        projectId: result.project_id,
       })
     }
   } catch (e) {

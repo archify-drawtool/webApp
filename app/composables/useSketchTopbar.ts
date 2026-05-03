@@ -2,7 +2,6 @@ export interface SketchTopbarState {
   sketchTitle: string
   backTo: string
   sketchId?: number
-  projectId?: number
 }
 
 export function useSketchTopbar() {
