@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import type { SketchSummary } from '~/types/SketchSummary';
-import { User, Trash2 } from 'lucide-vue-next';
+import { User, Trash2, Globe, Lock } from 'lucide-vue-next';
 
 const props = defineProps<{
   sketch: SketchSummary;
@@ -52,6 +52,11 @@ const timeAgo = (dateString: string): string => {
       </p>
       <p class="text-grey-600 text-small mt-1">
         Laatst bewerkt: {{ timeAgo(sketch.updated_at) }}
+      </p>
+      <p class="text-small mt-2 flex items-center gap-1" :class="sketch.is_shared ? 'text-primary-500' : 'text-grey-600'">
+        <Globe v-if="sketch.is_shared" :size="14" />
+        <Lock v-else :size="14" />
+        {{ sketch.is_shared ? 'Gedeeld' : 'Privé' }}
       </p>
     </NuxtLink>
     <button
