@@ -60,10 +60,10 @@ export function useSketchCanvas() {
     clearHistory()
   }
 
-  const watchAndSave = (sketchId: string | number, projectId: string | number) => {
+  const watchAndSave = (sketchId: string | number) => {
     stopWatchers?.()
 
-    const endpoint = `/api/projects/${projectId}/sketches/${sketchId}`
+    const endpoint = `/api/sketches/${sketchId}`
     const debounceMs = appConfig.sketch?.saveDebounceMs ?? 2000
 
     const save = () => {
