@@ -1,32 +1,12 @@
 <script setup lang="ts">
-import {
-  Server,
-  Database,
-  LayoutDashboard,
-  User,
-  Square,
-  StickyNote,
-} from 'lucide-vue-next'
+import { resolveIcon } from '~/utils/lucideIcon'
 
 const { menuState, closeMenu } = useNodeContextMenu()
 const { nodeTypes } = useNodeTypes()
 const { changeNodeTypeWithHistory } = useSketchCanvas()
 
-const iconComponents: Record<string, Component> = {
-  server: Server,
-  database: Database,
-  'layout-dashboard': LayoutDashboard,
-  user: User,
-  square: Square,
-  'sticky-note': StickyNote,
-}
-
-function iconFor(name: string): Component {
-  return iconComponents[name] ?? Square
-}
-
 const nodeDropdownItems = computed(() =>
-  nodeTypes.value.map(nt => ({ key: nt.type, icon: iconFor(nt.icon), label: nt.name })),
+  nodeTypes.value.map(nt => ({ key: nt.type, icon: resolveIcon(nt.icon), label: nt.name })),
 )
 
 function onSelect(key: string) {
@@ -49,9 +29,9 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 <template>
   <Teleport to="body">
     <template v-if="menuState">
-      <div class="fixed inset-0 z-[90]" @mousedown="closeMenu" />
+      <div class="fixed inset-0 z-90" @mousedown="closeMenu" />
       <div
-        class="fixed z-[91]"
+        class="fixed z-91"
         :style="{ top: menuState.y + 'px', left: menuState.x + 'px' }"
       >
         <SketchToolbarDropdown

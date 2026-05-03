@@ -1,6 +1,6 @@
 <script setup lang="ts">
 import { Handle, Position, type NodeProps } from '@vue-flow/core'
-import { Server, Database, LayoutDashboard, User, Square, StickyNote } from 'lucide-vue-next'
+import { resolveIcon } from '~/utils/lucideIcon'
 
 const props = defineProps<NodeProps<{ label?: string }>>()
 defineEmits(['updateNodeInternals'])
@@ -8,19 +8,11 @@ defineEmits(['updateNodeInternals'])
 const { nodeTypes } = useNodeTypes()
 const { updateNodeLabelWithHistory } = useSketchCanvas()
 const { openMenu } = useNodeContextMenu()
-
-const iconComponents: Record<string, Component> = {
-  server: Server,
-  database: Database,
-  'layout-dashboard': LayoutDashboard,
-  user: User,
-  square: Square,
-  'sticky-note': StickyNote,
-}
+const { isDragToolActive } = useDragTool()
 
 const icon = computed(() => {
   const iconName = nodeTypes.value.find(t => t.type === props.type)?.icon
-  return iconComponents[iconName ?? ''] ?? Square
+  return resolveIcon(iconName ?? '')
 })
 
 const editing = ref(false)
@@ -28,6 +20,7 @@ const editValue = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 
 function startEdit() {
+  if (isDragToolActive.value) return
   editValue.value = props.data.label ?? ''
   editing.value = true
   nextTick(() => inputRef.value?.focus())

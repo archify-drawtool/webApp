@@ -6,6 +6,7 @@ defineEmits(['updateNodeInternals'])
 
 const { updateNodeLabelWithHistory } = useSketchCanvas()
 const { openMenu } = useNodeContextMenu()
+const { isDragToolActive } = useDragTool()
 
 const editing = ref(false)
 const editValue = ref('')
@@ -19,6 +20,7 @@ function autoResize() {
 }
 
 function startEdit() {
+  if (isDragToolActive.value) return
   editValue.value = props.data.label ?? ''
   editing.value = true
   nextTick(() => {
