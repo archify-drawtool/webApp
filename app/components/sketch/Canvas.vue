@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition } from '@vue-flow/core'
+import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -13,7 +13,8 @@ import { markRaw } from 'vue'
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
-const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
+const { selectedNodeType, isPlacingNode } = useNodeTool()
+const { isDragToolActive } = useDragTool()
 const { screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory } = useSketchCanvas()
 const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
@@ -55,10 +56,19 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
   connection.source !== connection.target
 
 function onConnect(params: Connection) {
+  if (isDragToolActive.value) return
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
 }
 
+const isSpacePressed = useKeyPress('Space')
+
+const panOnDrag = computed(() => {
+  if (isDragToolActive.value) return true
+  return isSpacePressed.value ? [0, 1] as number[] : [1] as number[]
+})
+
 function onPaneClick(event: MouseEvent) {
+  if (isSpacePressed.value) return
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
   const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
@@ -72,8 +82,6 @@ function onPaneClick(event: MouseEvent) {
     position,
     data: { label: nodeType.name },
   }])
-
-  stopPlacing()
 }
 </script>
 
@@ -81,13 +89,16 @@ function onPaneClick(event: MouseEvent) {
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
-:class="['w-full h-full', isPlacingNode ? 'placing-node' : '']"
+:class="['w-full h-full', isPlacingNode ? (isSpacePressed ? 'placing-node space-pan' : 'placing-node') : isDragToolActive ? 'drag-tool-active' : '']"
 :edge-types="edgeTypes"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
 :min-zoom="0.1"
 :max-zoom="4"
 :delete-key-code="null"
+:pan-on-drag="panOnDrag"
+:nodes-draggable="!isDragToolActive"
+:elements-selectable="!isDragToolActive"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
 @pane-click="onPaneClick"
@@ -110,6 +121,22 @@ function onPaneClick(event: MouseEvent) {
 <style>
 .placing-node .vue-flow__pane {
   cursor: crosshair;
+}
+
+.placing-node.space-pan .vue-flow__pane {
+  cursor: grab;
+}
+
+.placing-node.space-pan .vue-flow__pane:active {
+  cursor: grabbing;
+}
+
+.drag-tool-active .vue-flow__pane {
+  cursor: grab;
+}
+
+.drag-tool-active .vue-flow__pane:active {
+  cursor: grabbing;
 }
 
 .vue-flow__node.selected::after {
