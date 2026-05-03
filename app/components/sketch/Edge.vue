@@ -35,14 +35,74 @@ function confirmEdit() {
 function cancelEdit() {
   editing.value = false
 }
+
+const emptyMarkerPattern = /url\(['"]?#['"]?\)/
+
+const hasMarkerEnd = computed(() => {
+  const url = props.markerEnd
+  return !!url && !emptyMarkerPattern.test(url)
+})
+
+const hasMarkerStart = computed(() => {
+  const url = props.markerStart
+  return !!url && !emptyMarkerPattern.test(url)
+})
+
+const markerEndId = computed(() => `archify-marker-end-${props.id}`)
+const markerStartId = computed(() => `archify-marker-start-${props.id}`)
 </script>
 
 <template>
+  <defs>
+    <marker
+      v-if="hasMarkerEnd"
+      :id="markerEndId"
+      class="vue-flow__arrowhead"
+      viewBox="-10 -10 20 20"
+      refX="0"
+      refY="0"
+      markerWidth="12.5"
+      markerHeight="12.5"
+      markerUnits="strokeWidth"
+      orient="auto-start-reverse"
+    >
+      <polyline
+        stroke="#b1b1b7"
+        fill="#b1b1b7"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        points="-5,-4 0,0 -5,4 -5,-4"
+      />
+    </marker>
+    <marker
+      v-if="hasMarkerStart"
+      :id="markerStartId"
+      class="vue-flow__arrowhead"
+      viewBox="-10 -10 20 20"
+      refX="0"
+      refY="0"
+      markerWidth="12.5"
+      markerHeight="12.5"
+      markerUnits="strokeWidth"
+      orient="auto-start-reverse"
+    >
+      <polyline
+        stroke="#b1b1b7"
+        fill="#b1b1b7"
+        stroke-width="1"
+        stroke-linecap="round"
+        stroke-linejoin="round"
+        points="-5,-4 0,0 -5,4 -5,-4"
+      />
+    </marker>
+  </defs>
   <BaseEdge
     :id="id"
+    :key="`${id}:${hasMarkerStart ? 's' : ''}${hasMarkerEnd ? 'e' : ''}`"
     :path="pathData[0]"
-    :marker-end="markerEnd"
-    :marker-start="markerStart"
+    :marker-end="hasMarkerEnd ? `url(#${markerEndId})` : undefined"
+    :marker-start="hasMarkerStart ? `url(#${markerStartId})` : undefined"
     :style="style"
   />
   <path

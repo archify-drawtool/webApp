@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition } from '@vue-flow/core'
+import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type EdgeMouseEvent } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -58,6 +58,30 @@ function onConnect(params: Connection) {
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
 }
 
+interface EdgeContextMenuState {
+  edgeId: string
+  x: number
+  y: number
+  hasMarkerEnd: boolean
+  hasMarkerStart: boolean
+  isDashed: boolean
+}
+
+const edgeContextMenu = ref<EdgeContextMenuState | null>(null)
+
+function onEdgeContextMenu({ edge, event }: EdgeMouseEvent) {
+  event.preventDefault()
+  const mouseEvent = event as MouseEvent
+  edgeContextMenu.value = {
+    edgeId: edge.id,
+    x: mouseEvent.clientX,
+    y: mouseEvent.clientY,
+    hasMarkerEnd: !!(edge.markerEnd && (edge.markerEnd as { type?: string }).type),
+    hasMarkerStart: !!(edge.markerStart && (edge.markerStart as { type?: string }).type),
+    isDashed: !!((edge.style as Record<string, unknown>)?.strokeDasharray),
+  }
+}
+
 function onPaneClick(event: MouseEvent) {
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
@@ -91,6 +115,7 @@ function onPaneClick(event: MouseEvent) {
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
 @pane-click="onPaneClick"
+@edge-context-menu="onEdgeContextMenu"
 >
   <Background
     :variant="BackgroundVariant.Dots"
@@ -101,6 +126,11 @@ function onPaneClick(event: MouseEvent) {
   />
   <Controls :show-interactive="false" />
   <SketchToolbar />
+  <SketchEdgeContextMenu
+    v-if="edgeContextMenu"
+    v-bind="edgeContextMenu"
+    @close="edgeContextMenu = null"
+  />
   <Panel v-if="saveLabel" position="bottom-right" class="pointer-events-none text-xs mb-1 mr-1">
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
   </Panel>

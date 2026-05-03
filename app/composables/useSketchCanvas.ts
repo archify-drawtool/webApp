@@ -1,4 +1,4 @@
-import { useVueFlow, type NodeChange, type EdgeChange } from '@vue-flow/core'
+import { useVueFlow, MarkerType, type NodeChange, type EdgeChange } from '@vue-flow/core'
 import type { Sketch } from '~/types/Sketch'
 
 export const SKETCH_CANVAS_ID = 'sketch-canvas'
@@ -135,6 +135,41 @@ export function useSketchCanvas() {
     currentSave?.()
   }
 
+  function updateEdgePropertiesWithHistory(
+    id: string,
+    updates: { markerEnd?: boolean; markerStart?: boolean; dashed?: boolean },
+  ) {
+    const edge = vueFlow.findEdge(id)
+    if (!edge) return
+
+    if (edge.markerEnd === undefined) edge.markerEnd = ''
+    if (edge.markerStart === undefined) edge.markerStart = ''
+
+    const { snapshot } = useSketchHistory()
+    snapshot()
+
+    const markerEnd = 'markerEnd' in updates
+      ? (updates.markerEnd ? { type: MarkerType.ArrowClosed } : '')
+      : edge.markerEnd
+
+    const markerStart = 'markerStart' in updates
+      ? (updates.markerStart ? { type: MarkerType.ArrowClosed } : '')
+      : edge.markerStart
+
+    const currentStyle = typeof edge.style === 'object' && edge.style ? edge.style : {}
+    const style = 'dashed' in updates
+      ? { ...currentStyle, strokeDasharray: updates.dashed ? '6 4' : undefined }
+      : edge.style
+
+    vueFlow.setEdges(
+      vueFlow.getEdges.value.map(e =>
+        e.id === id ? { ...e, markerEnd, markerStart, style } : e,
+      ),
+    )
+
+    currentSave?.()
+  }
+
   function updateNodeLabelWithHistory(id: string, label: string) {
     const { snapshot } = useSketchHistory()
     snapshot()
@@ -162,6 +197,7 @@ export function useSketchCanvas() {
     addNodeWithHistory,
     addEdgeWithHistory,
     updateEdgeLabelWithHistory,
+    updateEdgePropertiesWithHistory,
     updateNodeLabelWithHistory,
     undo,
     redo,
