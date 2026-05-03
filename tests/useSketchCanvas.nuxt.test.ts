@@ -57,9 +57,9 @@ describe('useSketchCanvas – fetchSketch', () => {
     mockGet.mockResolvedValue(sketchFixture)
 
     const { fetchSketch } = useSketchCanvas()
-    const result = await fetchSketch('1', '42')
+    const result = await fetchSketch('1')
 
-    expect(mockGet).toHaveBeenCalledWith('/api/projects/42/sketches/1')
+    expect(mockGet).toHaveBeenCalledWith('/api/sketches/1')
     expect(mockSetNodes).toHaveBeenCalledWith(sketchFixture.canvas_state!.nodes)
     expect(result).toEqual(sketchFixture)
   })
@@ -68,19 +68,10 @@ describe('useSketchCanvas – fetchSketch', () => {
     mockGet.mockResolvedValue({ ...sketchFixture, canvas_state: null })
 
     const { fetchSketch } = useSketchCanvas()
-    await fetchSketch('1', '42')
+    await fetchSketch('1')
 
     expect(mockSetNodes).toHaveBeenCalledWith([])
     expect(mockSetEdges).toHaveBeenCalledWith([])
-  })
-
-  it('gebruikt het fallback endpoint als er geen projectId is', async () => {
-    mockGet.mockResolvedValue(sketchFixture)
-
-    const { fetchSketch } = useSketchCanvas()
-    await fetchSketch('1')
-
-    expect(mockGet).toHaveBeenCalledWith('/api/sketches/1')
   })
 
   it('gooit een 404 error als de API undefined teruggeeft', async () => {
@@ -88,7 +79,7 @@ describe('useSketchCanvas – fetchSketch', () => {
 
     const { fetchSketch } = useSketchCanvas()
 
-    await expect(fetchSketch('999', '42')).rejects.toMatchObject({
+    await expect(fetchSketch('999')).rejects.toMatchObject({
       statusCode: 404,
       statusMessage: 'Schets niet gevonden',
     })
@@ -104,7 +95,7 @@ describe('useSketchCanvas – fetchSketch', () => {
 
     const { fetchSketch } = useSketchCanvas()
 
-    await expect(fetchSketch('1', '42')).rejects.toMatchObject({
+    await expect(fetchSketch('1')).rejects.toMatchObject({
       statusCode: 500,
     })
 
@@ -123,7 +114,7 @@ describe('useSketchCanvas – fetchSketch', () => {
     mockGet.mockResolvedValue(sketchZonderEdgeType)
 
     const { fetchSketch } = useSketchCanvas()
-    await fetchSketch('1', '42')
+    await fetchSketch('1')
 
     expect(mockSetEdges).toHaveBeenCalledWith([
       expect.objectContaining({ id: 'e1', type: 'smoothstep' }),

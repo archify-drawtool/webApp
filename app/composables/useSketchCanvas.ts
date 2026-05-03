@@ -17,10 +17,8 @@ export function useSketchCanvas() {
   const { get, put } = useApi()
   const appConfig = useAppConfig() as { sketch?: { saveDebounceMs?: number } }
 
-  const fetchSketch = async (sketchId: string | number, projectId?: string | number): Promise<Sketch> => {
-    const endpoint = projectId
-      ? `/api/projects/${projectId}/sketches/${sketchId}`
-      : `/api/sketches/${sketchId}`
+  const fetchSketch = async (sketchId: string | number): Promise<Sketch> => {
+    const endpoint = `/api/sketches/${sketchId}`;
     const sketch = await get<Sketch>(endpoint)
     if (!sketch) {
         throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
