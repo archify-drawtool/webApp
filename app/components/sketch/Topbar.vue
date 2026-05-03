@@ -5,7 +5,6 @@ const props = defineProps<{
   sketchTitle: string
   backTo: string
   sketchId?: number
-  projectId?: number
 }>()
 
 const config = useRuntimeConfig()
@@ -56,11 +55,11 @@ async function confirmRename() {
     return
   }
 
-  if (!props.sketchId || !props.projectId) return
+  if (!props.sketchId) return
 
   try {
     await patch(
-      `/api/projects/${props.projectId}/sketches/${props.sketchId}/rename`,
+      `/api/sketches/${props.sketchId}/rename`,
       { title: newTitle },
     )
     updateTitle(newTitle)
@@ -90,14 +89,14 @@ function onRenameKeydown(e: KeyboardEvent) {
 // ─────────────────────────────────────────────────────────────
 
 async function exportMermaid() {
-  if (!props.sketchId || !props.projectId) return
+  if (!props.sketchId) return
 
   dropdownOpen.value = false
   loading.value = true
   error.value = null
 
   try {
-    const url = `${config.public.apiBaseUrl}/api/projects/${props.projectId}/sketches/${props.sketchId}/export/mermaid`
+    const url = `${config.public.apiBaseUrl}/api/sketches/${props.sketchId}/export/mermaid`
 
     const text = await $fetch<string>(url, {
       headers: { Authorization: `Bearer ${token.value}` },

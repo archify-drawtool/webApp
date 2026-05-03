@@ -71,7 +71,7 @@ const onDeleteConfirm = async () => {
   if (!sketchToDelete.value) return;
   deletePending.value = true;
   try {
-    await deleteSketch(projectId, sketchToDelete.value.id);
+    await deleteSketch(sketchToDelete.value.id);
     sketchToDelete.value = null;
   } catch (e) {
     const err = e as { statusMessage?: string };

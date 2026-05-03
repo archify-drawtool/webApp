@@ -22,8 +22,8 @@ export const useSketches = () => {
         }
     };
 
-    const deleteSketch = async (projectId: number, sketchId: number): Promise<void> => {
-        await del(`/api/projects/${projectId}/sketches/${sketchId}`);
+    const deleteSketch = async (sketchId: number): Promise<void> => {
+        await del(`/api/sketches/${sketchId}`);
         sketches.value = sketches.value.filter(s => s.id !== sketchId);
     };
 
