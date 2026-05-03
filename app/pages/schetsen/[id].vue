@@ -14,7 +14,7 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const sketch = ref<Sketch | null>(null)
 
-async function load(id: string, projectId: string | undefined) {
+async function load(id: string) {
   clearCanvas()
   loading.value = true
   error.value = null
@@ -50,13 +50,12 @@ onBeforeRouteUpdate((to, from) => {
     && to.params.projectId === from.params.projectId
   ) return
   clearCanvas()
-  void load(to.params.id as string, to.params.projectId as string | undefined)
+  void load(to.params.id as string)
 })
 
 onMounted(() => {
   void load(
-    route.params.id as string,
-    route.params.projectId as string | undefined,
+    route.params.id as string
   )
 })
 </script>
@@ -67,7 +66,7 @@ onMounted(() => {
     <div v-if="loading || error" class="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-[var(--color-secondary-950)]">
       <span v-if="loading" class="text-grey-400">Schets laden...</span>
       <template v-else-if="error">
-        <p class="text-[var(--color-error-text)] text-base text-center px-8">{{ error }}</p>
+        <p class="text-error-text text-base text-center px-8">{{ error }}</p>
         <NuxtLink
           v-if="route.params.projectId"
           :to="`/projecten/${route.params.projectId}`"
