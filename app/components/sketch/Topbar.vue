@@ -202,36 +202,39 @@ onUnmounted(() => {
       </p>
     </div>
 
-    <div ref="dropdownRef" class="ml-auto relative z-50">
-      <button
-        class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-500 hover:bg-primary-900 active:bg-primary-700 text-white font-heading font-bold text-sm transition-colors"
-        :disabled="loading"
-        @click="dropdownOpen = !dropdownOpen"
-      >
-        <Download :size="15" />
-        <span>{{ loading ? 'Exporteren...' : 'Exporteren' }}</span>
-        <ChevronDown :size="14" class="transition-transform" :class="{ 'rotate-180': dropdownOpen }" />
-      </button>
+    <div class="ml-auto flex items-center gap-2">
+      <SketchShareDropdown v-if="sketchId && projectId" :sketch-id="sketchId" :project-id="projectId" />
+      <div ref="dropdownRef" class="relative z-50">
+        <button
+          class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-500 hover:bg-primary-900 active:bg-primary-700 text-white font-heading font-bold text-sm transition-colors"
+          :disabled="loading"
+          @click="dropdownOpen = !dropdownOpen"
+        >
+          <Download :size="15" />
+          <span>{{ loading ? 'Exporteren...' : 'Exporteren' }}</span>
+          <ChevronDown :size="14" class="transition-transform" :class="{ 'rotate-180': dropdownOpen }" />
+        </button>
 
-      <div
-        v-if="dropdownOpen"
-        class="absolute top-full right-0 mt-1 bg-secondary-900 border border-secondary-700 rounded-lg p-1 min-w-36"
-      >
-        <button
-          class="flex items-center gap-2 px-3 py-2 rounded-md w-full text-grey-100 hover:bg-secondary-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
-          :disabled="isExporting"
-          @click="handleExportPng"
+        <div
+          v-if="dropdownOpen"
+          class="absolute top-full right-0 mt-1 bg-secondary-900 border border-secondary-700 rounded-lg p-1 min-w-36"
         >
-          <FileImage :size="15" />
-          <span>{{ isExporting ? 'Exporteren...' : 'PNG' }}</span>
-        </button>
-        <button
-          class="flex items-center gap-2 px-3 py-2 rounded-md w-full text-grey-100 hover:bg-secondary-700 transition-colors text-sm cursor-pointer"
-          @click="exportMermaid"
-        >
-          <GitBranch :size="15" />
-          <span>Mermaid</span>
-        </button>
+          <button
+            class="flex items-center gap-2 px-3 py-2 rounded-md w-full text-grey-100 hover:bg-secondary-700 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
+            :disabled="isExporting"
+            @click="handleExportPng"
+          >
+            <FileImage :size="15" />
+            <span>{{ isExporting ? 'Exporteren...' : 'PNG' }}</span>
+          </button>
+          <button
+            class="flex items-center gap-2 px-3 py-2 rounded-md w-full text-grey-100 hover:bg-secondary-700 transition-colors text-sm cursor-pointer"
+            @click="exportMermaid"
+          >
+            <GitBranch :size="15" />
+            <span>Mermaid</span>
+          </button>
+        </div>
       </div>
     </div>
 
