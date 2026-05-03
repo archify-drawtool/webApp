@@ -19,7 +19,7 @@ async function load(id: string, projectId: string | undefined) {
   loading.value = true
   error.value = null
   try {
-    const result = await fetchSketch(id, projectId)
+    const result = await fetchSketch(id)
     if (result) {
       sketch.value = result
       watchAndSave(result.id)
