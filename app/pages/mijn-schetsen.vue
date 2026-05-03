@@ -2,12 +2,12 @@
 import { Plus } from 'lucide-vue-next'
 import type { SketchSummary } from '~/types/SketchSummary'
 
-const { get, post, del } = useApi()
+const { get, del } = useApi()
+const { creating, createSketch } = useCreateSketch()
 
 const sketches = ref<SketchSummary[]>([])
 const loading = ref(false)
 const error = ref<string | null>(null)
-const creating = ref(false)
 
 const sketchToDelete = ref<SketchSummary | null>(null)
 const deleteError = ref<string | null>(null)
@@ -23,21 +23,6 @@ async function fetchSketches() {
     error.value = err?.statusMessage ?? 'Er is een onbekende fout opgetreden.'
   } finally {
     loading.value = false
-  }
-}
-
-async function createSketch() {
-  creating.value = true
-  try {
-    const sketch = await post<SketchSummary>('/api/sketches', {})
-    if (sketch) {
-      await navigateTo(`/schetsen/${sketch.id}`)
-    }
-  } catch (e) {
-    const err = e as { statusMessage?: string }
-    error.value = err?.statusMessage ?? 'Aanmaken mislukt. Probeer het opnieuw.'
-  } finally {
-    creating.value = false
   }
 }
 
