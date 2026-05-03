@@ -10,6 +10,7 @@ const props = defineProps<{
 
 const config = useRuntimeConfig()
 const token = useCookie<string | null>('auth_token')
+const { toObject } = useSketchCanvas()
 
 const dropdownOpen = ref(false)
 const isExporting = ref(false)
@@ -20,19 +21,29 @@ const error = ref<string | null>(null)
 const { exportAsPng } = useExport()
 
 async function exportMermaid() {
-  if (!props.sketchId || !props.projectId) return
-
   dropdownOpen.value = false
   loading.value = true
   error.value = null
 
   try {
-    const url = `${config.public.apiBaseUrl}/api/projects/${props.projectId}/sketches/${props.sketchId}/export/mermaid`
+    const baseUrl = config.public.apiBaseUrl
+    const headers = { Authorization: `Bearer ${token.value}` }
+    let text: string
 
-    const text = await $fetch<string>(url, {
-      headers: { Authorization: `Bearer ${token.value}` },
-      responseType: 'text',
-    })
+    if (props.sketchId && props.projectId) {
+      text = await $fetch<string>(
+        `${baseUrl}/api/projects/${props.projectId}/sketches/${props.sketchId}/export/mermaid`,
+        { headers, responseType: 'text' },
+      )
+    } else {
+      const { nodes, edges } = toObject()
+      text = await $fetch<string>(`${baseUrl}/api/export/mermaid`, {
+        method: 'POST',
+        headers,
+        body: { canvas_state: { nodes, edges } },
+        responseType: 'text',
+      })
+    }
 
     const blob = new Blob([text], { type: 'text/plain' })
     const objectUrl = URL.createObjectURL(blob)
