@@ -2,12 +2,13 @@
 import { Pencil } from 'lucide-vue-next';
 import type { Project } from '~/types/Project';
 import type { Tab } from '~/components/TabNav.vue';
+import type { SketchSummary } from '~/types/SketchSummary';
 
 const route = useRoute();
 const projectId = Number(route.params.id);
 
 const { get } = useApi();
-const { sketches, loading, error, fetchSketches } = useSketches();
+const { sketches, loading, error, fetchSketches, deleteSketch } = useSketches();
 
 const project = ref<Project | null>(null);
 const projectError = ref<string | null>(null);
@@ -17,6 +18,33 @@ const tabs: Tab[] = [
   { key: 'schetsen', label: 'Schetsen' },
   { key: 'info', label: 'Project informatie' },
 ];
+
+const sketchToDelete = ref<SketchSummary | null>(null);
+const deleteError = ref<string | null>(null);
+const deletePending = ref(false);
+
+const onDeleteRequest = (sketch: SketchSummary) => {
+  sketchToDelete.value = sketch;
+  deleteError.value = null;
+};
+
+const onDeleteCancel = () => {
+  sketchToDelete.value = null;
+};
+
+const onDeleteConfirm = async () => {
+  if (!sketchToDelete.value) return;
+  deletePending.value = true;
+  try {
+    await deleteSketch(projectId, sketchToDelete.value.id);
+    sketchToDelete.value = null;
+  } catch (e) {
+    const err = e as { statusMessage?: string };
+    deleteError.value = err?.statusMessage ?? 'Er is een fout opgetreden bij het verwijderen.';
+  } finally {
+    deletePending.value = false;
+  }
+};
 
 try {
     project.value = await get<Project>(`/api/projects/${projectId}`) ?? null;
@@ -60,6 +88,7 @@ await fetchSketches(projectId);
               v-for="sketch in sketches"
               :key="sketch.id"
               :sketch="sketch"
+              @delete="onDeleteRequest"
           />
         </BaseGrid>
       </template>
@@ -70,5 +99,14 @@ await fetchSketches(projectId);
         <p class="text-grey-600">Hier komt de project informatie.</p>
       </template>
     </template>
+
+    <ConfirmDialog
+      v-if="sketchToDelete"
+      message="Weet je het zeker? Deze actie kan niet ongedaan worden gemaakt."
+      :error="deleteError"
+      :pending="deletePending"
+      @confirm="onDeleteConfirm"
+      @cancel="onDeleteCancel"
+    />
   </div>
 </template>

@@ -1,7 +1,7 @@
 import type { SketchSummary } from '~/types/SketchSummary';
 
 export const useSketches = () => {
-    const { get } = useApi();
+    const { get, del } = useApi();
 
     const sketches = ref<SketchSummary[]>([]);
     const loading = ref(false);
@@ -22,5 +22,10 @@ export const useSketches = () => {
         }
     };
 
-    return { sketches, loading, error, fetchSketches };
+    const deleteSketch = async (projectId: number, sketchId: number): Promise<void> => {
+        await del(`/api/projects/${projectId}/sketches/${sketchId}`);
+        sketches.value = sketches.value.filter(s => s.id !== sketchId);
+    };
+
+    return { sketches, loading, error, fetchSketches, deleteSketch };
 };

@@ -10,6 +10,7 @@ import {
   LayoutDashboard,
   User,
   Square,
+  StickyNote,
   Type,
 } from 'lucide-vue-next'
 
@@ -28,6 +29,7 @@ const iconComponents: Record<string, Component> = {
   'layout-dashboard': LayoutDashboard,
   user: User,
   square: Square,
+  'sticky-note': StickyNote,
   'arrow-right': ArrowRight,
   'arrow-left-right': ArrowLeftRight,
   minus: Minus,
