@@ -16,7 +16,9 @@ const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode } = useNodeTool()
 const { isDragToolActive } = useDragTool()
 const { screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
-const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory } = useSketchCanvas()
+const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, triggerSave } = useSketchCanvas()
+const { showDots } = useDotsToggle()
+watch(showDots, () => triggerSave())
 const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
 const { mount: mountHistoryWatcher, unmount: unmountHistoryWatcher } = useSketchHistoryWatcher()
 onMounted(() => {
@@ -104,6 +106,7 @@ function onPaneClick(event: MouseEvent) {
 @pane-click="onPaneClick"
 >
   <Background
+    v-if="showDots"
     :variant="BackgroundVariant.Dots"
     :gap="20"
     :size="1.5"
