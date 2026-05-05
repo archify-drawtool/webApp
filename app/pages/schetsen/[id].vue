@@ -8,7 +8,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { fetchSketch, clearCanvas, stopSaving, watchAndSave } = useSketchCanvas()
+const { fetchSketch, clearCanvas, watchAndSave } = useSketchCanvas()
 const { setTopbar, clearTopbar } = useSketchTopbar()
 
 const loading = ref(true)
