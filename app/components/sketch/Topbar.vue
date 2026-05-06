@@ -12,6 +12,7 @@ const config = useRuntimeConfig()
 const token = useCookie<string | null>('auth_token')
 const { patch } = useApi()
 const { updateTitle } = useSketchTopbar()
+const { toObject } = useSketchCanvas()
 
 const dropdownOpen = ref(false)
 const isExporting = ref(false)
@@ -21,7 +22,6 @@ const error = ref<string | null>(null)
 
 const { exportAsPng } = useExport()
 
-// ── Rename state ──────────────────────────────────────────────
 const renaming = ref(false)
 const renameValue = ref('')
 const renameInput = ref<HTMLInputElement | null>(null)
@@ -87,20 +87,20 @@ function onRenameKeydown(e: KeyboardEvent) {
     cancelRename()
   }
 }
-// ─────────────────────────────────────────────────────────────
 
 async function exportMermaid() {
-  if (!props.sketchId || !props.projectId) return
-
   dropdownOpen.value = false
   loading.value = true
   error.value = null
 
   try {
-    const url = `${config.public.apiBaseUrl}/api/projects/${props.projectId}/sketches/${props.sketchId}/export/mermaid`
+    const { nodes, edges, viewport } = toObject()
+    const url = `${config.public.apiBaseUrl}/api/export/mermaid`
 
     const text = await $fetch<string>(url, {
+      method: 'POST',
       headers: { Authorization: `Bearer ${token.value}` },
+      body: { canvas_state: { nodes, edges, viewport } },
       responseType: 'text',
     })
 
@@ -161,7 +161,6 @@ onUnmounted(() => {
       <span>Terug</span>
     </NuxtLink>
 
-    <!-- Rename: bewerkbare schetsnaam -->
     <div class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-0">
       <div class="flex items-center gap-1.5 max-w-xs">
         <template v-if="renaming">
