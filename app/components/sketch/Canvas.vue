@@ -1,10 +1,11 @@
 <script setup lang="ts">
 
-import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge } from '@vue-flow/core'
+import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 import SketchNode from '~/components/sketch/Node.vue'
+import SketchNoteNode from '~/components/sketch/NoteNode.vue'
 import SketchEdge from '~/components/sketch/Edge.vue'
 import SketchToolbar from '~/components/sketch/Toolbar.vue'
 import { markRaw } from 'vue'
@@ -13,6 +14,7 @@ const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
+const { isDragToolActive } = useDragTool()
 const { screenToFlowCoordinate, edges: flowEdges, setEdges } = useVueFlow(SKETCH_CANVAS_ID)
 const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory } = useSketchCanvas()
 
@@ -60,10 +62,16 @@ const saveLabel = computed(() => {
 })
 
 const rawSketchNode = markRaw(SketchNode)
+const rawSketchNoteNode = markRaw(SketchNoteNode)
 const rawSketchEdge = markRaw(SketchEdge)
 
 const nodeTypes = computed(() =>
-  Object.fromEntries(apiNodeTypes.value.map(t => [t.type, rawSketchNode]))
+  Object.fromEntries(
+    apiNodeTypes.value.map(t => [
+      t.type,
+      t.type === 'note' ? rawSketchNoteNode : rawSketchNode,
+    ])
+  )
 )
 const edgeTypes = { smoothstep: rawSketchEdge }
 
@@ -71,6 +79,7 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
   connection.source !== connection.target
 
 function onConnect(params: Connection) {
+  if (isDragToolActive.value) return
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
 }
 
@@ -79,7 +88,15 @@ function onEdgeUpdate({ edge, connection }: { edge: GraphEdge, connection: Conne
   reconnectEdgeWithHistory(edge, connection)
 }
 
+const isSpacePressed = useKeyPress('Space')
+
+const panOnDrag = computed(() => {
+  if (isDragToolActive.value) return true
+  return isSpacePressed.value ? [0, 1] as number[] : [1] as number[]
+})
+
 function onPaneClick(event: MouseEvent) {
+  if (isSpacePressed.value) return
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
   const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
@@ -102,7 +119,7 @@ function onPaneClick(event: MouseEvent) {
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
-:class="['w-full h-full', isPlacingNode ? 'placing-node' : '']"
+:class="['w-full h-full', isPlacingNode ? (isSpacePressed ? 'placing-node space-pan' : 'placing-node') : isDragToolActive ? 'drag-tool-active' : '']"
 :edge-types="edgeTypes"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
@@ -110,6 +127,9 @@ function onPaneClick(event: MouseEvent) {
 :max-zoom="4"
 :delete-key-code="null"
 :edges-updatable="false"
+:pan-on-drag="panOnDrag"
+:nodes-draggable="!isDragToolActive"
+:elements-selectable="!isDragToolActive"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
 @edge-update="onEdgeUpdate"
@@ -133,6 +153,22 @@ function onPaneClick(event: MouseEvent) {
 <style>
 .placing-node .vue-flow__pane {
   cursor: crosshair;
+}
+
+.placing-node.space-pan .vue-flow__pane {
+  cursor: grab;
+}
+
+.placing-node.space-pan .vue-flow__pane:active {
+  cursor: grabbing;
+}
+
+.drag-tool-active .vue-flow__pane {
+  cursor: grab;
+}
+
+.drag-tool-active .vue-flow__pane:active {
+  cursor: grabbing;
 }
 
 .vue-flow__node.selected::after {
