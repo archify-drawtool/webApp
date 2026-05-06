@@ -25,12 +25,12 @@ const { creating, createSketch } = useCreateSketch()
 
       <!-- Start sketching -->
       <div class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }">
-        <PrimaryButton :disabled="creating" tabindex="-1" @click="createSketch">
+        <PrimaryButton :disabled="creating" tabindex="-1" @click="()=>createSketch()">
           {{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}
         </PrimaryButton>
       </div>
 
-      <button v-if="isCollapsed" class="flex justify-center" :disabled="creating" @click="createSketch">
+      <button v-if="isCollapsed" class="flex justify-center" :disabled="creating" @click="()=>createSketch()">
         <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="'white'" />
       </button>
 

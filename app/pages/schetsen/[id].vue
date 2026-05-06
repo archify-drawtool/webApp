@@ -29,6 +29,7 @@ async function load(id: string) {
         sketchTitle: result.title,
         backTo: result.project_id ? `/projecten/${result.project_id}` : '/mijn-schetsen',
         sketchId: result.id,
+        projectId: result.project_id ?? undefined,
       })
     }
   } catch (e) {

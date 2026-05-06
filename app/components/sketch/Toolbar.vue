@@ -137,8 +137,8 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
         </button>
         <button
           class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
-          @click.stop="toggle('node')"
           title="Kies uit een nodetype"
+          @click.stop="toggle('node')"
         >
           <ChevronUp :size="14" />
         </button>
@@ -159,8 +159,8 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
         </div>
         <button
           class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
-          @click.stop="toggle('edge')"
           title="Kies uit een relatietype"
+          @click.stop="toggle('edge')"
         >
           <ChevronUp :size="14" />
         </button>

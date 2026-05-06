@@ -5,6 +5,7 @@ const props = defineProps<{
   sketchTitle: string
   backTo: string
   sketchId?: number
+  projectId?: number
 }>()
 
 const config = useRuntimeConfig()
