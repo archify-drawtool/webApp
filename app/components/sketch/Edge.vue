@@ -4,6 +4,7 @@ import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '
 const props = defineProps<EdgeProps>()
 
 const { updateEdgeLabelWithHistory } = useSketchCanvas()
+const { isDragToolActive } = useDragTool()
 
 const pathData = computed(() =>
   getSmoothStepPath({
@@ -21,6 +22,7 @@ const editValue = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
 
 function startEdit() {
+  if (isDragToolActive.value) return
   editValue.value = typeof props.label === 'string' ? props.label : ''
   editing.value = true
   nextTick(() => inputRef.value?.focus())
