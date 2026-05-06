@@ -60,7 +60,7 @@ await fetchSketches()
       <button
         class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-500 hover:bg-primary-900 active:bg-primary-700 text-white font-heading font-bold text-sm transition-colors disabled:opacity-50"
         :disabled="creating"
-        @click="createSketch"
+        @click="()=> createSketch()"
       >
         <Plus :size="16" />
         <span>{{ creating ? 'Aanmaken...' : 'Nieuwe schets' }}</span>

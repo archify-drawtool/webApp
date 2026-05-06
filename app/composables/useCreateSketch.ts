@@ -5,18 +5,24 @@ export function useCreateSketch() {
   const creating = ref(false)
   const createError = ref<string | null>(null)
 
-  function defaultTitle(): string {
-    const now = new Date()
-    const date = now.toLocaleDateString('nl-NL', { day: '2-digit', month: '2-digit' })
-    const time = now.toLocaleTimeString('nl-NL', { hour: '2-digit', minute: '2-digit', hour12: false })
-    return `Nieuwe schets ${date} ${time}`
+  function generateSketchTitle(): string {
+  const maanden = [
+    'januari', 'februari', 'maart', 'april', 'mei', 'juni',
+    'juli', 'augustus', 'september', 'oktober', 'november', 'december',
+  ];
+  const now = new Date();
+  const dag = now.getDate();
+  const maand = maanden[now.getMonth()];
+  const uur = String(now.getHours()).padStart(2, '0');
+  const min = String(now.getMinutes()).padStart(2, '0');
+  return `Schets ${dag} ${maand} ${uur}:${min}`;
   }
 
-  async function createSketch() {
+  async function createSketch(projectId?: number) {
     creating.value = true
     createError.value = null
     try {
-      const sketch = await post<SketchSummary>('/api/sketches', { title: defaultTitle() })
+      const sketch = await post<SketchSummary>('/api/sketches', { title: generateSketchTitle(), project_id: projectId })
       if (sketch) {
         await navigateTo(`/schetsen/${sketch.id}`)
       }

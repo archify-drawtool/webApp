@@ -3,47 +3,15 @@ import { Pencil } from 'lucide-vue-next';
 import type { Project } from '~/types/Project';
 import type { Tab } from '~/components/TabNav.vue';
 import type { SketchSummary } from '~/types/SketchSummary';
-import type { Sketch } from '~/types/Sketch';
 
 const route = useRoute();
 const projectId = Number(route.params.id);
 
-const { get, post } = useApi();
+const { get } = useApi();
+const { creating, createSketch } = useCreateSketch()
 const { sketches, loading, error, fetchSketches, deleteSketch } = useSketches();
 
-const createPending = ref(false);
 const createError = ref<string | null>(null);
-
-function generateSketchTitle(): string {
-  const maanden = [
-    'januari', 'februari', 'maart', 'april', 'mei', 'juni',
-    'juli', 'augustus', 'september', 'oktober', 'november', 'december',
-  ];
-  const now = new Date();
-  const dag = now.getDate();
-  const maand = maanden[now.getMonth()];
-  const uur = String(now.getHours()).padStart(2, '0');
-  const min = String(now.getMinutes()).padStart(2, '0');
-  return `Schets ${dag} ${maand} ${uur}:${min}`;
-}
-
-async function createSketch() {
-  createPending.value = true;
-  createError.value = null;
-  try {
-    const schets = await post<Sketch>(
-      `/api/projects/${projectId}/sketches`,
-      { title: generateSketchTitle() },
-    );
-    if (!schets?.id) throw new Error('Geen geldig schets-ID ontvangen.');
-    await navigateTo(`/projecten/${projectId}/schetsen/${schets.id}`);
-  } catch (e) {
-    const err = e as { statusMessage?: string; message?: string };
-    createError.value = err?.statusMessage ?? err?.message ?? 'Schets kon niet worden aangemaakt.';
-  } finally {
-    createPending.value = false;
-  }
-}
 
 const project = ref<Project | null>(null);
 const projectError = ref<string | null>(null);
@@ -112,11 +80,11 @@ await fetchSketches(projectId);
             :cols="{ sm: 2, lg: 3, xl: 4 }"
         >
           <button
-              :disabled="createPending"
+              :disabled="creating"
               class="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-              @click="createSketch"
+              @click="() => createSketch(projectId)"
           >
-            <span class="font-heading text-h3">{{ createPending ? 'Aanmaken...' : 'Begin met schetsen' }}</span>
+            <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span>
             <Pencil :size="20" />
             <span v-if="createError" class="text-[var(--color-error-text)] text-sm mt-1">{{ createError }}</span>
           </button>
