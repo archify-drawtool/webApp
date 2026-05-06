@@ -67,7 +67,7 @@ const submit = async () => {
   error.value = null;
   try {
     await login(credentials.value);
-    await navigateTo("/");
+    await navigateTo("/projecten");
   } catch (err) {
     error.value = err as Error;
   } finally {

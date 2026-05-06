@@ -8,5 +8,6 @@ export interface SketchSummary {
     creator: User | null;
     created_at: string;
     updated_at: string;
+    is_shared: boolean;
 }
 

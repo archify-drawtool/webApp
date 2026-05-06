@@ -1,7 +1,7 @@
 import type { User, LoginCredentials, LoginResponse } from "~/types/Auth";
 
 export const useAuth = () => {
-  const { post } = useApi();
+  const { post, get } = useApi();
 
   const token = useCookie<string | null>("auth_token");
   const user = useState<User | null>("auth_user", () => null);
@@ -27,5 +27,15 @@ export const useAuth = () => {
     }
   };
 
-  return { login, logout, user, token, isLoggedIn };
+  const fetchCurrentUser = async (): Promise<void> => {
+    try {
+      const response = await get<User>("/api/user");
+      if (response) user.value = response;
+    } catch {
+      token.value = null;
+      user.value = null;
+    }
+  };
+
+  return { login, logout, fetchCurrentUser, user, token, isLoggedIn };
 };
