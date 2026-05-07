@@ -1,4 +1,4 @@
-import { useVueFlow, type NodeChange, type EdgeChange } from '@vue-flow/core'
+import { useVueFlow, type NodeChange, type EdgeChange, type Connection, type GraphEdge } from '@vue-flow/core'
 import type { Sketch } from '~/types/Sketch'
 
 export const SKETCH_CANVAS_ID = 'sketch-canvas'
@@ -136,6 +136,19 @@ export function useSketchCanvas() {
     currentSave?.()
   }
 
+  function reconnectEdgeWithHistory(oldEdge: GraphEdge, newConnection: Connection) {
+    const { snapshot } = useSketchHistory()
+    snapshot()
+    const updated = vueFlow.updateEdge(oldEdge, newConnection)
+    if (updated) {
+      updated.type = oldEdge.type
+      updated.markerStart = oldEdge.markerStart
+      updated.markerEnd = oldEdge.markerEnd
+      currentSave?.()
+    }
+    return updated
+  }
+
   function undo() {
     if (historyUndo()) currentSave?.()
   }
@@ -155,6 +168,7 @@ export function useSketchCanvas() {
     addEdgeWithHistory,
     updateEdgeLabelWithHistory,
     updateNodeLabelWithHistory,
+    reconnectEdgeWithHistory,
     undo,
     redo,
   }
