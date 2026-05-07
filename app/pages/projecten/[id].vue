@@ -2,14 +2,13 @@
 import { Pencil } from 'lucide-vue-next';
 import type { Project } from '~/types/Project';
 import type { Tab } from '~/components/TabNav.vue';
-import type { SketchSummary } from '~/types/SketchSummary';
 
 const route = useRoute();
 const projectId = Number(route.params.id);
 
 const { get } = useApi();
 const { creating, createSketch } = useCreateSketch()
-const { sketches, loading, error, fetchSketches, deleteSketch } = useSketches();
+const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches();
 
 const createError = ref<string | null>(null);
 
@@ -21,33 +20,6 @@ const tabs: Tab[] = [
   { key: 'schetsen', label: 'Schetsen' },
   { key: 'info', label: 'Project informatie' },
 ];
-
-const sketchToDelete = ref<SketchSummary | null>(null);
-const deleteError = ref<string | null>(null);
-const deletePending = ref(false);
-
-const onDeleteRequest = (sketch: SketchSummary) => {
-  sketchToDelete.value = sketch;
-  deleteError.value = null;
-};
-
-const onDeleteCancel = () => {
-  sketchToDelete.value = null;
-};
-
-const onDeleteConfirm = async () => {
-  if (!sketchToDelete.value) return;
-  deletePending.value = true;
-  try {
-    await deleteSketch(sketchToDelete.value.id);
-    sketchToDelete.value = null;
-  } catch (e) {
-    const err = e as { statusMessage?: string };
-    deleteError.value = err?.statusMessage ?? 'Er is een fout opgetreden bij het verwijderen.';
-  } finally {
-    deletePending.value = false;
-  }
-};
 
 try {
     project.value = await get<Project>(`/api/projects/${projectId}`) ?? null;
@@ -86,7 +58,7 @@ await fetchSketches(projectId);
           >
             <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span>
             <Pencil :size="20" />
-            <span v-if="createError" class="text-[var(--color-error-text)] text-sm mt-1">{{ createError }}</span>
+            <span v-if="createError" class="text-error-text text-sm mt-1">{{ createError }}</span>
           </button>
 
           <SketchCard

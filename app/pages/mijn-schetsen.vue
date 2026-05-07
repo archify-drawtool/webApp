@@ -1,54 +1,8 @@
 <script setup lang="ts">
 import { Plus } from 'lucide-vue-next'
-import type { SketchSummary } from '~/types/SketchSummary'
 
-const { get, del } = useApi()
 const { creating, createSketch } = useCreateSketch()
-
-const sketches = ref<SketchSummary[]>([])
-const loading = ref(false)
-const error = ref<string | null>(null)
-
-const sketchToDelete = ref<SketchSummary | null>(null)
-const deleteError = ref<string | null>(null)
-const deletePending = ref(false)
-
-async function fetchSketches() {
-  loading.value = true
-  error.value = null
-  try {
-    sketches.value = await get<SketchSummary[]>('/api/sketches') ?? []
-  } catch (e) {
-    const err = e as { statusMessage?: string }
-    error.value = err?.statusMessage ?? 'Er is een onbekende fout opgetreden.'
-  } finally {
-    loading.value = false
-  }
-}
-
-const onDeleteRequest = (sketch: SketchSummary) => {
-  sketchToDelete.value = sketch
-  deleteError.value = null
-}
-
-const onDeleteCancel = () => {
-  sketchToDelete.value = null
-}
-
-const onDeleteConfirm = async () => {
-  if (!sketchToDelete.value) return
-  deletePending.value = true
-  try {
-    await del(`/api/sketches/${sketchToDelete.value.id}`)
-    sketches.value = sketches.value.filter(s => s.id !== sketchToDelete.value!.id)
-    sketchToDelete.value = null
-  } catch (e) {
-    const err = e as { statusMessage?: string }
-    deleteError.value = err?.statusMessage ?? 'Er is een fout opgetreden bij het verwijderen.'
-  } finally {
-    deletePending.value = false
-  }
-}
+const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches()
 
 await fetchSketches()
 </script>
