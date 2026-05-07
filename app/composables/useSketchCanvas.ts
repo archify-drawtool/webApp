@@ -142,24 +142,23 @@ export function useSketchCanvas() {
     const edge = vueFlow.findEdge(id)
     if (!edge) return
 
-    if (edge.markerEnd === undefined) edge.markerEnd = ''
-    if (edge.markerStart === undefined) edge.markerStart = ''
-
     const { snapshot } = useSketchHistory()
     snapshot()
 
     const markerEnd = 'markerEnd' in updates
       ? (updates.markerEnd ? { type: MarkerType.ArrowClosed } : '')
-      : edge.markerEnd
+      : (edge.markerEnd ?? '')
 
     const markerStart = 'markerStart' in updates
       ? (updates.markerStart ? { type: MarkerType.ArrowClosed } : '')
-      : edge.markerStart
+      : (edge.markerStart ?? '')
 
     const currentStyle = typeof edge.style === 'object' && edge.style ? edge.style : {}
-    const style = 'dashed' in updates
-      ? { ...currentStyle, strokeDasharray: updates.dashed ? '6 4' : undefined }
-      : edge.style
+    let style: Record<string, unknown> | undefined = edge.style
+    if ('dashed' in updates) {
+      const { strokeDasharray: _omit, ...rest } = currentStyle as Record<string, unknown>
+      style = updates.dashed ? { ...rest, strokeDasharray: '6 4' } : rest
+    }
 
     vueFlow.setEdges(
       vueFlow.getEdges.value.map(e =>

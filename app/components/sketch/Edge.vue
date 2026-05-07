@@ -5,6 +5,7 @@ const props = defineProps<EdgeProps>()
 
 const { updateEdgeLabelWithHistory } = useSketchCanvas()
 const { isDragToolActive } = useDragTool()
+const { open: openEdgeContextMenu } = useEdgeContextMenu()
 
 const pathData = computed(() =>
   getSmoothStepPath({
@@ -52,6 +53,18 @@ const hasMarkerStart = computed(() => {
 
 const markerEndId = computed(() => `archify-marker-end-${props.id}`)
 const markerStartId = computed(() => `archify-marker-start-${props.id}`)
+
+function onContextMenu(event: MouseEvent) {
+  event.preventDefault()
+  openEdgeContextMenu({
+    edgeId: props.id,
+    x: event.clientX,
+    y: event.clientY,
+    hasMarkerEnd: hasMarkerEnd.value,
+    hasMarkerStart: hasMarkerStart.value,
+    isDashed: !!((props.style as Record<string, unknown> | undefined)?.strokeDasharray),
+  })
+}
 </script>
 
 <template>
@@ -111,9 +124,10 @@ const markerStartId = computed(() => `archify-marker-start-${props.id}`)
     :d="pathData[0]"
     fill="none"
     stroke="transparent"
-    stroke-width="20"
-    class="cursor-pointer"
+    stroke-width="30"
+    class="archify-edge-hit cursor-pointer"
     @dblclick.stop="startEdit"
+    @contextmenu.stop.prevent="onContextMenu"
   />
   <EdgeLabelRenderer>
     <div

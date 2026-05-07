@@ -1,6 +1,6 @@
 <script setup lang="ts">
 
-import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge, type EdgeMouseEvent } from '@vue-flow/core'
+import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -81,6 +81,7 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
 function onConnect(params: Connection) {
   if (isDragToolActive.value) return
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
+  stopPlacing()
 }
 
 function onEdgeUpdate({ edge, connection }: { edge: GraphEdge, connection: Connection }) {
@@ -88,29 +89,7 @@ function onEdgeUpdate({ edge, connection }: { edge: GraphEdge, connection: Conne
   reconnectEdgeWithHistory(edge, connection)
 }
 
-interface EdgeContextMenuState {
-  edgeId: string
-  x: number
-  y: number
-  hasMarkerEnd: boolean
-  hasMarkerStart: boolean
-  isDashed: boolean
-}
-
-const edgeContextMenu = ref<EdgeContextMenuState | null>(null)
-
-function onEdgeContextMenu({ edge, event }: EdgeMouseEvent) {
-  event.preventDefault()
-  const mouseEvent = event as MouseEvent
-  edgeContextMenu.value = {
-    edgeId: edge.id,
-    x: mouseEvent.clientX,
-    y: mouseEvent.clientY,
-    hasMarkerEnd: !!(edge.markerEnd && (edge.markerEnd as { type?: string }).type),
-    hasMarkerStart: !!(edge.markerStart && (edge.markerStart as { type?: string }).type),
-    isDashed: !!((edge.style as Record<string, unknown>)?.strokeDasharray),
-  }
-}
+const { state: edgeContextMenu, close: closeEdgeContextMenu } = useEdgeContextMenu()
 
 const isSpacePressed = useKeyPress('Space')
 
@@ -158,7 +137,6 @@ function onPaneClick(event: MouseEvent) {
 @connect="onConnect"
 @edge-update="onEdgeUpdate"
 @pane-click="onPaneClick"
-@edge-context-menu="onEdgeContextMenu"
 >
   <Background
     :variant="BackgroundVariant.Dots"
@@ -172,7 +150,7 @@ function onPaneClick(event: MouseEvent) {
   <SketchEdgeContextMenu
     v-if="edgeContextMenu"
     v-bind="edgeContextMenu"
-    @close="edgeContextMenu = null"
+    @close="closeEdgeContextMenu"
   />
   <Panel v-if="saveLabel" position="bottom-right" class="pointer-events-none text-xs mb-1 mr-1">
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
@@ -199,6 +177,14 @@ function onPaneClick(event: MouseEvent) {
 
 .drag-tool-active .vue-flow__pane:active {
   cursor: grabbing;
+}
+
+.drag-tool-active .vue-flow__edge {
+  pointer-events: auto;
+}
+
+.archify-edge-hit {
+  pointer-events: stroke;
 }
 
 .vue-flow__node.selected::after {
