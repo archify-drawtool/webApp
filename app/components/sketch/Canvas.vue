@@ -134,6 +134,10 @@ function onPaneClick(event: MouseEvent) {
 </script>
 
 <template>
+  <div
+    class="w-full h-full"
+    @contextmenu="(e: MouseEvent) => { if (e.ctrlKey) { e.preventDefault(); e.stopPropagation() } }"
+  >
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
@@ -176,6 +180,7 @@ function onPaneClick(event: MouseEvent) {
   </Panel>
   </VueFlow>
   <SketchNodeContextMenu />
+  </div>
 </template>
 
 <style>
