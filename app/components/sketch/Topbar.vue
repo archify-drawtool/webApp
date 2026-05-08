@@ -8,9 +8,7 @@ const props = defineProps<{
   projectId?: number
 }>()
 
-const config = useRuntimeConfig()
-const token = useCookie<string | null>('auth_token')
-const { patch } = useApi()
+const { patch, post } = useApi()
 const { updateTitle } = useSketchTopbar()
 const { toObject } = useSketchCanvas()
 
@@ -95,14 +93,8 @@ async function exportMermaid() {
 
   try {
     const { nodes, edges, viewport } = toObject()
-    const url = `${config.public.apiBaseUrl}/api/export/mermaid`
 
-    const text = await $fetch<string>(url, {
-      method: 'POST',
-      headers: { Authorization: `Bearer ${token.value}` },
-      body: { canvas_state: { nodes, edges, viewport } },
-      responseType: 'text',
-    })
+    const text = await post<string>('/api/export/mermaid', { canvas_state: { nodes, edges, viewport } }) ?? ''
 
     const blob = new Blob([text], { type: 'text/plain' })
     const objectUrl = URL.createObjectURL(blob)
