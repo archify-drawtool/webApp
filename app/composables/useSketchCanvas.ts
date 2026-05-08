@@ -16,16 +16,17 @@ export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
   const { get, put } = useApi()
   const appConfig = useAppConfig() as { sketch?: { saveDebounceMs?: number } }
+  const { snapshot, undo: historyUndo, redo: historyRedo} = useSketchHistory()
 
-  const fetchSketch = async (sketchId: string | number, projectId?: string | number): Promise<Sketch> => {
-    const endpoint = projectId
-      ? `/api/projects/${projectId}/sketches/${sketchId}`
-      : `/api/sketches/${sketchId}`
+  const fetchSketch = async (sketchId: string | number): Promise<Sketch> => {
+    const endpoint = `/api/sketches/${sketchId}`;
     const sketch = await get<Sketch>(endpoint)
     if (!sketch) {
         throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
     }
     if (sketch) {
+      const { setDotsVisible } = useDotsToggle()
+      setDotsVisible(sketch.canvas_state?.show_dots ?? true)
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
         // Bouw het edge object opnieuw op zonder ongeldige markers.
@@ -56,14 +57,17 @@ export function useSketchCanvas() {
     saveError.value = null
     vueFlow.setNodes([])
     vueFlow.setEdges([])
+    const { setDotsVisible } = useDotsToggle()
+    setDotsVisible(true)
     const { clearHistory } = useSketchHistory()
+
     clearHistory()
   }
 
-  const watchAndSave = (sketchId: string | number, projectId: string | number) => {
+  const watchAndSave = (sketchId: string | number) => {
     stopWatchers?.()
 
-    const endpoint = `/api/projects/${projectId}/sketches/${sketchId}`
+    const endpoint = `/api/sketches/${sketchId}`
     const debounceMs = appConfig.sketch?.saveDebounceMs ?? 2000
 
     const save = () => {
@@ -76,7 +80,8 @@ export function useSketchCanvas() {
         pendingSave = false
 
         const { nodes, edges, viewport } = vueFlow.toObject()
-        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport }
+        const { showDots } = useDotsToggle()
+        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport, show_dots: showDots.value }
         saveStatus.value = 'saving'
         saveError.value = null
 
@@ -116,19 +121,16 @@ export function useSketchCanvas() {
   }
 
   function addNodeWithHistory(...args: Parameters<typeof vueFlow.addNodes>) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     vueFlow.addNodes(...args)
   }
 
   function addEdgeWithHistory(...args: Parameters<typeof vueFlow.addEdges>) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     vueFlow.addEdges(...args)
   }
 
   function updateEdgeLabelWithHistory(id: string, label: string) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     const edge = vueFlow.findEdge(id)
     if (edge) edge.label = label
@@ -170,7 +172,6 @@ export function useSketchCanvas() {
   }
 
   function updateNodeLabelWithHistory(id: string, label: string) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     vueFlow.updateNodeData(id, { label })
     currentSave?.()
@@ -189,21 +190,43 @@ export function useSketchCanvas() {
     return updated
   }
 
+  function changeNodeTypeWithHistory(id: string, newType: string) {
+    const { snapshot } = useSketchHistory()
+    snapshot()
+    vueFlow.updateNode(id, { type: newType })
+    currentSave?.()
+  }
+
   function undo() {
-    const { undo: historyUndo } = useSketchHistory()
     if (historyUndo()) currentSave?.()
   }
 
   function redo() {
-    const { redo: historyRedo } = useSketchHistory()
     if (historyRedo()) currentSave?.()
+  }
+
+  function triggerSave() {
+    currentSave?.()
+  }
+
+  function stopSaving() {
+    stopWatchers?.()
+    stopWatchers = null
+    currentSave = null
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = null
+    pendingSave = false
+    saveStatus.value = 'idle'
+    saveError.value = null
   }
 
   return {
     ...vueFlow,
     fetchSketch,
     clearCanvas,
+    stopSaving,
     watchAndSave,
+    triggerSave,
     saveStatus,
     saveError,
     addNodeWithHistory,
@@ -212,6 +235,7 @@ export function useSketchCanvas() {
     updateEdgePropertiesWithHistory,
     updateNodeLabelWithHistory,
     reconnectEdgeWithHistory,
+    changeNodeTypeWithHistory,
     undo,
     redo,
   }
