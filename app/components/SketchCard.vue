@@ -12,6 +12,11 @@ const emit = defineEmits<{
 
 const { user } = useAuth();
 const isOwner = computed(() => user.value?.id === props.sketch.created_by);
+const linkTo = computed(() =>
+  props.sketch.project_id
+    ? `/projecten/${props.sketch.project_id}/schetsen/${props.sketch.id}`
+    : `/schetsen/${props.sketch.id}`
+);
 
 const timeAgo = (dateString: string): string => {
   const date = new Date(dateString);
@@ -43,7 +48,7 @@ const timeAgo = (dateString: string): string => {
 <template>
   <div class="sketch-card-wrapper h-full">
     <NuxtLink
-      :to="`/projecten/${sketch.project_id}/schetsen/${sketch.id}`"
+      :to="linkTo"
       class="block h-full bg-white border border-primary-500 p-4 pr-10 hover:bg-primary-50 transition-colors"
     >
       <h3>{{ sketch.title }}</h3>
