@@ -204,12 +204,13 @@ function onPaneClick(event: MouseEvent) {
   cursor: grabbing;
 }
 
-.drag-tool-active .vue-flow__edge {
-  pointer-events: auto;
+.drag-tool-active .vue-flow__edge,
+.drag-tool-active .archify-edge-hit {
+  pointer-events: none;
 }
 
 .drag-tool-active .vue-flow__node {
-  pointer-events: all !important;
+  pointer-events: none !important;
 }
 
 .archify-edge-hit {
