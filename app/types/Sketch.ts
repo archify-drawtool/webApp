@@ -7,6 +7,7 @@ export interface Sketch {
   canvas_state: {
     nodes: Node[];
     edges: Edge[];
+    show_dots: boolean;
   } | null;
   created_at: string;
   updated_at: string;

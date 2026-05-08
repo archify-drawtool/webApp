@@ -13,6 +13,7 @@ import {
   StickyNote,
   Type,
   Hand,
+  Grip,
 } from 'lucide-vue-next'
 
 const { nodeTypes } = useNodeTypes()
@@ -20,6 +21,7 @@ const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
 const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing } = useNodeTool()
 const { isDragToolActive, activateDragTool } = useDragTool()
+const { showDots, toggleDots } = useDotsToggle()
 
 type DropdownId = 'node' | 'edge'
 const activeDropdown = ref<DropdownId | null>(null)
@@ -165,6 +167,22 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
           <ChevronUp :size="14" />
         </button>
       </div>
+
+      <div class="w-px h-5 bg-secondary-700 mx-1" />
+
+      <!-- Dots toggle -->
+      <button
+        :class="[
+          'rounded-md p-2 transition-colors cursor-pointer',
+          showDots
+            ? 'bg-primary-500 text-white'
+            : 'hover:bg-secondary-700 text-grey-200',
+        ]"
+        :title="showDots ? 'Verberg achtergrond stipjes' : 'Toon achtergrond stipjes'"
+        @click.stop="toggleDots"
+      >
+        <Grip :size="18" />
+      </button>
     </div>
 
     <SketchToolbarDropdown

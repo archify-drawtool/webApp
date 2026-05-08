@@ -16,7 +16,7 @@ export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
   const { get, put } = useApi()
   const appConfig = useAppConfig() as { sketch?: { saveDebounceMs?: number } }
-  const { snapshot, undo: historyUndo, redo: historyRedo, clearHistory } = useSketchHistory()
+  const { snapshot, undo: historyUndo, redo: historyRedo} = useSketchHistory()
 
   const fetchSketch = async (sketchId: string | number): Promise<Sketch> => {
     const endpoint = `/api/sketches/${sketchId}`;
@@ -25,6 +25,8 @@ export function useSketchCanvas() {
         throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
     }
     if (sketch) {
+      const { setDotsVisible } = useDotsToggle()
+      setDotsVisible(sketch.canvas_state?.show_dots ?? true)
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
         // Bouw het edge object opnieuw op zonder ongeldige markers.
@@ -55,6 +57,10 @@ export function useSketchCanvas() {
     saveError.value = null
     vueFlow.setNodes([])
     vueFlow.setEdges([])
+    const { setDotsVisible } = useDotsToggle()
+    setDotsVisible(true)
+    const { clearHistory } = useSketchHistory()
+
     clearHistory()
   }
 
@@ -74,7 +80,8 @@ export function useSketchCanvas() {
         pendingSave = false
 
         const { nodes, edges, viewport } = vueFlow.toObject()
-        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport }
+        const { showDots } = useDotsToggle()
+        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport, show_dots: showDots.value }
         saveStatus.value = 'saving'
         saveError.value = null
 
@@ -157,11 +164,28 @@ export function useSketchCanvas() {
     if (historyRedo()) currentSave?.()
   }
 
+  function triggerSave() {
+    currentSave?.()
+  }
+
+  function stopSaving() {
+    stopWatchers?.()
+    stopWatchers = null
+    currentSave = null
+    if (debounceTimer) clearTimeout(debounceTimer)
+    debounceTimer = null
+    pendingSave = false
+    saveStatus.value = 'idle'
+    saveError.value = null
+  }
+
   return {
     ...vueFlow,
     fetchSketch,
     clearCanvas,
+    stopSaving,
     watchAndSave,
+    triggerSave,
     saveStatus,
     saveError,
     addNodeWithHistory,
