@@ -16,7 +16,7 @@ export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
   const { get, put } = useApi()
   const appConfig = useAppConfig() as { sketch?: { saveDebounceMs?: number } }
-  const { snapshot, undo: historyUndo, redo: historyRedo, clearHistory } = useSketchHistory()
+  const { snapshot, undo: historyUndo, redo: historyRedo} = useSketchHistory()
 
   const fetchSketch = async (sketchId: string | number): Promise<Sketch> => {
     const endpoint = `/api/sketches/${sketchId}`;
