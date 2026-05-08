@@ -153,6 +153,7 @@ function onPaneClick(event: MouseEvent) {
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
   </Panel>
   </VueFlow>
+  <SketchNodeContextMenu />
 </template>
 
 <style>
@@ -174,6 +175,10 @@ function onPaneClick(event: MouseEvent) {
 
 .drag-tool-active .vue-flow__pane:active {
   cursor: grabbing;
+}
+
+.drag-tool-active .vue-flow__node {
+  pointer-events: all !important;
 }
 
 .vue-flow__node.selected::after {
