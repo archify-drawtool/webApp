@@ -1,16 +1,13 @@
 import type { SharedSketch } from '~/types/SharedSketch'
 
 export function useSharedSketch() {
-  const config = useRuntimeConfig()
+  const { get } = useApi()
 
   const fetchShared = async (token: string): Promise<SharedSketch | null> => {
     try {
-      return await $fetch<SharedSketch>(
-        `${config.public.apiBaseUrl}/api/shared/${token}`,
-        { headers: { Accept: 'application/json' } },
-      )
+      return await get<SharedSketch>(`/api/shared/${token}`) ?? null
     } catch (err: unknown) {
-      if ((err as { status?: number })?.status === 404) return null
+      if ((err as { statusCode?: number })?.statusCode === 404) return null
       throw err
     }
   }
