@@ -85,12 +85,15 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
 function onConnect(params: Connection) {
   if (isDragToolActive.value) return
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
+  stopPlacing()
 }
 
 function onEdgeUpdate({ edge, connection }: { edge: GraphEdge, connection: Connection }) {
   if (connection.source === connection.target) return
   reconnectEdgeWithHistory(edge, connection)
 }
+
+const { state: edgeContextMenu, close: closeEdgeContextMenu } = useEdgeContextMenu()
 
 const isSpacePressed = useKeyPress('Space')
 
@@ -149,6 +152,11 @@ function onPaneClick(event: MouseEvent) {
   />
   <Controls :show-interactive="false" />
   <SketchToolbar />
+  <SketchEdgeContextMenu
+    v-if="edgeContextMenu"
+    v-bind="edgeContextMenu"
+    @close="closeEdgeContextMenu"
+  />
   <Panel v-if="saveLabel" position="bottom-right" class="pointer-events-none text-xs mb-1 mr-1">
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
   </Panel>
@@ -177,8 +185,16 @@ function onPaneClick(event: MouseEvent) {
   cursor: grabbing;
 }
 
+.drag-tool-active .vue-flow__edge {
+  pointer-events: auto;
+}
+
 .drag-tool-active .vue-flow__node {
   pointer-events: all !important;
+}
+
+.archify-edge-hit {
+  pointer-events: stroke;
 }
 
 .vue-flow__node.selected::after {
