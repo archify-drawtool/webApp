@@ -13,6 +13,7 @@ import {
   StickyNote,
   Type,
   Hand,
+  MousePointer2,
   Grip,
 } from 'lucide-vue-next'
 
@@ -21,6 +22,7 @@ const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
 const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing } = useNodeTool()
 const { isDragToolActive, activateDragTool } = useDragTool()
+const { activatePointerTool } = usePointerTool()
 const { showDots, toggleDots } = useDotsToggle()
 
 type DropdownId = 'node' | 'edge'
@@ -89,7 +91,7 @@ function togglePlacingMode() {
 function handleEscape(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     if (isPlacingNode.value) {
-      activateDragTool()
+      stopPlacing()
     } else {
       closeAll()
     }
@@ -107,18 +109,32 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
 
     <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
-      <!-- Drag tool -->
+      <!-- Slepen tool -->
       <button
         :class="[
-          'rounded-md p-2 transition-colors',
+          'rounded-md p-2 transition-colors cursor-pointer',
           isDragToolActive
             ? 'bg-primary-500 text-white'
-            : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
+            : 'hover:bg-secondary-700 text-grey-200',
         ]"
-        title="Versleep het canvas"
+        title="Slepen"
         @click.stop="activateDragTool"
       >
         <Hand :size="18" />
+      </button>
+
+      <!-- Pointer tool -->
+      <button
+        :class="[
+          'rounded-md p-2 transition-colors cursor-pointer',
+          !isDragToolActive
+            ? 'bg-primary-500 text-white'
+            : 'hover:bg-secondary-700 text-grey-200',
+        ]"
+        title="Pointer"
+        @click.stop="activatePointerTool"
+      >
+        <MousePointer2 :size="18" />
       </button>
 
       <div class="w-px h-5 bg-secondary-700 mx-1" />
