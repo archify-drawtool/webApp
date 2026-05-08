@@ -53,11 +53,10 @@ await fetchSketches(projectId);
         >
           <button
               :disabled="creating"
-              class="flex flex-col items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+              class="flex flex-row items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
               @click="() => createSketch(projectId)"
           >
-            <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span>
-            <Pencil :size="20" />
+            <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span><Pencil :size="20" />
             <span v-if="createError" class="text-error-text text-sm mt-1">{{ createError }}</span>
           </button>
 

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Plus } from 'lucide-vue-next'
+import { Pencil } from 'lucide-vue-next'
 
 const { creating, createSketch } = useCreateSketch()
 const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches()
@@ -9,26 +9,22 @@ await fetchSketches()
 
 <template>
   <div>
-    <div class="flex items-center justify-between mb-4">
-      <h1>Mijn Schetsen</h1>
-      <button
-        class="flex items-center gap-1.5 px-3 py-1.5 bg-primary-500 hover:bg-primary-900 active:bg-primary-700 text-white font-heading font-bold text-sm transition-colors disabled:opacity-50"
-        :disabled="creating"
-        @click="()=> createSketch()"
-      >
-        <Plus :size="16" />
-        <span>{{ creating ? 'Aanmaken...' : 'Nieuwe schets' }}</span>
-      </button>
-    </div>
+    <h1 class="mb-4">Mijn Schetsen</h1>
 
     <BaseGrid
       :loading="loading"
       :error="error"
-      :is-empty="!loading && sketches.length === 0"
-      empty-title="Geen schetsen gevonden"
-      empty-message="Je hebt nog geen schetsen. Maak er een aan!"
+      :is-empty="false"
       :cols="{ sm: 2, lg: 3, xl: 4 }"
     >
+      <button
+        :disabled="creating"
+        class="flex flex-row items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+        @click="() => createSketch()"
+      >
+        <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span><Pencil :size="20" />
+      </button>
+
       <SketchCard
         v-for="sketch in sketches"
         :key="sketch.id"
