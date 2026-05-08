@@ -15,10 +15,9 @@ await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode } = useNodeTool()
 const { isDragToolActive } = useDragTool()
-const { screenToFlowCoordinate, nodesSelectionActive, addSelectedNodes, getSelectedNodes } = useVueFlow(SKETCH_CANVAS_ID)
+const { screenToFlowCoordinate, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd } = useVueFlow(SKETCH_CANVAS_ID)
 
-watch(nodesSelectionActive, (active) => {
-  if (!active) return
+onSelectionEnd(() => {
   const selected = getSelectedNodes.value
   nodesSelectionActive.value = false
   if (selected.length > 0) addSelectedNodes(selected)
