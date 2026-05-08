@@ -16,11 +16,10 @@ export function useSketchCanvas() {
   const vueFlow = useVueFlow(SKETCH_CANVAS_ID)
   const { get, put } = useApi()
   const appConfig = useAppConfig() as { sketch?: { saveDebounceMs?: number } }
+  const { snapshot, undo: historyUndo, redo: historyRedo, clearHistory } = useSketchHistory()
 
-  const fetchSketch = async (sketchId: string | number, projectId?: string | number): Promise<Sketch> => {
-    const endpoint = projectId
-      ? `/api/projects/${projectId}/sketches/${sketchId}`
-      : `/api/sketches/${sketchId}`
+  const fetchSketch = async (sketchId: string | number): Promise<Sketch> => {
+    const endpoint = `/api/sketches/${sketchId}`;
     const sketch = await get<Sketch>(endpoint)
     if (!sketch) {
         throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
@@ -56,14 +55,13 @@ export function useSketchCanvas() {
     saveError.value = null
     vueFlow.setNodes([])
     vueFlow.setEdges([])
-    const { clearHistory } = useSketchHistory()
     clearHistory()
   }
 
-  const watchAndSave = (sketchId: string | number, projectId: string | number) => {
+  const watchAndSave = (sketchId: string | number) => {
     stopWatchers?.()
 
-    const endpoint = `/api/projects/${projectId}/sketches/${sketchId}`
+    const endpoint = `/api/sketches/${sketchId}`
     const debounceMs = appConfig.sketch?.saveDebounceMs ?? 2000
 
     const save = () => {
@@ -116,19 +114,16 @@ export function useSketchCanvas() {
   }
 
   function addNodeWithHistory(...args: Parameters<typeof vueFlow.addNodes>) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     vueFlow.addNodes(...args)
   }
 
   function addEdgeWithHistory(...args: Parameters<typeof vueFlow.addEdges>) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     vueFlow.addEdges(...args)
   }
 
   function updateEdgeLabelWithHistory(id: string, label: string) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     const edge = vueFlow.findEdge(id)
     if (edge) edge.label = label
@@ -136,7 +131,6 @@ export function useSketchCanvas() {
   }
 
   function updateNodeLabelWithHistory(id: string, label: string) {
-    const { snapshot } = useSketchHistory()
     snapshot()
     vueFlow.updateNodeData(id, { label })
     currentSave?.()
@@ -156,12 +150,10 @@ export function useSketchCanvas() {
   }
 
   function undo() {
-    const { undo: historyUndo } = useSketchHistory()
     if (historyUndo()) currentSave?.()
   }
 
   function redo() {
-    const { redo: historyRedo } = useSketchHistory()
     if (historyRedo()) currentSave?.()
   }
 
