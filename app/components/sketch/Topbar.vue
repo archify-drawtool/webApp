@@ -56,11 +56,11 @@ async function confirmRename() {
     return
   }
 
-  if (!props.sketchId || !props.projectId) return
+  if (!props.sketchId) return
 
   try {
     await patch(
-      `/api/projects/${props.projectId}/sketches/${props.sketchId}/rename`,
+      `/api/sketches/${props.sketchId}/rename`,
       { title: newTitle },
     )
     updateTitle(newTitle)

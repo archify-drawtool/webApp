@@ -12,12 +12,16 @@ import {
   Square,
   StickyNote,
   Type,
+  Hand,
+  Grip,
 } from 'lucide-vue-next'
 
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
 const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing } = useNodeTool()
+const { isDragToolActive, activateDragTool } = useDragTool()
+const { showDots, toggleDots } = useDotsToggle()
 
 type DropdownId = 'node' | 'edge'
 const activeDropdown = ref<DropdownId | null>(null)
@@ -77,7 +81,7 @@ function togglePlacingMode() {
     if (!selectedNodeType.value && nodeTypes.value.length > 0) {
       setNodeType(nodeTypes.value[0].type)
     } else {
-      isPlacingNode.value = true
+      setNodeType(selectedNodeType.value!)
     }
   }
 }
@@ -85,7 +89,7 @@ function togglePlacingMode() {
 function handleEscape(e: KeyboardEvent) {
   if (e.key === 'Escape') {
     if (isPlacingNode.value) {
-      stopPlacing()
+      activateDragTool()
     } else {
       closeAll()
     }
@@ -103,6 +107,22 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
 
     <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
+      <!-- Drag tool -->
+      <button
+        :class="[
+          'rounded-md p-2 transition-colors',
+          isDragToolActive
+            ? 'bg-primary-500 text-white'
+            : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
+        ]"
+        title="Versleep het canvas"
+        @click.stop="activateDragTool"
+      >
+        <Hand :size="18" />
+      </button>
+
+      <div class="w-px h-5 bg-secondary-700 mx-1" />
+
       <!-- Node tool section -->
       <div class="flex items-center">
         <button
@@ -119,6 +139,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
         </button>
         <button
           class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
+          title="Kies uit een nodetype"
           @click.stop="toggle('node')"
         >
           <ChevronUp :size="14" />
@@ -128,7 +149,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
       <!-- Text placement tool -->
       <button
         class="rounded-md p-2 hover:bg-secondary-700 text-grey-200 transition-colors"
-        title="Place text"
+        title="Plaats tekst"
       >
         <Type :size="18" />
       </button>
@@ -140,11 +161,28 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
         </div>
         <button
           class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
+          title="Kies uit een relatietype"
           @click.stop="toggle('edge')"
         >
           <ChevronUp :size="14" />
         </button>
       </div>
+
+      <div class="w-px h-5 bg-secondary-700 mx-1" />
+
+      <!-- Dots toggle -->
+      <button
+        :class="[
+          'rounded-md p-2 transition-colors cursor-pointer',
+          showDots
+            ? 'bg-primary-500 text-white'
+            : 'hover:bg-secondary-700 text-grey-200',
+        ]"
+        :title="showDots ? 'Verberg achtergrond stipjes' : 'Toon achtergrond stipjes'"
+        @click.stop="toggleDots"
+      >
+        <Grip :size="18" />
+      </button>
     </div>
 
     <SketchToolbarDropdown
