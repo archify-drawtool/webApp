@@ -1,5 +1,5 @@
 <script setup lang="ts">
-
+  
 import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
@@ -15,9 +15,15 @@ await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
 const { isDragToolActive } = useDragTool()
+const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd } = useVueFlow(SKETCH_CANVAS_ID)
 
-const { screenToFlowCoordinate, edges: flowEdges, setEdges } = useVueFlow(SKETCH_CANVAS_ID)
-const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory, triggerSave} = useSketchCanvas()
+onSelectionEnd(() => {
+  const selected = getSelectedNodes.value
+  nodesSelectionActive.value = false
+  if (selected.length > 0) addSelectedNodes(selected)
+})
+  
+const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory, triggerSave } = useSketchCanvas()
 const { showDots } = useDotsToggle()
 watch(showDots, () => triggerSave())
 
@@ -102,6 +108,11 @@ const panOnDrag = computed(() => {
   return isSpacePressed.value ? [0, 1] as number[] : [1] as number[]
 })
 
+function onNodeDragStart({ event, node }: { event: MouseEvent; node: GraphNode }) {
+  if (!event.ctrlKey || node.selected || getSelectedNodes.value.length === 0) return
+  addSelectedNodes([node])
+}
+
 function onPaneClick(event: MouseEvent) {
   if (isSpacePressed.value) return
   if (!isPlacingNode.value || !selectedNodeType.value) return
@@ -123,6 +134,10 @@ function onPaneClick(event: MouseEvent) {
 </script>
 
 <template>
+  <div
+    class="w-full h-full"
+    @contextmenu="(e: MouseEvent) => { if (e.ctrlKey) { e.preventDefault(); e.stopPropagation() } }"
+  >
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
@@ -135,10 +150,13 @@ function onPaneClick(event: MouseEvent) {
 :delete-key-code="null"
 :edges-updatable="false"
 :pan-on-drag="panOnDrag"
+:selection-key-code="isDragToolActive ? null : 'Control'"
+:multi-selection-key-code="'Control'"
 :nodes-draggable="!isDragToolActive"
 :elements-selectable="!isDragToolActive"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
+@node-drag-start="onNodeDragStart"
 @edge-update="onEdgeUpdate"
 @pane-click="onPaneClick"
 >
@@ -162,6 +180,7 @@ function onPaneClick(event: MouseEvent) {
   </Panel>
   </VueFlow>
   <SketchNodeContextMenu />
+  </div>
 </template>
 
 <style>
@@ -205,5 +224,15 @@ function onPaneClick(event: MouseEvent) {
   opacity: 0.15;
   border-radius: 4px;
   pointer-events: none;
+}
+
+.vue-flow__selection {
+  border: 2px dashed var(--color-primary-500);
+  background-color: color-mix(in srgb, var(--color-primary-500) 8%, transparent);
+}
+
+.vue-flow__nodesselection-rect {
+  border: none;
+  background: transparent;
 }
 </style>
