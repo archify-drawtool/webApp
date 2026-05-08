@@ -3,6 +3,7 @@ import { FolderOpen, FolderLock, PencilLine, ChevronLeft } from 'lucide-vue-next
 
 const { isCollapsed, toggle } = useSidebar()
 const route = useRoute()
+const { creating, createSketch } = useCreateSketch()
 </script>
 
 <template>
@@ -23,13 +24,15 @@ const route = useRoute()
       </div>
 
       <!-- Start sketching -->
-      <NuxtLink to="/schetsen/nieuw" class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }" :tabindex="isCollapsed ? -1 : 0">
-        <PrimaryButton tabindex="-1">Begin met schetsen</PrimaryButton>
-      </NuxtLink>
+      <div class="btn-wrapper" :class="{ 'btn-wrapper--hidden': isCollapsed }">
+        <PrimaryButton :disabled="creating" tabindex="-1" @click="()=>createSketch()">
+          {{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}
+        </PrimaryButton>
+      </div>
 
-      <NuxtLink v-if="isCollapsed" to="/schetsen/nieuw" class="flex justify-center">
-        <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="route.path === '/schetsen/nieuw' ? 'var(--color-primary-500)' : 'white'" />
-      </NuxtLink>
+      <button v-if="isCollapsed" class="flex justify-center" :disabled="creating" @click="()=>createSketch()">
+        <PencilLine :size="20" class="shrink-0 h-6 w-6" :color="'white'" />
+      </button>
 
       <!-- Links -->
       <NuxtLink to="/projecten" :class="['sidebar-link', { 'justify-center w-full' : isCollapsed }]">
