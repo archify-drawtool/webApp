@@ -60,8 +60,17 @@ export function useSketchCanvas() {
     const { setDotsVisible } = useDotsToggle()
     setDotsVisible(true)
     const { clearHistory } = useSketchHistory()
-
     clearHistory()
+
+    const { activeTool } = useActiveTool()
+    activeTool.value = 'drag'
+
+    const { selectedNodeType, isPlacingNode } = useNodeTool()
+    selectedNodeType.value = null
+    isPlacingNode.value = false
+
+    const { activeEdgeTool } = useEdgeTool()
+    activeEdgeTool.value = 'none'
   }
 
   const watchAndSave = (sketchId: string | number) => {
