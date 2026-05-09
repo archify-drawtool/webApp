@@ -129,7 +129,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
       <!-- Tool section (drag / pointer) -->
       <div class="flex items-center">
         <button
-          class="rounded-md p-2 hover:bg-secondary-700 text-grey-200 transition-colors cursor-pointer"
+          class="rounded-md p-2 bg-primary-500 text-white transition-colors cursor-pointer"
           title="Actief gereedschap"
           @click.stop="toggle('tool')"
         >
