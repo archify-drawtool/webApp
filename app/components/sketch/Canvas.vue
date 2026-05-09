@@ -150,7 +150,7 @@ function onPaneClick(event: MouseEvent) {
 :delete-key-code="null"
 :edges-updatable="false"
 :pan-on-drag="panOnDrag"
-:selection-key-code="isDragToolActive ? null : 'Control'"
+:selection-key-code="isDragToolActive ? null : true"
 :multi-selection-key-code="'Control'"
 :nodes-draggable="!isDragToolActive"
 :elements-selectable="!isDragToolActive"
