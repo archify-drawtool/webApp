@@ -109,7 +109,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
 
     <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
-      <!-- Slepen tool -->
+      <!-- drag tool -->
       <button
         :class="[
           'rounded-md p-2 transition-colors cursor-pointer',
