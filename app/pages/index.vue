@@ -1,5 +1,7 @@
 <script setup lang="ts">
-await navigateTo("/projecten", { replace: true });
+definePageMeta({
+  redirect: '/projecten',
+})
 </script>
 
 <template>
