@@ -101,6 +101,8 @@ function togglePlacingMode() {
   }
 }
 
+const panelRef = ref<HTMLElement | null>(null)
+
 function handleKeydown(e: KeyboardEvent) {
   const target = e.target as HTMLElement
   if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
@@ -115,15 +117,25 @@ function handleKeydown(e: KeyboardEvent) {
   }
 }
 
-onMounted(() => window.addEventListener('keydown', handleKeydown))
-onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
+function onDocumentMousedown(e: MouseEvent) {
+  if (!anyOpen.value) return
+  if (panelRef.value?.contains(e.target as Node)) return
+  closeAll()
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+  document.addEventListener('mousedown', onDocumentMousedown, true)
+})
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  document.removeEventListener('mousedown', onDocumentMousedown, true)
+})
 </script>
 
 <template>
   <Panel position="bottom-center">
-    <!-- Backdrop to close dropdowns on outside click -->
-    <div v-if="anyOpen" class="fixed inset-0 z-40" @mousedown.stop="closeAll" />
-
+    <div ref="panelRef" class="relative">
     <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
       <!-- Tool section (drag / pointer) -->
@@ -161,7 +173,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
               : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
           ]"
           :title="isPlacingNode ? 'Klik op het canvas om een node te plaatsen (Escape om te annuleren)' : 'Selecteer een node type'"
-          @click.stop="togglePlacingMode"
+          @click.stop="() => { closeAll(); togglePlacingMode() }"
         >
           <component :is="iconFor(selectedNodeTypeObj?.icon ?? 'square')" :size="18" />
         </button>
@@ -183,18 +195,23 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
       </button>
 
       <!-- Edge tool section -->
-      <div class="flex items-center">
-        <div class="rounded-md p-2 text-grey-200">
+      <button
+        :class="[
+          'flex items-center rounded-md transition-colors cursor-pointer',
+          activeDropdown === 'edge'
+            ? 'bg-primary-500 text-white'
+            : 'hover:bg-secondary-700 text-grey-200',
+        ]"
+        title="Kies uit een relatietype"
+        @click.stop="toggle('edge')"
+      >
+        <span class="p-2">
           <component :is="activeEdgeIcon" :size="18" />
-        </div>
-        <button
-          class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
-          title="Kies uit een relatietype"
-          @click.stop="toggle('edge')"
-        >
+        </span>
+        <span class="p-1" :class="activeDropdown === 'edge' ? 'text-white' : 'text-grey-400'">
           <ChevronUp :size="14" />
-        </button>
-      </div>
+        </span>
+      </button>
 
       <div class="w-px h-5 bg-secondary-700 mx-1" />
 
@@ -207,7 +224,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
             : 'hover:bg-secondary-700 text-grey-200',
         ]"
         :title="showDots ? 'Verberg achtergrond stipjes' : 'Toon achtergrond stipjes'"
-        @click.stop="toggleDots"
+        @click.stop="() => { closeAll(); toggleDots() }"
       >
         <Grip :size="18" />
       </button>
@@ -234,5 +251,6 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
       align-right
       @select="key => { setEdgeTool(key as EdgeToolId); activeDropdown = null }"
     />
+    </div>
   </Panel>
 </template>
