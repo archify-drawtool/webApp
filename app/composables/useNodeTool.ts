@@ -11,13 +11,13 @@ export function useNodeTool() {
 
   function stopPlacing() {
     isPlacingNode.value = false
-    activeTool.value = 'drag'
+    activeTool.value = 'pointer'
   }
 
   function clearNodeType() {
     selectedNodeType.value = null
     isPlacingNode.value = false
-    activeTool.value = 'drag'
+    activeTool.value = 'pointer'
   }
 
   return { selectedNodeType, isPlacingNode, setNodeType, stopPlacing, clearNodeType }

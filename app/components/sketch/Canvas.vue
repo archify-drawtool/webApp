@@ -27,25 +27,23 @@ const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnect
 const { showDots } = useDotsToggle()
 watch(showDots, () => triggerSave())
 
-let lastSelectedEdgeId: string | null = null
 watch(
   () => flowEdges.value.map(e => ({ id: e.id, selected: !!e.selected })),
-  (next) => {
+  (next, prev) => {
     for (const { id, selected } of next) {
       const edge = flowEdges.value.find(e => e.id === id)
       if (edge && edge.updatable !== selected) edge.updatable = selected
     }
 
-    const selectedIds = next.filter(e => e.selected).map(e => e.id)
-    const newlySelected = selectedIds.find(id => id !== lastSelectedEdgeId)
+    const prevSelectedIds = new Set((prev ?? []).filter(e => e.selected).map(e => e.id))
+    const newlySelected = next.find(e => e.selected && !prevSelectedIds.has(e.id))
     if (newlySelected) {
       const current = flowEdges.value
-      const target = current.find(e => e.id === newlySelected)
-      if (target && current[current.length - 1]?.id !== newlySelected) {
-        setEdges([...current.filter(e => e.id !== newlySelected), target])
+      const target = current.find(e => e.id === newlySelected.id)
+      if (target && current[current.length - 1]?.id !== newlySelected.id) {
+        setEdges([...current.filter(e => e.id !== newlySelected.id), target])
       }
     }
-    lastSelectedEdgeId = selectedIds[selectedIds.length - 1] ?? null
   },
   { deep: true },
 )
@@ -150,7 +148,7 @@ function onPaneClick(event: MouseEvent) {
 :delete-key-code="null"
 :edges-updatable="false"
 :pan-on-drag="panOnDrag"
-:selection-key-code="isDragToolActive ? null : 'Control'"
+:selection-key-code="isDragToolActive ? null : true"
 :multi-selection-key-code="'Control'"
 :nodes-draggable="!isDragToolActive"
 :elements-selectable="!isDragToolActive"
@@ -204,12 +202,13 @@ function onPaneClick(event: MouseEvent) {
   cursor: grabbing;
 }
 
-.drag-tool-active .vue-flow__edge {
-  pointer-events: auto;
+.drag-tool-active .vue-flow__edge,
+.drag-tool-active .archify-edge-hit {
+  pointer-events: none;
 }
 
 .drag-tool-active .vue-flow__node {
-  pointer-events: all !important;
+  pointer-events: none !important;
 }
 
 .archify-edge-hit {

@@ -13,6 +13,7 @@ import {
   StickyNote,
   Type,
   Hand,
+  MousePointer2,
   Grip,
 } from 'lucide-vue-next'
 
@@ -21,11 +22,25 @@ const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
 const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing } = useNodeTool()
 const { isDragToolActive, activateDragTool } = useDragTool()
+const { activatePointerTool } = usePointerTool()
 const { showDots, toggleDots } = useDotsToggle()
 
-type DropdownId = 'node' | 'edge'
+type DropdownId = 'node' | 'edge' | 'tool'
 const activeDropdown = ref<DropdownId | null>(null)
 const anyOpen = computed(() => activeDropdown.value !== null)
+
+const toolDropdownItems = [
+  { key: 'drag', icon: Hand, label: 'Slepen' },
+  { key: 'pointer', icon: MousePointer2, label: 'Pointer' },
+]
+const selectedToolKey = computed(() => (isDragToolActive.value ? 'drag' : 'pointer'))
+const activeToolIcon = computed(() => (isDragToolActive.value ? Hand : MousePointer2))
+
+function selectTool(key: string) {
+  if (key === 'drag') activateDragTool()
+  else activatePointerTool()
+  activeDropdown.value = null
+}
 
 const iconComponents: Record<string, Component> = {
   server: Server,
@@ -86,18 +101,22 @@ function togglePlacingMode() {
   }
 }
 
-function handleEscape(e: KeyboardEvent) {
+function handleKeydown(e: KeyboardEvent) {
+  const target = e.target as HTMLElement
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
+
   if (e.key === 'Escape') {
-    if (isPlacingNode.value) {
-      activateDragTool()
-    } else {
-      closeAll()
-    }
+    if (isPlacingNode.value) stopPlacing()
+    else closeAll()
+  } else if (e.key === '1') {
+    activateDragTool()
+  } else if (e.key === '2') {
+    activatePointerTool()
   }
 }
 
-onMounted(() => window.addEventListener('keydown', handleEscape))
-onUnmounted(() => window.removeEventListener('keydown', handleEscape))
+onMounted(() => window.addEventListener('keydown', handleKeydown))
+onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
 </script>
 
 <template>
@@ -107,19 +126,28 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
 
     <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
-      <!-- Drag tool -->
-      <button
-        :class="[
-          'rounded-md p-2 transition-colors',
-          isDragToolActive
-            ? 'bg-primary-500 text-white'
-            : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
-        ]"
-        title="Versleep het canvas"
-        @click.stop="activateDragTool"
-      >
-        <Hand :size="18" />
-      </button>
+      <!-- Tool section (drag / pointer) -->
+      <div class="flex items-center">
+        <button
+          :class="[
+            'rounded-md p-2 transition-colors cursor-pointer',
+            isPlacingNode
+              ? 'hover:bg-secondary-700 text-grey-200'
+              : 'bg-primary-500 text-white',
+          ]"
+          title="Actief gereedschap"
+          @click.stop="selectTool(selectedToolKey)"
+        >
+          <component :is="activeToolIcon" :size="18" />
+        </button>
+        <button
+          class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
+          title="Kies gereedschap"
+          @click.stop="toggle('tool')"
+        >
+          <ChevronUp :size="14" />
+        </button>
+      </div>
 
       <div class="w-px h-5 bg-secondary-700 mx-1" />
 
@@ -184,6 +212,13 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
         <Grip :size="18" />
       </button>
     </div>
+
+    <SketchToolbarDropdown
+      v-if="activeDropdown === 'tool'"
+      :items="toolDropdownItems"
+      :selected-key="selectedToolKey"
+      @select="selectTool"
+    />
 
     <SketchToolbarDropdown
       v-if="activeDropdown === 'node'"
