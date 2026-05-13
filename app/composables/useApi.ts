@@ -104,6 +104,20 @@ export const useApi = () => {
     }
   };
 
+  const getBlob = async (endpoint: string) => {
+    try {
+      return await $fetch<Blob>(`${baseURL}${endpoint}`, {
+        method: "GET",
+        headers: {
+          ...authHeader.value,
+        },
+        responseType: "blob",
+      });
+    } catch (error) {
+      handleError(error);
+    }
+  };
+
   const patch = async <T>(
     endpoint: string,
     body: Record<string, unknown> = {},
@@ -125,5 +139,5 @@ export const useApi = () => {
     }
   };
 
-  return { get, post, put, patch, del };
+  return { get, getBlob, post, put, patch, del };
 };

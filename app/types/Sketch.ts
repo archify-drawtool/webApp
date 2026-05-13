@@ -9,6 +9,7 @@ export interface Sketch {
     edges: Edge[];
     show_dots: boolean;
   } | null;
+  has_photo?: boolean;
   created_at: string;
   updated_at: string;
 }
