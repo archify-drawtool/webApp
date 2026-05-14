@@ -3,7 +3,6 @@ import { Handle, Position, type NodeProps } from '@vue-flow/core'
 import { resolveIcon } from '~/utils/lucideIcon'
 
 const props = defineProps<NodeProps<{ label?: string }>>()
-defineEmits(['updateNodeInternals'])
 
 const { nodeTypes } = useNodeTypes()
 const { updateNodeLabelWithHistory } = useSketchCanvas()
@@ -68,13 +67,3 @@ function onContextMenu(event: MouseEvent) {
   </div>
 </template>
 
-<style scoped>
-:deep(.vue-flow__handle) {
-  width: 10px;
-  height: 10px;
-  background-color: #E5097F;
-  border: 2px solid white;
-  border-radius: 50%;
-  opacity: 1;
-}
-</style>

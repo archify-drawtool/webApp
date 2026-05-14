@@ -234,4 +234,25 @@ function onPaneClick(event: MouseEvent) {
   border: none;
   background: transparent;
 }
+
+.vue-flow__handle {
+  width: 26px !important;
+  height: 26px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.vue-flow__handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background-color: #555;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
 </style>
