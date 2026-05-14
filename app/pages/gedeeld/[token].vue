@@ -84,7 +84,7 @@ onUnmounted(() => {
     <button
       v-if="sketch?.has_photo"
       type="button"
-      class="absolute top-4 right-4 z-40 flex items-center gap-1.5 px-3 py-1.5 bg-secondary-900 border border-secondary-700 hover:bg-secondary-800 text-grey-100 font-heading font-bold text-sm transition-colors"
+      class="absolute top-4 right-4 z-40 flex items-center gap-1.5 px-3 py-1.5 bg-secondary-950 border border-secondary-700 hover:bg-secondary-800 text-grey-100 font-heading font-bold text-sm transition-colors"
       title="Originele foto bekijken"
       @click="photoOpen = true"
     >
