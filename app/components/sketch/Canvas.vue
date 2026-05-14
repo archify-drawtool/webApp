@@ -126,8 +126,6 @@ function onPaneClick(event: MouseEvent) {
     position,
     data: { label: nodeType.name },
   }])
-
-  stopPlacing()
 }
 
 onPaneClickHook(onPaneClick)
@@ -153,7 +151,7 @@ onEdgeUpdateHook(onEdgeUpdate)
 :delete-key-code="null"
 :edges-updatable="false"
 :pan-on-drag="panOnDrag"
-:selection-key-code="isDragToolActive ? null : true"
+:selection-key-code="isDragToolActive || isPlacingNode ? null : true"
 :multi-selection-key-code="'Control'"
 :nodes-draggable="!isDragToolActive"
 :elements-selectable="!isDragToolActive"
@@ -234,5 +232,26 @@ onEdgeUpdateHook(onEdgeUpdate)
 .vue-flow__nodesselection-rect {
   border: none;
   background: transparent;
+}
+
+.vue-flow__handle {
+  width: 26px !important;
+  height: 26px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.vue-flow__handle::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 6px;
+  height: 6px;
+  background-color: #555;
+  border: 1px solid #fff;
+  border-radius: 50%;
+  transform: translate(-50%, -50%);
+  pointer-events: none;
 }
 </style>
