@@ -126,8 +126,6 @@ function onPaneClick(event: MouseEvent) {
     position,
     data: { label: nodeType.name },
   }])
-
-  stopPlacing()
 }
 
 onPaneClickHook(onPaneClick)
@@ -153,7 +151,7 @@ onEdgeUpdateHook(onEdgeUpdate)
 :delete-key-code="null"
 :edges-updatable="false"
 :pan-on-drag="panOnDrag"
-:selection-key-code="isDragToolActive ? null : true"
+:selection-key-code="isDragToolActive || isPlacingNode ? null : true"
 :multi-selection-key-code="'Control'"
 :nodes-draggable="!isDragToolActive"
 :elements-selectable="!isDragToolActive"
