@@ -231,7 +231,7 @@ function closePhoto() {
         @click="openPhoto"
       >
         <ImageIcon :size="15" />
-        <span>Foto</span>
+        <span>Referentie</span>
       </button>
       <SketchShareDropdown v-if="sketchId && projectId" :sketch-id="sketchId" :project-id="projectId" />
       <div ref="dropdownRef" class="relative z-50">
