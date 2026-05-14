@@ -1,6 +1,6 @@
 <script setup lang="ts">
   
-import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge } from '@vue-flow/core'
+import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge, type NodeDragEvent } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -15,7 +15,7 @@ await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
 const { isDragToolActive } = useDragTool()
-const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd } = useVueFlow(SKETCH_CANVAS_ID)
+const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook } = useVueFlow(SKETCH_CANVAS_ID)
 
 onSelectionEnd(() => {
   const selected = getSelectedNodes.value
@@ -106,7 +106,7 @@ const panOnDrag = computed(() => {
   return isSpacePressed.value ? [0, 1] as number[] : [1] as number[]
 })
 
-function onNodeDragStart({ event, node }: { event: MouseEvent; node: GraphNode }) {
+function onNodeDragStart({ event, node }: NodeDragEvent) {
   if (!event.ctrlKey || node.selected || getSelectedNodes.value.length === 0) return
   addSelectedNodes([node])
 }
@@ -127,6 +127,11 @@ function onPaneClick(event: MouseEvent) {
     data: { label: nodeType.name },
   }])
 }
+
+onPaneClickHook(onPaneClick)
+onConnectHook(onConnect)
+onNodeDragStartHook(onNodeDragStart)
+onEdgeUpdateHook(onEdgeUpdate)
 </script>
 
 <template>
@@ -151,10 +156,6 @@ function onPaneClick(event: MouseEvent) {
 :nodes-draggable="!isDragToolActive"
 :elements-selectable="!isDragToolActive"
 :is-valid-connection="isValidConnection"
-@connect="onConnect"
-@node-drag-start="onNodeDragStart"
-@edge-update="onEdgeUpdate"
-@pane-click="onPaneClick"
 >
   <Background
     v-if="showDots"
