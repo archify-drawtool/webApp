@@ -15,6 +15,10 @@ await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
 const { isDragToolActive } = useDragTool()
+const { isCommentToolActive } = useCommentTool()
+const { addComment } = useComments()
+const { activatePointerTool } = usePointerTool()
+const commentAutoOpenId = useState<number | null>('comment-auto-open-id', () => null)
 const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook } = useVueFlow(SKETCH_CANVAS_ID)
 
 onSelectionEnd(() => {
@@ -111,8 +115,22 @@ function onNodeDragStart({ event, node }: NodeDragEvent) {
   addSelectedNodes([node])
 }
 
+const route = useRoute()
+
 function onPaneClick(event: MouseEvent) {
   if (isSpacePressed.value) return
+
+  if (isCommentToolActive.value) {
+    const sketchId = Number(route.params.id)
+    if (!Number.isFinite(sketchId)) return
+    const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
+    void addComment(sketchId, position.x, position.y, '').then(created => {
+      if (created) commentAutoOpenId.value = created.id
+    })
+    activatePointerTool()
+    return
+  }
+
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
   const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
@@ -142,7 +160,7 @@ onEdgeUpdateHook(onEdgeUpdate)
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
-:class="['w-full h-full', isPlacingNode ? (isSpacePressed ? 'placing-node space-pan' : 'placing-node') : isDragToolActive ? 'drag-tool-active' : '']"
+:class="['w-full h-full', isPlacingNode || isCommentToolActive ? (isSpacePressed ? 'placing-node space-pan' : 'placing-node') : isDragToolActive ? 'drag-tool-active' : '']"
 :edge-types="edgeTypes"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
@@ -176,6 +194,7 @@ onEdgeUpdateHook(onEdgeUpdate)
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
   </Panel>
   </VueFlow>
+  <SketchCommentLayer />
   <SketchNodeContextMenu />
   </div>
 </template>

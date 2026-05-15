@@ -27,6 +27,8 @@ export function useSketchCanvas() {
     if (sketch) {
       const { setDotsVisible } = useDotsToggle()
       setDotsVisible(sketch.canvas_state?.show_dots ?? true)
+      const { loadComments } = useComments()
+      void loadComments(sketch.id)
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
         // Bouw het edge object opnieuw op zonder ongeldige markers.
@@ -71,6 +73,9 @@ export function useSketchCanvas() {
 
     const { activeEdgeTool } = useEdgeTool()
     activeEdgeTool.value = 'none'
+
+    const { clearComments } = useComments()
+    clearComments()
   }
 
   const watchAndSave = (sketchId: string | number) => {
