@@ -16,6 +16,8 @@ const emit = defineEmits<{
   delete: [id: number]
 }>()
 
+const { isDragToolActive } = useDragTool()
+
 const open = ref(false)
 const editValue = ref(props.comment.body)
 const popoverRef = ref<HTMLElement | null>(null)
@@ -63,7 +65,7 @@ function closePopover() {
 }
 
 function onPinClick() {
-  if (isDragging.value) return
+  if (isDragToolActive.value || isDragging.value) return
   openPopover()
 }
 
@@ -72,7 +74,7 @@ function onDelete() {
 }
 
 function onPointerDown(event: PointerEvent) {
-  if (event.button !== 0 || open.value) return
+  if (isDragToolActive.value || event.button !== 0 || open.value) return
   event.stopPropagation()
   dragStartScreenX = event.clientX
   dragStartScreenY = event.clientY
@@ -171,7 +173,7 @@ onUnmounted(() => {
   >
     <button
       class="pin-button"
-      :class="{ 'pin-button--active': open }"
+      :class="{ 'pin-button--active': open, 'pin-button--no-interact': isDragToolActive }"
       aria-label="Comment"
       @pointerdown="onPointerDown"
       @click.stop="onPinClick"
@@ -244,6 +246,11 @@ onUnmounted(() => {
 
 .pin-button:active {
   cursor: grabbing;
+}
+
+.pin-button--no-interact {
+  cursor: default;
+  pointer-events: none;
 }
 
 .pin-button:hover,
