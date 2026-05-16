@@ -1,7 +1,6 @@
 <script setup lang="ts">
 import { Pencil } from 'lucide-vue-next';
 import type { Project } from '~/types/Project';
-import type { Tab } from '~/components/TabNav.vue';
 
 const route = useRoute();
 const projectId = Number(route.params.id);
@@ -14,12 +13,6 @@ const createError = ref<string | null>(null);
 
 const project = ref<Project | null>(null);
 const projectError = ref<string | null>(null);
-
-const activeTab = ref('schetsen');
-const tabs: Tab[] = [
-  { key: 'schetsen', label: 'Schetsen' },
-  { key: 'info', label: 'Project informatie' },
-];
 
 try {
     project.value = await get<Project>(`/api/projects/${projectId}`) ?? null;
@@ -40,40 +33,29 @@ await fetchSketches(projectId);
     <template v-if="project">
       <h1 class="mb-4">{{ project.title }}</h1>
 
-      <TabNav v-model="activeTab" :tabs="tabs" class="mb-6" />
-
-      <!-- Tab: Schetsen -->
-      <template v-if="activeTab === 'schetsen'">
-        <h2 class="mb-4">Schetsen</h2>
-        <BaseGrid
-            :loading="loading"
-            :error="error"
-            :is-empty="false"
-            :cols="{ sm: 2, lg: 3, xl: 4 }"
+      <h2 class="mb-4">Schetsen</h2>
+      <BaseGrid
+          :loading="loading"
+          :error="error"
+          :is-empty="false"
+          :cols="{ sm: 2, lg: 3, xl: 4 }"
+      >
+        <button
+            :disabled="creating"
+            class="flex flex-row items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+            @click="() => createSketch(projectId)"
         >
-          <button
-              :disabled="creating"
-              class="flex flex-row items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
-              @click="() => createSketch(projectId)"
-          >
-            <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span><Pencil :size="20" />
-            <span v-if="createError" class="text-error-text text-sm mt-1">{{ createError }}</span>
-          </button>
+          <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span><Pencil :size="20" />
+          <span v-if="createError" class="text-error-text text-sm mt-1">{{ createError }}</span>
+        </button>
 
-          <SketchCard
-              v-for="sketch in sketches"
-              :key="sketch.id"
-              :sketch="sketch"
-              @delete="onDeleteRequest"
-          />
-        </BaseGrid>
-      </template>
-
-      <!-- Tab: Project informatie -->
-      <template v-if="activeTab === 'info'">
-        <h2 class="mb-4">Project informatie</h2>
-        <p class="text-grey-600">Hier komt de project informatie.</p>
-      </template>
+        <SketchCard
+            v-for="sketch in sketches"
+            :key="sketch.id"
+            :sketch="sketch"
+            @delete="onDeleteRequest"
+        />
+      </BaseGrid>
     </template>
 
     <ConfirmDialog

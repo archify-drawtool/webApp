@@ -7,7 +7,6 @@ export interface Sketch {
   canvas_state: {
     nodes: Node[];
     edges: Edge[];
-    show_dots: boolean;
   } | null;
   has_photo?: boolean;
   created_at: string;
