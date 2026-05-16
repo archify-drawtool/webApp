@@ -1,3 +1,9 @@
+export interface CommentAuthor {
+  id: number
+  name: string
+  email: string
+}
+
 export interface Comment {
   id: number
   sketch_id: number
@@ -8,4 +14,5 @@ export interface Comment {
   body: string
   created_at: string
   updated_at: string
+  author?: CommentAuthor
 }

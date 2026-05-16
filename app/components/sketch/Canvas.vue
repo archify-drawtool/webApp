@@ -166,6 +166,7 @@ onNodeClickHook(onNodeClick)
 <template>
   <div
     class="w-full h-full"
+    :class="{ 'drag-tool-active': isDragToolActive }"
     @contextmenu="(e: MouseEvent) => { if (e.ctrlKey) { e.preventDefault(); e.stopPropagation() } }"
   >
   <VueFlow
@@ -239,6 +240,14 @@ onNodeClickHook(onNodeClick)
 
 .drag-tool-active .vue-flow__node {
   pointer-events: none !important;
+}
+
+.drag-tool-active .pin-button {
+  pointer-events: none !important;
+}
+
+.drag-tool-active .comment-pin {
+  cursor: grab;
 }
 
 .archify-edge-hit {
