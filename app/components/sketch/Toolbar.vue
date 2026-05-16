@@ -146,7 +146,7 @@ onUnmounted(() => {
         <button
           :class="[
             'rounded-md p-2 transition-colors cursor-pointer',
-            isPlacingNode
+            isPlacingNode || isCommentToolActive
               ? 'hover:bg-secondary-700 text-grey-200'
               : 'bg-primary-500 text-white',
           ]"

@@ -16,6 +16,29 @@ export function useComments() {
     return created
   }
 
+  async function addReply(sketchId: number, parentId: number, body: string): Promise<Comment | undefined> {
+    const parent = comments.value.find(c => c.id === parentId)
+    if (!parent) return undefined
+    const created = await post<Comment>(`/api/sketches/${sketchId}/comments`, {
+      x: parent.x,
+      y: parent.y,
+      body,
+      parent_id: parentId,
+    })
+    if (created) comments.value.push(created)
+    return created
+  }
+
+  function getReplies(parentId: number): Comment[] {
+    return comments.value
+      .filter(c => c.parent_id === parentId)
+      .sort((a, b) => a.created_at.localeCompare(b.created_at))
+  }
+
+  function resolveThread(parentId: number): Promise<void> {
+    return deleteComment(parentId)
+  }
+
   async function updateCommentPosition(id: number, x: number, y: number) {
     const local = comments.value.find(c => c.id === id)
     if (local) {
@@ -44,6 +67,9 @@ export function useComments() {
     comments,
     loadComments,
     addComment,
+    addReply,
+    getReplies,
+    resolveThread,
     updateCommentPosition,
     updateCommentBody,
     deleteComment,
