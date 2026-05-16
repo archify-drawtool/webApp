@@ -224,6 +224,7 @@ onUnmounted(() => {
 <template>
   <div
     class="comment-pin"
+    :class="{ 'comment-pin--no-interact': isDragToolActive }"
     :style="{ left: screenX + 'px', top: screenY + 'px' }"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
@@ -348,6 +349,10 @@ onUnmounted(() => {
   position: absolute;
   transform: translate(-50%, -100%);
   pointer-events: auto;
+}
+
+.comment-pin--no-interact {
+  pointer-events: none;
 }
 
 .pin-button {
