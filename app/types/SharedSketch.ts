@@ -4,6 +4,7 @@ export interface SharedSketch {
   title: string
   project_title: string
   canvas_state: { nodes: Node[]; edges: Edge[] } | null
+  has_photo: boolean
 }
 
 export interface SketchShareState {

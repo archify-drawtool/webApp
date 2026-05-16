@@ -1,14 +1,15 @@
 <script setup lang="ts">
-import { ArrowLeft, Download, ChevronDown, FileImage, GitBranch, Pencil } from 'lucide-vue-next'
+import { ArrowLeft, Download, ChevronDown, FileImage, GitBranch, Pencil, Image as ImageIcon } from 'lucide-vue-next'
 
 const props = defineProps<{
   sketchTitle: string
   backTo: string
   sketchId?: number
   projectId?: number
+  hasPhoto?: boolean
 }>()
 
-const { patch, post } = useApi()
+const { patch, post, getBlob } = useApi()
 const { updateTitle } = useSketchTopbar()
 const { toObject } = useSketchCanvas()
 
@@ -138,7 +139,46 @@ watch(dropdownOpen, (open) => {
 
 onUnmounted(() => {
   document.removeEventListener('click', onDocumentClick)
+  if (photoUrl.value) {
+    URL.revokeObjectURL(photoUrl.value)
+    photoUrl.value = null
+  }
 })
+
+const photoOpen = ref(false)
+const photoLoading = ref(false)
+const photoError = ref<string | null>(null)
+const photoUrl = ref<string | null>(null)
+
+watch(() => props.sketchId, () => {
+  photoOpen.value = false
+  photoError.value = null
+  if (photoUrl.value) {
+    URL.revokeObjectURL(photoUrl.value)
+    photoUrl.value = null
+  }
+})
+
+async function openPhoto() {
+  if (!props.sketchId) return
+  photoOpen.value = true
+  photoError.value = null
+  if (photoUrl.value) return
+
+  photoLoading.value = true
+  try {
+    const blob = await getBlob(`/api/sketches/${props.sketchId}/photo`)
+    if (blob) photoUrl.value = URL.createObjectURL(blob)
+  } catch {
+    photoError.value = 'Foto kon niet worden geladen.'
+  } finally {
+    photoLoading.value = false
+  }
+}
+
+function closePhoto() {
+  photoOpen.value = false
+}
 </script>
 
 <template>
@@ -183,6 +223,16 @@ onUnmounted(() => {
     </div>
 
     <div class="ml-auto flex items-center gap-2">
+      <button
+        v-if="hasPhoto && sketchId"
+        type="button"
+        class="flex items-center gap-1.5 px-3 py-1.5 border border-secondary-700 hover:bg-secondary-800 text-grey-100 font-heading font-bold text-sm transition-colors"
+        title="Originele foto bekijken"
+        @click="openPhoto"
+      >
+        <ImageIcon :size="15" />
+        <span>Referentie</span>
+      </button>
       <SketchShareDropdown v-if="sketchId && projectId" :sketch-id="sketchId" :project-id="projectId" />
       <div ref="dropdownRef" class="relative z-50">
         <button
@@ -226,5 +276,13 @@ onUnmounted(() => {
   >
     {{ error }}
   </div>
+
+  <SketchPhotoModal
+    v-if="photoOpen"
+    :src="photoUrl"
+    :loading="photoLoading"
+    :error="photoError"
+    @close="closePhoto"
+  />
 
 </template>

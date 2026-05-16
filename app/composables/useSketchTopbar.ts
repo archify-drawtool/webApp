@@ -3,6 +3,7 @@ export interface SketchTopbarState {
   backTo: string
   sketchId?: number
   projectId?: number
+  hasPhoto?: boolean
 }
 
 export function useSketchTopbar() {
