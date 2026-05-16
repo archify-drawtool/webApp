@@ -181,10 +181,10 @@ onNodeClickHook(onNodeClick)
 :delete-key-code="null"
 :edges-updatable="false"
 :pan-on-drag="panOnDrag"
-:selection-key-code="isDragToolActive || isPlacingNode ? null : true"
+:selection-key-code="isDragToolActive || isPlacingNode || isCommentToolActive ? null : true"
 :multi-selection-key-code="'Control'"
-:nodes-draggable="!isDragToolActive"
-:elements-selectable="!isDragToolActive"
+:nodes-draggable="!isDragToolActive && !isCommentToolActive"
+:elements-selectable="!isDragToolActive && !isCommentToolActive"
 :is-valid-connection="isValidConnection"
 >
   <Background
