@@ -7,6 +7,7 @@ defineEmits(['updateNodeInternals'])
 const { updateNodeLabelWithHistory } = useSketchCanvas()
 const { openMenu } = useNodeContextMenu()
 const { isDragToolActive } = useDragTool()
+const { pendingFocusNodeId } = useNodeTool()
 
 const editing = ref(false)
 const editValue = ref('')
@@ -43,6 +44,19 @@ function cancelEdit() {
 function onContextMenu(event: MouseEvent) {
   openMenu(props.id, props.type, event.clientX, event.clientY)
 }
+
+onMounted(() => {
+  if (pendingFocusNodeId.value === props.id) {
+    pendingFocusNodeId.value = null
+    editValue.value = props.data.label ?? ''
+    editing.value = true
+    setTimeout(() => {
+      inputRef.value?.focus()
+      inputRef.value?.select()
+      autoResize()
+    }, 0)
+  }
+})
 </script>
 
 <template>

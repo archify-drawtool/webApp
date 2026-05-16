@@ -8,6 +8,7 @@ const { nodeTypes } = useNodeTypes()
 const { updateNodeLabelWithHistory } = useSketchCanvas()
 const { openMenu } = useNodeContextMenu()
 const { isDragToolActive } = useDragTool()
+const { pendingFocusNodeId } = useNodeTool()
 
 const icon = computed(() => {
   const iconName = nodeTypes.value.find(t => t.type === props.type)?.icon
@@ -38,6 +39,15 @@ function cancelEdit() {
 function onContextMenu(event: MouseEvent) {
   openMenu(props.id, props.type, event.clientX, event.clientY)
 }
+
+onMounted(() => {
+  if (pendingFocusNodeId.value === props.id) {
+    pendingFocusNodeId.value = null
+    editValue.value = props.data.label ?? ''
+    editing.value = true
+    setTimeout(() => inputRef.value?.focus(), 0)
+  }
+})
 </script>
 
 <template>

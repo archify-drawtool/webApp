@@ -13,7 +13,7 @@ import { markRaw } from 'vue'
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
-const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
+const { selectedNodeType, isPlacingNode, stopPlacing, pendingFocusNodeId } = useNodeTool()
 const { isDragToolActive } = useDragTool()
 const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook } = useVueFlow(SKETCH_CANVAS_ID)
 
@@ -111,8 +111,21 @@ function onNodeDragStart({ event, node }: NodeDragEvent) {
   addSelectedNodes([node])
 }
 
+let suppressNextPaneClick = false
+
+function onWrapperMouseDown() {
+  const active = document.activeElement
+  if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) {
+    suppressNextPaneClick = true
+  }
+}
+
 function onPaneClick(event: MouseEvent) {
   if (isSpacePressed.value) return
+  if (suppressNextPaneClick) {
+    suppressNextPaneClick = false
+    return
+  }
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
   const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
@@ -120,12 +133,14 @@ function onPaneClick(event: MouseEvent) {
 
   const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
 
+  const nodeId = crypto.randomUUID()
   addNodeWithHistory([{
-    id: crypto.randomUUID(),
+    id: nodeId,
     type: nodeType.type,
     position,
     data: { label: nodeType.name },
   }])
+  pendingFocusNodeId.value = nodeId
 }
 
 onPaneClickHook(onPaneClick)
@@ -137,6 +152,7 @@ onEdgeUpdateHook(onEdgeUpdate)
 <template>
   <div
     class="w-full h-full"
+    @mousedown="onWrapperMouseDown"
     @contextmenu="(e: MouseEvent) => { if (e.ctrlKey) { e.preventDefault(); e.stopPropagation() } }"
   >
   <VueFlow
