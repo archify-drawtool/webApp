@@ -15,7 +15,11 @@ await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
 const { isDragToolActive } = useDragTool()
-const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook } = useVueFlow(SKETCH_CANVAS_ID)
+const { isCommentToolActive } = useCommentTool()
+const { addComment } = useComments()
+const { activatePointerTool } = usePointerTool()
+const commentAutoOpenId = useState<number | null>('comment-auto-open-id', () => null)
+const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook, onNodeClick: onNodeClickHook } = useVueFlow(SKETCH_CANVAS_ID)
 
 onSelectionEnd(() => {
   const selected = getSelectedNodes.value
@@ -110,8 +114,22 @@ function onNodeDragStart({ event, node }: NodeDragEvent) {
   addSelectedNodes([node])
 }
 
+const route = useRoute()
+
 function onPaneClick(event: MouseEvent) {
   if (isSpacePressed.value) return
+
+  if (isCommentToolActive.value) {
+    const sketchId = Number(route.params.id)
+    if (!Number.isFinite(sketchId)) return
+    const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
+    void addComment(sketchId, position.x, position.y, '').then(created => {
+      if (created) commentAutoOpenId.value = created.id
+    })
+    activatePointerTool()
+    return
+  }
+
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
   const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
@@ -127,10 +145,22 @@ function onPaneClick(event: MouseEvent) {
   }])
 }
 
+function onNodeClick({ event }: { event: MouseEvent }) {
+  if (!isCommentToolActive.value || isSpacePressed.value) return
+  const sketchId = Number(route.params.id)
+  if (!Number.isFinite(sketchId)) return
+  const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
+  void addComment(sketchId, position.x, position.y, '').then(created => {
+    if (created) commentAutoOpenId.value = created.id
+  })
+  activatePointerTool()
+}
+
 onPaneClickHook(onPaneClick)
 onConnectHook(onConnect)
 onNodeDragStartHook(onNodeDragStart)
 onEdgeUpdateHook(onEdgeUpdate)
+onNodeClickHook(onNodeClick)
 </script>
 
 <template>
@@ -141,7 +171,7 @@ onEdgeUpdateHook(onEdgeUpdate)
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
-:class="['w-full h-full', isPlacingNode ? (isSpacePressed ? 'placing-node space-pan' : 'placing-node') : isDragToolActive ? 'drag-tool-active' : '']"
+:class="['w-full h-full', isPlacingNode || isCommentToolActive ? (isSpacePressed ? 'placing-node space-pan' : 'placing-node') : isDragToolActive ? 'drag-tool-active' : '']"
 :edge-types="edgeTypes"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
@@ -150,10 +180,10 @@ onEdgeUpdateHook(onEdgeUpdate)
 :delete-key-code="null"
 :edges-updatable="false"
 :pan-on-drag="panOnDrag"
-:selection-key-code="isDragToolActive || isPlacingNode ? null : true"
+:selection-key-code="isDragToolActive || isPlacingNode || isCommentToolActive ? null : true"
 :multi-selection-key-code="'Control'"
-:nodes-draggable="!isDragToolActive"
-:elements-selectable="!isDragToolActive"
+:nodes-draggable="!isDragToolActive && !isCommentToolActive"
+:elements-selectable="!isDragToolActive && !isCommentToolActive"
 :is-valid-connection="isValidConnection"
 >
   <Background
@@ -175,13 +205,15 @@ onEdgeUpdateHook(onEdgeUpdate)
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
   </Panel>
   </VueFlow>
+  <SketchCommentLayer />
   <SketchNodeContextMenu />
   </div>
 </template>
 
 <style>
-.placing-node .vue-flow__pane {
-  cursor: crosshair;
+.placing-node .vue-flow__pane,
+.placing-node .vue-flow__node {
+  cursor: crosshair !important;
 }
 
 .placing-node.space-pan .vue-flow__pane {

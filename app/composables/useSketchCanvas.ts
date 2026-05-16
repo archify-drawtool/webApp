@@ -25,6 +25,8 @@ export function useSketchCanvas() {
         throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
     }
     if (sketch) {
+      const { loadComments } = useComments()
+      void loadComments(sketch.id)
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
         // Bouw het edge object opnieuw op zonder ongeldige markers.
@@ -67,6 +69,9 @@ export function useSketchCanvas() {
 
     const { activeEdgeTool } = useEdgeTool()
     activeEdgeTool.value = 'none'
+
+    const { clearComments } = useComments()
+    clearComments()
   }
 
   const watchAndSave = (sketchId: string | number) => {
