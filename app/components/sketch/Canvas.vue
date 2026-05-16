@@ -19,7 +19,7 @@ const { isCommentToolActive } = useCommentTool()
 const { addComment } = useComments()
 const { activatePointerTool } = usePointerTool()
 const commentAutoOpenId = useState<number | null>('comment-auto-open-id', () => null)
-const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook } = useVueFlow(SKETCH_CANVAS_ID)
+const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook, onNodeClick: onNodeClickHook } = useVueFlow(SKETCH_CANVAS_ID)
 
 onSelectionEnd(() => {
   const selected = getSelectedNodes.value
@@ -146,10 +146,22 @@ function onPaneClick(event: MouseEvent) {
   }])
 }
 
+function onNodeClick({ event }: { event: MouseEvent }) {
+  if (!isCommentToolActive.value || isSpacePressed.value) return
+  const sketchId = Number(route.params.id)
+  if (!Number.isFinite(sketchId)) return
+  const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
+  void addComment(sketchId, position.x, position.y, '').then(created => {
+    if (created) commentAutoOpenId.value = created.id
+  })
+  activatePointerTool()
+}
+
 onPaneClickHook(onPaneClick)
 onConnectHook(onConnect)
 onNodeDragStartHook(onNodeDragStart)
 onEdgeUpdateHook(onEdgeUpdate)
+onNodeClickHook(onNodeClick)
 </script>
 
 <template>
@@ -200,8 +212,9 @@ onEdgeUpdateHook(onEdgeUpdate)
 </template>
 
 <style>
-.placing-node .vue-flow__pane {
-  cursor: crosshair;
+.placing-node .vue-flow__pane,
+.placing-node .vue-flow__node {
+  cursor: crosshair !important;
 }
 
 .placing-node.space-pan .vue-flow__pane {

@@ -206,7 +206,7 @@ onUnmounted(() => {
             : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
         ]"
         :title="isCommentToolActive ? 'Klik op het canvas om een comment te plaatsen (Escape om te annuleren)' : 'Plaats een comment'"
-        @click.stop="() => { closeAll(); activateCommentTool() }"
+        @click.stop="() => { closeAll(); isCommentToolActive ? activatePointerTool() : activateCommentTool() }"
       >
         <MessageCircle :size="18" />
       </button>
