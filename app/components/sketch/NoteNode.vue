@@ -4,13 +4,8 @@ import { Handle, Position, type NodeProps } from '@vue-flow/core'
 const props = defineProps<NodeProps<{ label?: string }>>()
 defineEmits(['updateNodeInternals'])
 
-const { updateNodeLabelWithHistory } = useSketchCanvas()
 const { openMenu } = useNodeContextMenu()
-const { isDragToolActive } = useDragTool()
-const { pendingFocusNodeId } = useNodeTool()
 
-const editing = ref(false)
-const editValue = ref('')
 const inputRef = ref<HTMLTextAreaElement | null>(null)
 
 function autoResize() {
@@ -20,43 +15,19 @@ function autoResize() {
   el.style.height = el.scrollHeight + 'px'
 }
 
-function startEdit() {
-  if (isDragToolActive.value) return
-  editValue.value = props.data.label ?? ''
-  editing.value = true
-  nextTick(() => {
-    inputRef.value?.focus()
+const { editing, editValue, startEdit, confirmEdit, cancelEdit } = useNodeLabelEditing(
+  props.id,
+  () => props.data.label,
+  inputRef,
+  () => {
     inputRef.value?.select()
     autoResize()
-  })
-}
-
-function confirmEdit() {
-  if (!editing.value) return
-  editing.value = false
-  updateNodeLabelWithHistory(props.id, editValue.value)
-}
-
-function cancelEdit() {
-  editing.value = false
-}
+  },
+)
 
 function onContextMenu(event: MouseEvent) {
   openMenu(props.id, props.type, event.clientX, event.clientY)
 }
-
-onMounted(() => {
-  if (pendingFocusNodeId.value === props.id) {
-    pendingFocusNodeId.value = null
-    editValue.value = props.data.label ?? ''
-    editing.value = true
-    setTimeout(() => {
-      inputRef.value?.focus()
-      inputRef.value?.select()
-      autoResize()
-    }, 0)
-  }
-})
 </script>
 
 <template>
