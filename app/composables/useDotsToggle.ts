@@ -1,13 +1,14 @@
-const showDots = ref(true)
-
 export function useDotsToggle() {
-  function toggleDots() {
-    showDots.value = !showDots.value
+  const { patch } = useApi()
+  const { user } = useAuth()
+
+  const showDots = computed(() => user.value?.show_background_dots ?? true)
+
+  async function toggleDots() {
+    const newValue = !showDots.value
+    if (user.value) user.value.show_background_dots = newValue
+    await patch('/api/user', { show_background_dots: newValue })
   }
 
-  function setDotsVisible(value: boolean) {
-    showDots.value = value
-  }
-
-  return { showDots, toggleDots, setDotsVisible }
+  return { showDots, toggleDots }
 }

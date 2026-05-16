@@ -23,9 +23,8 @@ onSelectionEnd(() => {
   if (selected.length > 0) addSelectedNodes(selected)
 })
   
-const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory, triggerSave } = useSketchCanvas()
+const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory } = useSketchCanvas()
 const { showDots } = useDotsToggle()
-watch(showDots, () => triggerSave())
 
 watch(
   () => flowEdges.value.map(e => ({ id: e.id, selected: !!e.selected })),
