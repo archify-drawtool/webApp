@@ -30,6 +30,7 @@ async function load(id: string) {
         backTo: result.project_id ? `/projecten/${result.project_id}` : '/mijn-schetsen',
         sketchId: result.id,
         projectId: result.project_id ?? undefined,
+        hasPhoto: result.has_photo ?? false,
       })
     }
   } catch (e) {
