@@ -1,6 +1,6 @@
 <script setup lang="ts">
   
-import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge, type NodeDragEvent } from '@vue-flow/core'
+import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge, type NodeDragEvent, type NodeMouseEvent } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -162,8 +162,9 @@ function onPaneClick(event: MouseEvent) {
   pendingFocusNodeId.value = nodeId
 }
 
-function onNodeClick({ event }: { event: MouseEvent }) {
+function onNodeClick({ event }: NodeMouseEvent) {
   if (!isCommentToolActive.value || isSpacePressed.value) return
+  if (!(event instanceof MouseEvent)) return
   const sketchId = Number(route.params.id)
   if (!Number.isFinite(sketchId)) return
   const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })

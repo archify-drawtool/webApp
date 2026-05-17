@@ -40,6 +40,7 @@ export function useNodeLabelEditing<T extends HTMLInputElement | HTMLTextAreaEle
       editing.value = true
       setTimeout(() => {
         inputRef.value?.focus()
+        inputRef.value?.select()
         afterFocus?.()
       }, 0)
     }
