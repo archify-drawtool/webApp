@@ -128,10 +128,11 @@ const route = useRoute()
 
 function onPaneClick(event: MouseEvent) {
   if (isSpacePressed.value) return
-  
+
   if (suppressNextPaneClick) {
     suppressNextPaneClick = false
     return
+  }
 
   if (isCommentToolActive.value) {
     const sketchId = Number(route.params.id)
