@@ -9,7 +9,7 @@ const props = defineProps<{
   hasPhoto?: boolean
 }>()
 
-const { patch, post, getBlob } = useApi()
+const { patch, post, getBlob, get } = useApi()
 const { updateTitle } = useSketchTopbar()
 const { toObject } = useSketchCanvas()
 
@@ -149,10 +149,12 @@ const photoOpen = ref(false)
 const photoLoading = ref(false)
 const photoError = ref<string | null>(null)
 const photoUrl = ref<string | null>(null)
+const arucoData = ref<unknown>(null)
 
 watch(() => props.sketchId, () => {
   photoOpen.value = false
   photoError.value = null
+  arucoData.value = null
   if (photoUrl.value) {
     URL.revokeObjectURL(photoUrl.value)
     photoUrl.value = null
@@ -167,8 +169,12 @@ async function openPhoto() {
 
   photoLoading.value = true
   try {
-    const blob = await getBlob(`/api/sketches/${props.sketchId}/photo`)
+    const [blob, aruco] = await Promise.all([
+      getBlob(`/api/sketches/${props.sketchId}/photo`),
+      get<unknown>(`/api/photos/${props.sketchId}/aruco`).catch(() => null),
+    ])
     if (blob) photoUrl.value = URL.createObjectURL(blob)
+    arucoData.value = aruco ?? null
   } catch {
     photoError.value = 'Foto kon niet worden geladen.'
   } finally {
@@ -282,6 +288,7 @@ function closePhoto() {
     :src="photoUrl"
     :loading="photoLoading"
     :error="photoError"
+    :aruco-data="arucoData"
     @close="closePhoto"
   />
 
