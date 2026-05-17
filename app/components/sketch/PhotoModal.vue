@@ -2,29 +2,39 @@
 import { X } from 'lucide-vue-next'
 
 interface ArucoCorner {
+  position: 'top_left' | 'top_right' | 'bottom_right' | 'bottom_left'
   x: number
   y: number
 }
 
-interface DetectionLine {
-  x1: number
-  y1: number
-  x2: number
-  y2: number
+interface ArucoPoint {
+  x: number
+  y: number
 }
 
 interface ArucoMarker {
   id: number
+  marker_id: number
+  center_x: number
+  center_y: number
+  ocr_text: string | null
   corners: ArucoCorner[]
-  hitbox_corners: ArucoCorner[]
+  hitbox_corners: ArucoPoint[]
+}
+
+interface CorridorSide {
+  origin: ArucoPoint
+  far_start: ArucoPoint
+  far_end: ArucoPoint
 }
 
 interface ArucoEdge {
   id: number
   detection_lines: {
-    center: DetectionLine
-    upper: DetectionLine
-    lower: DetectionLine
+    main_start: ArucoPoint
+    main_end: ArucoPoint
+    upper: CorridorSide
+    lower: CorridorSide
   }
 }
 
@@ -59,8 +69,8 @@ const showMarkers = ref(true)
 const showHitboxes = ref(true)
 const showEdges = ref(true)
 
-function cornersToPoints(corners: ArucoCorner[]) {
-  return corners.map(c => `${c.x},${c.y}`).join(' ')
+function toPoints(pts: ArucoPoint[]) {
+  return pts.map(p => `${p.x},${p.y}`).join(' ')
 }
 
 function onKeydown(e: KeyboardEvent) {
@@ -95,7 +105,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
             <button
               type="button"
               class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-              :class="showMarkers ? 'border-green-400 text-green-400' : 'border-secondary-700 text-grey-500'"
+              :class="showMarkers ? 'border-white text-white' : 'border-secondary-700 text-grey-500'"
               @click="showMarkers = !showMarkers"
             >
               Markers
@@ -133,61 +143,117 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
               :viewBox="`0 0 ${naturalW} ${naturalH}`"
               preserveAspectRatio="xMidYMid meet"
             >
-              <!-- Marker squares (solid) -->
+              <!-- Marker corners + labels -->
               <g v-if="showMarkers">
-                <polygon
-                  v-for="m in aruco.markers"
-                  :key="`marker-${m.id}`"
-                  :points="cornersToPoints(m.corners)"
-                  fill="none"
-                  stroke="#4ade80"
-                  stroke-width="9"
-                />
+                <g v-for="m in aruco.markers" :key="`marker-${m.id}`">
+                  <polygon
+                    :points="toPoints(m.corners)"
+                    fill="none"
+                    stroke="white"
+                    stroke-width="9"
+                  />
+                  <text
+                    :x="m.center_x"
+                    :y="m.center_y - 8"
+                    text-anchor="middle"
+                    dominant-baseline="auto"
+                    fill="white"
+                    font-size="28"
+                    font-weight="bold"
+                    paint-order="stroke"
+                    stroke="black"
+                    stroke-width="6"
+                  >{{ m.marker_id }}</text>
+                  <text
+                    v-if="m.ocr_text"
+                    :x="m.center_x"
+                    :y="m.center_y + 28"
+                    text-anchor="middle"
+                    dominant-baseline="auto"
+                    fill="#4ade80"
+                    font-size="24"
+                    paint-order="stroke"
+                    stroke="black"
+                    stroke-width="6"
+                  >{{ m.ocr_text }}</text>
+                </g>
               </g>
 
-              <!-- Hitbox outlines (dashed) -->
+              <!-- Hitbox (OCR crop) outlines -->
               <g v-if="showHitboxes">
                 <polygon
                   v-for="m in aruco.markers"
                   :key="`hitbox-${m.id}`"
-                  :points="cornersToPoints(m.hitbox_corners)"
+                  :points="toPoints(m.hitbox_corners)"
                   fill="none"
                   stroke="#fb923c"
                   stroke-width="6"
-                  stroke-dasharray="10 5"
+                  stroke-dasharray="16 8"
                 />
               </g>
 
-              <!-- Edge detection lines -->
+              <!-- Edge detection corridors -->
               <g v-if="showEdges">
                 <g v-for="e in aruco.edges" :key="`edge-${e.id}`">
+                  <!-- Main detection axis -->
                   <line
-                    :x1="e.detection_lines.center.x1"
-                    :y1="e.detection_lines.center.y1"
-                    :x2="e.detection_lines.center.x2"
-                    :y2="e.detection_lines.center.y2"
+                    :x1="e.detection_lines.main_start.x"
+                    :y1="e.detection_lines.main_start.y"
+                    :x2="e.detection_lines.main_end.x"
+                    :y2="e.detection_lines.main_end.y"
                     stroke="#60a5fa"
                     stroke-width="6"
                   />
+                  <!-- Perpendicular indicator (upper.origin → lower.origin) -->
                   <line
-                    :x1="e.detection_lines.upper.x1"
-                    :y1="e.detection_lines.upper.y1"
-                    :x2="e.detection_lines.upper.x2"
-                    :y2="e.detection_lines.upper.y2"
+                    :x1="e.detection_lines.upper.origin.x"
+                    :y1="e.detection_lines.upper.origin.y"
+                    :x2="e.detection_lines.lower.origin.x"
+                    :y2="e.detection_lines.lower.origin.y"
+                    stroke="#60a5fa"
+                    stroke-width="6"
+                  />
+                  <!-- Upper corridor boundaries -->
+                  <line
+                    :x1="e.detection_lines.upper.origin.x"
+                    :y1="e.detection_lines.upper.origin.y"
+                    :x2="e.detection_lines.upper.far_start.x"
+                    :y2="e.detection_lines.upper.far_start.y"
                     stroke="#60a5fa"
                     stroke-width="3"
-                    stroke-dasharray="6 4"
-                    opacity="0.6"
+                    stroke-dasharray="8 6"
+                    opacity="0.7"
                   />
                   <line
-                    :x1="e.detection_lines.lower.x1"
-                    :y1="e.detection_lines.lower.y1"
-                    :x2="e.detection_lines.lower.x2"
-                    :y2="e.detection_lines.lower.y2"
+                    :x1="e.detection_lines.upper.origin.x"
+                    :y1="e.detection_lines.upper.origin.y"
+                    :x2="e.detection_lines.upper.far_end.x"
+                    :y2="e.detection_lines.upper.far_end.y"
                     stroke="#60a5fa"
                     stroke-width="3"
-                    stroke-dasharray="6 4"
-                    opacity="0.6"
+                    stroke-dasharray="8 6"
+                    opacity="0.7"
+                  />
+                  <!-- Lower corridor boundaries -->
+                  <line
+                    :x1="e.detection_lines.lower.origin.x"
+                    :y1="e.detection_lines.lower.origin.y"
+                    :x2="e.detection_lines.lower.far_start.x"
+                    :y2="e.detection_lines.lower.far_start.y"
+                    stroke="#60a5fa"
+                    stroke-width="3"
+                    stroke-dasharray="8 6"
+                    opacity="0.7"
+                  />
+                  <line
+                    :x1="e.detection_lines.lower.origin.x"
+                    :y1="e.detection_lines.lower.origin.y"
+                    :x2="e.detection_lines.lower.far_end.x"
+                    :y2="e.detection_lines.lower.far_end.y"
+                    stroke="#60a5fa"
+                    stroke-width="3"
+                    stroke-dasharray="8 6"
+                    opacity="0.7"
                   />
                 </g>
               </g>
