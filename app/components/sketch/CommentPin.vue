@@ -2,13 +2,17 @@
 import { MapPin, Trash2, Check, Send, Pencil } from 'lucide-vue-next'
 import type { Comment } from '~/types/Comment'
 
-const props = defineProps<{
+const props = withDefaults(defineProps<{
   comment: Comment
   replies: Comment[]
   screenX: number
   screenY: number
   autoOpen?: boolean
-}>()
+  readonly?: boolean
+}>(), {
+  autoOpen: false,
+  readonly: false,
+})
 
 const emit = defineEmits<{
   drag: [payload: { id: number; screenX: number; screenY: number }]
@@ -20,6 +24,7 @@ const emit = defineEmits<{
 }>()
 
 const { isDragToolActive } = useDragTool()
+const dragBlocksInteraction = computed(() => isDragToolActive.value && !props.readonly)
 
 const open = ref(false)
 const popoverRef = ref<HTMLElement | null>(null)
@@ -58,7 +63,7 @@ function openPopover(startInEdit = false) {
   if (open.value) return
   open.value = true
   bodyDraft.value = props.comment.body
-  if (startInEdit || props.comment.body === '') {
+  if (!props.readonly && (startInEdit || props.comment.body === '')) {
     startBodyEdit()
   }
 }
@@ -71,6 +76,7 @@ function closePopover() {
 }
 
 function startBodyEdit() {
+  if (props.readonly) return
   editingBody.value = true
   bodyDraft.value = props.comment.body
   nextTick(() => {
@@ -111,12 +117,12 @@ function onDeleteReply(id: number) {
 }
 
 function onPinClick() {
-  if (isDragToolActive.value || isDragging.value) return
+  if (dragBlocksInteraction.value || isDragging.value) return
   openPopover()
 }
 
 function onPointerDown(event: PointerEvent) {
-  if (isDragToolActive.value || event.button !== 0 || open.value) return
+  if (props.readonly || isDragToolActive.value || event.button !== 0 || open.value) return
   event.stopPropagation()
   dragStartScreenX = event.clientX
   dragStartScreenY = event.clientY
@@ -204,7 +210,11 @@ function formatTime(iso: string): string {
 }
 
 function authorName(comment: Comment): string {
-  return comment.author?.name ?? 'Onbekend'
+  return comment.author?.name ?? comment.guest_name ?? 'Onbekend'
+}
+
+function isGuest(comment: Comment): boolean {
+  return !comment.author && !!comment.guest_name
 }
 
 onMounted(() => {
@@ -224,14 +234,14 @@ onUnmounted(() => {
 <template>
   <div
     class="comment-pin"
-    :class="{ 'comment-pin--no-interact': isDragToolActive }"
+    :class="{ 'comment-pin--no-interact': dragBlocksInteraction }"
     :style="{ left: screenX + 'px', top: screenY + 'px' }"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
     <button
       class="pin-button"
-      :class="{ 'pin-button--active': open, 'pin-button--no-interact': isDragToolActive }"
+      :class="{ 'pin-button--active': open, 'pin-button--no-interact': dragBlocksInteraction, 'pin-button--readonly': readonly }"
       aria-label="Comment"
       @pointerdown="onPointerDown"
       @click.stop="onPinClick"
@@ -269,10 +279,12 @@ onUnmounted(() => {
 
       <div class="thread-header">
         <div class="entry-meta">
-          <span class="entry-author">{{ authorName(comment) }}</span>
+          <span class="entry-author">
+            {{ authorName(comment) }}<template v-if="isGuest(comment)"> (<strong>gast</strong>)</template>
+          </span>
           <span class="entry-time">{{ formatTime(comment.created_at) }}</span>
         </div>
-        <button class="thread-resolve" @click="onResolve">
+        <button v-if="!readonly" class="thread-resolve" @click="onResolve">
           <Check :size="13" />
           <span>Resolven</span>
         </button>
@@ -280,7 +292,7 @@ onUnmounted(() => {
 
       <div class="thread-body">
         <textarea
-          v-if="editingBody"
+          v-if="editingBody && !readonly"
           ref="textareaRef"
           v-model="bodyDraft"
           rows="3"
@@ -290,6 +302,13 @@ onUnmounted(() => {
           @keydown.escape="cancelBodyEdit"
           @blur="commitBodyEdit"
         />
+        <div
+          v-else-if="readonly"
+          class="body-display body-display--readonly"
+        >
+          <p v-if="comment.body" class="body-text">{{ comment.body }}</p>
+          <p v-else class="body-placeholder">Geen opmerking</p>
+        </div>
         <div
           v-else
           class="body-display"
@@ -308,9 +327,12 @@ onUnmounted(() => {
           class="reply"
         >
           <div class="entry-meta">
-            <span class="entry-author">{{ authorName(reply) }}</span>
+            <span class="entry-author">
+              {{ authorName(reply) }}<template v-if="isGuest(reply)"> (<strong>gast</strong>)</template>
+            </span>
             <span class="entry-time">{{ formatTime(reply.created_at) }}</span>
             <button
+              v-if="!readonly"
               class="reply-delete"
               :aria-label="`Verwijder reply van ${authorName(reply)}`"
               @click="onDeleteReply(reply.id)"
@@ -322,7 +344,7 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div class="reply-input">
+      <div v-if="!readonly" class="reply-input">
         <textarea
           ref="replyInputRef"
           v-model="replyDraft"
@@ -378,6 +400,10 @@ onUnmounted(() => {
 .pin-button--no-interact {
   cursor: default;
   pointer-events: none;
+}
+
+.pin-button--readonly {
+  cursor: pointer;
 }
 
 .pin-button:hover,
@@ -525,6 +551,14 @@ onUnmounted(() => {
 
 .body-display:hover {
   background: #f9fafb;
+}
+
+.body-display--readonly {
+  cursor: default;
+}
+
+.body-display--readonly:hover {
+  background: transparent;
 }
 
 .body-display:hover .body-edit-icon {
