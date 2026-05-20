@@ -1,6 +1,6 @@
 export const useApi = () => {
   const config = useRuntimeConfig();
-  const baseURL = config.public.apiBaseUrl;
+  const baseURL = config.public.apiBase;
   const token = useCookie<string | null>('auth_token');
   const authHeader = computed((): Record<string, string> =>
     token.value ? { Authorization: `Bearer ${token.value}` } : {}

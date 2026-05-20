@@ -12,6 +12,7 @@
     "test": "vitest run"
   },
   "dependencies": {
+    "@azure/msal-browser": "^5.10.0",
     "@nuxt/eslint": "^1.15.2",
     "@tailwindcss/vite": "^4.2.1",
     "@vue-flow/background": "^1.3.2",
