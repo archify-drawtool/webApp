@@ -1,18 +1,23 @@
 import type { SketchSummary } from '~/types/SketchSummary';
 
 export const useSketches = () => {
-    const { get } = useApi();
+    const { get, del } = useApi();
 
     const sketches = ref<SketchSummary[]>([]);
     const loading = ref(false);
     const error = ref<string | null>(null);
 
-    const fetchSketches = async (projectId: number): Promise<void> => {
+    const sketchToDelete = ref<SketchSummary | null>(null);
+    const deleteError = ref<string | null>(null);
+    const deletePending = ref(false);
+
+    const fetchSketches = async (projectId?: number): Promise<void> => {
         loading.value = true;
         error.value = null;
 
         try {
-            const response = await get<SketchSummary[]>(`/api/projects/${projectId}/sketches`);
+            const url = projectId ? `/api/projects/${projectId}/sketches` : '/api/sketches';
+            const response = await get<SketchSummary[]>(url);
             sketches.value = response ?? [];
         } catch (e) {
             const err = e as { statusMessage?: string };
@@ -22,5 +27,38 @@ export const useSketches = () => {
         }
     };
 
-    return { sketches, loading, error, fetchSketches };
+    const deleteSketch = async (sketchId: number): Promise<void> => {
+        await del(`/api/sketches/${sketchId}`);
+        sketches.value = sketches.value.filter(s => s.id !== sketchId);
+    };
+
+    const onDeleteRequest = (sketch: SketchSummary) => {
+        sketchToDelete.value = sketch;
+        deleteError.value = null;
+    };
+
+    const onDeleteCancel = () => {
+        sketchToDelete.value = null;
+    };
+
+    const onDeleteConfirm = async () => {
+        if (!sketchToDelete.value) return;
+        deletePending.value = true;
+        try {
+            await deleteSketch(sketchToDelete.value.id);
+            sketchToDelete.value = null;
+        } catch (e) {
+            const err = e as { statusMessage?: string };
+            deleteError.value = err?.statusMessage ?? 'Er is een fout opgetreden bij het verwijderen.';
+        } finally {
+            deletePending.value = false;
+        }
+    };
+
+    return {
+        sketches, loading, error,
+        fetchSketches, deleteSketch,
+        sketchToDelete, deleteError, deletePending,
+        onDeleteRequest, onDeleteCancel, onDeleteConfirm,
+    };
 };

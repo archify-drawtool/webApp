@@ -11,6 +11,7 @@ export function useDeleteNode() {
   } = useVueFlow(SKETCH_CANVAS_ID)
   const { undo, redo } = useSketchCanvas()
   const { snapshot } = useSketchHistory()
+  const { copy, paste } = useCopyPaste()
 
   function deleteSelection() {
     const selectedNodes = getSelectedNodes.value
@@ -56,6 +57,18 @@ export function useDeleteNode() {
     if (modifier && (key === 'y' || (event.shiftKey && key === 'z'))) {
       event.preventDefault()
       redo()
+      return
+    }
+
+    if (modifier && key === 'c') {
+      event.preventDefault()
+      copy()
+      return
+    }
+
+    if (modifier && key === 'v') {
+      event.preventDefault()
+      paste()
       return
     }
 

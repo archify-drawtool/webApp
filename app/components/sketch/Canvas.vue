@@ -1,10 +1,11 @@
 <script setup lang="ts">
-
-import { VueFlow, useVueFlow, type Connection, type ValidConnectionFunc, Panel, type XYPosition } from '@vue-flow/core'
+  
+import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 import SketchNode from '~/components/sketch/Node.vue'
+import SketchNoteNode from '~/components/sketch/NoteNode.vue'
 import SketchEdge from '~/components/sketch/Edge.vue'
 import SketchToolbar from '~/components/sketch/Toolbar.vue'
 import { markRaw } from 'vue'
@@ -13,8 +14,40 @@ const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
 const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
-const { screenToFlowCoordinate } = useVueFlow(SKETCH_CANVAS_ID)
-const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory } = useSketchCanvas()
+const { isDragToolActive } = useDragTool()
+const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd } = useVueFlow(SKETCH_CANVAS_ID)
+
+onSelectionEnd(() => {
+  const selected = getSelectedNodes.value
+  nodesSelectionActive.value = false
+  if (selected.length > 0) addSelectedNodes(selected)
+})
+  
+const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory, triggerSave } = useSketchCanvas()
+const { showDots } = useDotsToggle()
+watch(showDots, () => triggerSave())
+
+watch(
+  () => flowEdges.value.map(e => ({ id: e.id, selected: !!e.selected })),
+  (next, prev) => {
+    for (const { id, selected } of next) {
+      const edge = flowEdges.value.find(e => e.id === id)
+      if (edge && edge.updatable !== selected) edge.updatable = selected
+    }
+
+    const prevSelectedIds = new Set((prev ?? []).filter(e => e.selected).map(e => e.id))
+    const newlySelected = next.find(e => e.selected && !prevSelectedIds.has(e.id))
+    if (newlySelected) {
+      const current = flowEdges.value
+      const target = current.find(e => e.id === newlySelected.id)
+      if (target && current[current.length - 1]?.id !== newlySelected.id) {
+        setEdges([...current.filter(e => e.id !== newlySelected.id), target])
+      }
+    }
+  },
+  { deep: true },
+)
+
 const { mount: mountDeleteNode, unmount: unmountDeleteNode } = useDeleteNode()
 const { mount: mountHistoryWatcher, unmount: unmountHistoryWatcher } = useSketchHistoryWatcher()
 onMounted(() => {
@@ -37,10 +70,16 @@ const saveLabel = computed(() => {
 })
 
 const rawSketchNode = markRaw(SketchNode)
+const rawSketchNoteNode = markRaw(SketchNoteNode)
 const rawSketchEdge = markRaw(SketchEdge)
 
 const nodeTypes = computed(() =>
-  Object.fromEntries(apiNodeTypes.value.map(t => [t.type, rawSketchNode]))
+  Object.fromEntries(
+    apiNodeTypes.value.map(t => [
+      t.type,
+      t.type === 'note' ? rawSketchNoteNode : rawSketchNode,
+    ])
+  )
 )
 const edgeTypes = { smoothstep: rawSketchEdge }
 
@@ -48,10 +87,32 @@ const isValidConnection: ValidConnectionFunc = (connection) =>
   connection.source !== connection.target
 
 function onConnect(params: Connection) {
+  if (isDragToolActive.value) return
   addEdgeWithHistory([{ ...params, ...defaultEdgeOptions.value }])
+  stopPlacing()
+}
+
+function onEdgeUpdate({ edge, connection }: { edge: GraphEdge, connection: Connection }) {
+  if (connection.source === connection.target) return
+  reconnectEdgeWithHistory(edge, connection)
+}
+
+const { state: edgeContextMenu, close: closeEdgeContextMenu } = useEdgeContextMenu()
+
+const isSpacePressed = useKeyPress('Space')
+
+const panOnDrag = computed(() => {
+  if (isDragToolActive.value) return true
+  return isSpacePressed.value ? [0, 1] as number[] : [1] as number[]
+})
+
+function onNodeDragStart({ event, node }: { event: MouseEvent; node: GraphNode }) {
+  if (!event.ctrlKey || node.selected || getSelectedNodes.value.length === 0) return
+  addSelectedNodes([node])
 }
 
 function onPaneClick(event: MouseEvent) {
+  if (isSpacePressed.value) return
   if (!isPlacingNode.value || !selectedNodeType.value) return
 
   const nodeType = apiNodeTypes.value.find(nt => nt.type === selectedNodeType.value)
@@ -71,21 +132,34 @@ function onPaneClick(event: MouseEvent) {
 </script>
 
 <template>
+  <div
+    class="w-full h-full"
+    @contextmenu="(e: MouseEvent) => { if (e.ctrlKey) { e.preventDefault(); e.stopPropagation() } }"
+  >
   <VueFlow
 :id="SKETCH_CANVAS_ID"
 :node-types="nodeTypes"
-:class="['w-full h-full', isPlacingNode ? 'placing-node' : '']"
+:class="['w-full h-full', isPlacingNode ? (isSpacePressed ? 'placing-node space-pan' : 'placing-node') : isDragToolActive ? 'drag-tool-active' : '']"
 :edge-types="edgeTypes"
 :default-edge-options="defaultEdgeOptions"
 :default-viewport="{ zoom: 1 }"
 :min-zoom="0.1"
 :max-zoom="4"
 :delete-key-code="null"
+:edges-updatable="false"
+:pan-on-drag="panOnDrag"
+:selection-key-code="isDragToolActive ? null : true"
+:multi-selection-key-code="'Control'"
+:nodes-draggable="!isDragToolActive"
+:elements-selectable="!isDragToolActive"
 :is-valid-connection="isValidConnection"
 @connect="onConnect"
+@node-drag-start="onNodeDragStart"
+@edge-update="onEdgeUpdate"
 @pane-click="onPaneClick"
 >
   <Background
+    v-if="showDots"
     :variant="BackgroundVariant.Dots"
     :gap="20"
     :size="1.5"
@@ -94,14 +168,70 @@ function onPaneClick(event: MouseEvent) {
   />
   <Controls :show-interactive="false" />
   <SketchToolbar />
+  <SketchEdgeContextMenu
+    v-if="edgeContextMenu"
+    v-bind="edgeContextMenu"
+    @close="closeEdgeContextMenu"
+  />
   <Panel v-if="saveLabel" position="bottom-right" class="pointer-events-none text-xs mb-1 mr-1">
     <span :class="saveLabel.error ? 'text-red-400' : 'text-gray-500'">{{ saveLabel.text }}</span>
   </Panel>
   </VueFlow>
+  <SketchNodeContextMenu />
+  </div>
 </template>
 
 <style>
 .placing-node .vue-flow__pane {
   cursor: crosshair;
+}
+
+.placing-node.space-pan .vue-flow__pane {
+  cursor: grab;
+}
+
+.placing-node.space-pan .vue-flow__pane:active {
+  cursor: grabbing;
+}
+
+.drag-tool-active .vue-flow__pane {
+  cursor: grab;
+}
+
+.drag-tool-active .vue-flow__pane:active {
+  cursor: grabbing;
+}
+
+.drag-tool-active .vue-flow__edge,
+.drag-tool-active .archify-edge-hit {
+  pointer-events: none;
+}
+
+.drag-tool-active .vue-flow__node {
+  pointer-events: none !important;
+}
+
+.archify-edge-hit {
+  pointer-events: stroke;
+}
+
+.vue-flow__node.selected::after {
+  content: '';
+  position: absolute;
+  inset: 8px;
+  background-color: var(--color-primary-500);
+  opacity: 0.15;
+  border-radius: 4px;
+  pointer-events: none;
+}
+
+.vue-flow__selection {
+  border: 2px dashed var(--color-primary-500);
+  background-color: color-mix(in srgb, var(--color-primary-500) 8%, transparent);
+}
+
+.vue-flow__nodesselection-rect {
+  border: none;
+  background: transparent;
 }
 </style>

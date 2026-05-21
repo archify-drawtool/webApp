@@ -9,6 +9,7 @@ defineProps<{
   items: Item[]
   selectedKey: string | null
   alignRight?: boolean
+  positionClass?: string
 }>()
 
 const emit = defineEmits<{
@@ -18,8 +19,8 @@ const emit = defineEmits<{
 
 <template>
   <div
-    class="absolute bottom-full mb-2 rounded-xl bg-secondary-950 shadow-lg p-1 z-50"
-    :class="alignRight ? 'right-0' : 'left-0'"
+    class="rounded-xl bg-secondary-950 shadow-lg p-1 z-50"
+    :class="[positionClass ?? 'absolute bottom-full mb-2', alignRight ? 'right-0' : 'left-0']"
   >
     <button
       v-for="item in items"

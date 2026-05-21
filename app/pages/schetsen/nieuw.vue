@@ -4,9 +4,20 @@ definePageMeta({
 })
 
 const { clearCanvas } = useSketchCanvas()
+const { setTopbar, clearTopbar } = useSketchTopbar()
 
-onMounted(clearCanvas)
-onBeforeRouteLeave(clearCanvas)
+onMounted(() => {
+  clearCanvas()
+  setTopbar({
+    sketchTitle: 'Nieuwe schets',
+    backTo: '/mijn-schetsen',
+  })
+})
+
+onBeforeRouteLeave(() => {
+  clearCanvas()
+  clearTopbar()
+})
 </script>
 
 <template>

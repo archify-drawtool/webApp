@@ -7,7 +7,10 @@ const route = useRoute();
 const projectId = Number(route.params.id);
 
 const { get } = useApi();
-const { sketches, loading, error, fetchSketches } = useSketches();
+const { creating, createSketch } = useCreateSketch()
+const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches();
+
+const createError = ref<string | null>(null);
 
 const project = ref<Project | null>(null);
 const projectError = ref<string | null>(null);
@@ -48,18 +51,20 @@ await fetchSketches(projectId);
             :is-empty="false"
             :cols="{ sm: 2, lg: 3, xl: 4 }"
         >
-          <NuxtLink
-              :to="`/projecten/${projectId}/schetsen/aanmaken`"
-              class="flex items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer"
+          <button
+              :disabled="creating"
+              class="flex flex-row items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed w-full"
+              @click="() => createSketch(projectId)"
           >
-            <span class="font-heading text-h3">Begin met schetsen</span>
-            <Pencil :size="20" />
-          </NuxtLink>
+            <span class="font-heading text-h3">{{ creating ? 'Aanmaken...' : 'Begin met schetsen' }}</span><Pencil :size="20" />
+            <span v-if="createError" class="text-error-text text-sm mt-1">{{ createError }}</span>
+          </button>
 
           <SketchCard
               v-for="sketch in sketches"
               :key="sketch.id"
               :sketch="sketch"
+              @delete="onDeleteRequest"
           />
         </BaseGrid>
       </template>
@@ -70,5 +75,14 @@ await fetchSketches(projectId);
         <p class="text-grey-600">Hier komt de project informatie.</p>
       </template>
     </template>
+
+    <ConfirmDialog
+      v-if="sketchToDelete"
+      message="Weet je het zeker? Deze actie kan niet ongedaan worden gemaakt."
+      :error="deleteError"
+      :pending="deletePending"
+      @confirm="onDeleteConfirm"
+      @cancel="onDeleteCancel"
+    />
   </div>
 </template>
