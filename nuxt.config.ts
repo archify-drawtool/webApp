@@ -20,7 +20,7 @@ export default defineNuxtConfig({
       entraTenantId: '',
       entraClientId: '',
       entraRedirectUri: '',
-      apiBase: '',
+      apiBaseUrl: '',
     },
   },
 
