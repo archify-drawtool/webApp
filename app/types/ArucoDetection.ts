@@ -1,5 +1,5 @@
 export interface ArucoCorner {
-  position: 'top_left' | 'top_right' | 'bottom_right' | 'bottom_left'
+  position: 'TL' | 'TR' | 'BR' | 'BL'
   x: number
   y: number
 }
@@ -9,14 +9,11 @@ export interface ArucoPoint {
   y: number
 }
 
-export interface ArucoMarker {
-  id: number
-  marker_id: number
-  center_x: number
-  center_y: number
-  ocr_text: string | null
-  corners: ArucoCorner[]
-  hitbox_corners: ArucoPoint[]
+export interface ArucoHitbox {
+  xPos: number
+  xNeg: number
+  yPos: number
+  yNeg: number
 }
 
 export interface CorridorSide {
@@ -25,17 +22,55 @@ export interface CorridorSide {
   far_end: ArucoPoint
 }
 
-export interface ArucoEdge {
+export interface ArucoNodeMarker {
   id: number
+  marker_id: number
+  center_x: number
+  center_y: number
+  rotation: number
+  ocr_text: string | null
+  corners: ArucoCorner[]
+  type: 'node'
+  hitbox: ArucoHitbox
+  hitbox_corners: ArucoPoint[]
+}
+
+export interface ArucoEdgeMarker {
+  id: number
+  marker_id: number
+  center_x: number
+  center_y: number
+  rotation: number
+  ocr_text: string | null
+  corners: ArucoCorner[]
+  type: 'directionless' | 'monodirectional' | 'bidirectional'
+  hitbox: ArucoHitbox
+  hitbox_corners: ArucoPoint[]
   detection_lines: {
     main_start: ArucoPoint
     main_end: ArucoPoint
+    center: ArucoPoint
     upper: CorridorSide
     lower: CorridorSide
   }
 }
 
+export interface ArucoEdgeRelation {
+  id: number
+  edge_type: 'directionless' | 'monodirectional' | 'bidirectional'
+  edge_marker_id: number
+  source_marker_id: number
+  target_marker_id: number
+}
+
+export interface ArucoConfig {
+  edge_margin: number
+  edge_angle_margin: number
+}
+
 export interface ArucoData {
-  markers: ArucoMarker[]
-  edges: ArucoEdge[]
+  node_markers: ArucoNodeMarker[]
+  edge_markers: ArucoEdgeMarker[]
+  edges: ArucoEdgeRelation[]
+  config: ArucoConfig
 }

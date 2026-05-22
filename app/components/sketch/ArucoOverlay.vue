@@ -10,9 +10,11 @@ const imgEl = ref<HTMLImageElement | null>(null)
 const naturalW = ref(0)
 const naturalH = ref(0)
 
-const showMarkers = ref(true)
-const showHitboxes = ref(true)
-const showEdges = ref(true)
+const showNodeMarkers = ref(true)
+const showNodeHitboxes = ref(true)
+const showEdgeMarkers = ref(true)
+const showEdgeHitboxes = ref(true)
+const showDetectionLines = ref(true)
 
 function onImgLoad() {
   if (imgEl.value) {
@@ -29,31 +31,55 @@ function toPoints(pts: ArucoPoint[]) {
 <template>
   <div class="flex flex-col items-center gap-3">
     <!-- Toggle controls -->
-    <div class="flex items-center gap-2 self-start">
-      <button
-        type="button"
-        class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-        :class="showMarkers ? 'border-aruco-marker text-aruco-marker' : 'border-secondary-700 text-grey-500'"
-        @click="showMarkers = !showMarkers"
-      >
-        Markers
-      </button>
-      <button
-        type="button"
-        class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-        :class="showHitboxes ? 'border-aruco-hitbox text-aruco-hitbox' : 'border-secondary-700 text-grey-500'"
-        @click="showHitboxes = !showHitboxes"
-      >
-        Hitboxes
-      </button>
-      <button
-        type="button"
-        class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-        :class="showEdges ? 'border-aruco-edge text-aruco-edge' : 'border-secondary-700 text-grey-500'"
-        @click="showEdges = !showEdges"
-      >
-        Detectielijnen
-      </button>
+    <div class="flex items-center gap-4 self-start flex-wrap">
+      <!-- Node toggles -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-grey-500 font-heading font-bold uppercase tracking-wide">Nodes</span>
+        <button
+          type="button"
+          class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
+          :class="showNodeMarkers ? 'border-aruco-marker text-aruco-marker' : 'border-secondary-700 text-grey-500'"
+          @click="showNodeMarkers = !showNodeMarkers"
+        >
+          Markers
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
+          :class="showNodeHitboxes ? 'border-aruco-hitbox text-aruco-hitbox' : 'border-secondary-700 text-grey-500'"
+          @click="showNodeHitboxes = !showNodeHitboxes"
+        >
+          Hitboxes
+        </button>
+      </div>
+      <!-- Edge toggles -->
+      <div class="flex items-center gap-2">
+        <span class="text-xs text-grey-500 font-heading font-bold uppercase tracking-wide">Edges</span>
+        <button
+          type="button"
+          class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
+          :class="showEdgeMarkers ? 'border-aruco-marker text-aruco-marker' : 'border-secondary-700 text-grey-500'"
+          @click="showEdgeMarkers = !showEdgeMarkers"
+        >
+          Markers
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
+          :class="showEdgeHitboxes ? 'border-aruco-hitbox text-aruco-hitbox' : 'border-secondary-700 text-grey-500'"
+          @click="showEdgeHitboxes = !showEdgeHitboxes"
+        >
+          Hitboxes
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
+          :class="showDetectionLines ? 'border-aruco-edge text-aruco-edge' : 'border-secondary-700 text-grey-500'"
+          @click="showDetectionLines = !showDetectionLines"
+        >
+          Detectielijnen
+        </button>
+      </div>
     </div>
 
     <!-- Photo with SVG overlay -->
@@ -71,9 +97,9 @@ function toPoints(pts: ArucoPoint[]) {
         :viewBox="`0 0 ${naturalW} ${naturalH}`"
         preserveAspectRatio="xMidYMid meet"
       >
-        <!-- Marker corners + labels -->
-        <g v-if="showMarkers">
-          <g v-for="m in props.arucoData.markers" :key="`marker-${m.id}`">
+        <!-- Node marker corners + labels -->
+        <g v-if="showNodeMarkers">
+          <g v-for="m in props.arucoData.node_markers" :key="`node-marker-${m.id}`">
             <polygon
               :points="toPoints(m.corners)"
               fill="none"
@@ -107,11 +133,60 @@ function toPoints(pts: ArucoPoint[]) {
           </g>
         </g>
 
-        <!-- Hitbox (OCR crop) outlines -->
-        <g v-if="showHitboxes">
+        <!-- Node hitbox (OCR crop) outlines -->
+        <g v-if="showNodeHitboxes">
           <polygon
-            v-for="m in props.arucoData.markers"
-            :key="`hitbox-${m.id}`"
+            v-for="m in props.arucoData.node_markers"
+            :key="`node-hitbox-${m.id}`"
+            :points="toPoints(m.hitbox_corners)"
+            fill="none"
+            class="stroke-aruco-hitbox"
+            stroke-width="6"
+            stroke-dasharray="16 8"
+          />
+        </g>
+
+        <!-- Edge marker corners + labels -->
+        <g v-if="showEdgeMarkers">
+          <g v-for="m in props.arucoData.edge_markers" :key="`edge-marker-${m.id}`">
+            <polygon
+              :points="toPoints(m.corners)"
+              fill="none"
+              class="stroke-aruco-marker"
+              stroke-width="9"
+            />
+            <text
+              :x="m.center_x"
+              :y="m.center_y - 8"
+              text-anchor="middle"
+              dominant-baseline="auto"
+              class="fill-aruco-marker"
+              font-size="28"
+              font-weight="bold"
+              paint-order="stroke"
+              stroke="black"
+              stroke-width="6"
+            >{{ m.marker_id }}</text>
+            <text
+              v-if="m.ocr_text"
+              :x="m.center_x"
+              :y="m.center_y + 28"
+              text-anchor="middle"
+              dominant-baseline="auto"
+              fill="#4ade80"
+              font-size="24"
+              paint-order="stroke"
+              stroke="black"
+              stroke-width="6"
+            >{{ m.ocr_text }}</text>
+          </g>
+        </g>
+
+        <!-- Edge hitbox outlines -->
+        <g v-if="showEdgeHitboxes">
+          <polygon
+            v-for="m in props.arucoData.edge_markers"
+            :key="`edge-hitbox-${m.id}`"
             :points="toPoints(m.hitbox_corners)"
             fill="none"
             class="stroke-aruco-hitbox"
@@ -121,8 +196,8 @@ function toPoints(pts: ArucoPoint[]) {
         </g>
 
         <!-- Edge detection corridors -->
-        <g v-if="showEdges">
-          <g v-for="e in props.arucoData.edges" :key="`edge-${e.id}`">
+        <g v-if="showDetectionLines">
+          <g v-for="e in props.arucoData.edge_markers" :key="`detection-${e.id}`">
             <!-- Main detection axis -->
             <line
               :x1="e.detection_lines.main_start.x"
