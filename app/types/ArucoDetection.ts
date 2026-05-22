@@ -46,6 +46,7 @@ export interface ArucoEdgeMarker {
   type: 'directionless' | 'monodirectional' | 'bidirectional'
   hitbox: ArucoHitbox
   hitbox_corners: ArucoPoint[]
+  is_detected: boolean
   detection_lines: {
     main_start: ArucoPoint
     main_end: ArucoPoint

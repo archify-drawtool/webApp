@@ -15,6 +15,7 @@ const showNodeHitboxes = ref(true)
 const showEdgeMarkers = ref(true)
 const showEdgeHitboxes = ref(true)
 const showDetectionLines = ref(true)
+const showFailedEdges = ref(true)
 
 function onImgLoad() {
   if (imgEl.value) {
@@ -78,6 +79,14 @@ function toPoints(pts: ArucoPoint[]) {
           @click="showDetectionLines = !showDetectionLines"
         >
           Detectielijnen
+        </button>
+        <button
+          type="button"
+          class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
+          :class="showFailedEdges ? 'border-red-500 text-red-500' : 'border-secondary-700 text-grey-500'"
+          @click="showFailedEdges = !showFailedEdges"
+        >
+          Mislukt
         </button>
       </div>
     </div>
@@ -195,9 +204,9 @@ function toPoints(pts: ArucoPoint[]) {
           />
         </g>
 
-        <!-- Edge detection corridors -->
+        <!-- Edge detection corridors (detected) -->
         <g v-if="showDetectionLines">
-          <g v-for="e in props.arucoData.edge_markers" :key="`detection-${e.id}`">
+          <g v-for="e in props.arucoData.edge_markers.filter(m => m.is_detected)" :key="`detection-${e.id}`">
             <!-- Main detection axis -->
             <line
               :x1="e.detection_lines.main_start.x"
@@ -254,6 +263,68 @@ function toPoints(pts: ArucoPoint[]) {
               :x2="e.detection_lines.lower.far_end.x"
               :y2="e.detection_lines.lower.far_end.y"
               class="stroke-aruco-edge"
+              stroke-width="3"
+              stroke-dasharray="8 6"
+              opacity="0.7"
+            />
+          </g>
+        </g>
+
+        <!-- Edge detection corridors (failed / not detected) -->
+        <g v-if="showFailedEdges">
+          <g v-for="e in props.arucoData.edge_markers.filter(m => !m.is_detected)" :key="`failed-${e.id}`">
+            <line
+              :x1="e.detection_lines.main_start.x"
+              :y1="e.detection_lines.main_start.y"
+              :x2="e.detection_lines.main_end.x"
+              :y2="e.detection_lines.main_end.y"
+              stroke="red"
+              stroke-width="6"
+            />
+            <line
+              :x1="e.detection_lines.upper.origin.x"
+              :y1="e.detection_lines.upper.origin.y"
+              :x2="e.detection_lines.lower.origin.x"
+              :y2="e.detection_lines.lower.origin.y"
+              stroke="red"
+              stroke-width="6"
+            />
+            <line
+              :x1="e.detection_lines.upper.origin.x"
+              :y1="e.detection_lines.upper.origin.y"
+              :x2="e.detection_lines.upper.far_start.x"
+              :y2="e.detection_lines.upper.far_start.y"
+              stroke="red"
+              stroke-width="3"
+              stroke-dasharray="8 6"
+              opacity="0.7"
+            />
+            <line
+              :x1="e.detection_lines.upper.origin.x"
+              :y1="e.detection_lines.upper.origin.y"
+              :x2="e.detection_lines.upper.far_end.x"
+              :y2="e.detection_lines.upper.far_end.y"
+              stroke="red"
+              stroke-width="3"
+              stroke-dasharray="8 6"
+              opacity="0.7"
+            />
+            <line
+              :x1="e.detection_lines.lower.origin.x"
+              :y1="e.detection_lines.lower.origin.y"
+              :x2="e.detection_lines.lower.far_start.x"
+              :y2="e.detection_lines.lower.far_start.y"
+              stroke="red"
+              stroke-width="3"
+              stroke-dasharray="8 6"
+              opacity="0.7"
+            />
+            <line
+              :x1="e.detection_lines.lower.origin.x"
+              :y1="e.detection_lines.lower.origin.y"
+              :x2="e.detection_lines.lower.far_end.x"
+              :y2="e.detection_lines.lower.far_end.y"
+              stroke="red"
               stroke-width="3"
               stroke-dasharray="8 6"
               opacity="0.7"
