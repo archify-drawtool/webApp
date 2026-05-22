@@ -83,7 +83,7 @@ function toPoints(pts: ArucoPoint[]) {
         <button
           type="button"
           class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-          :class="showFailedEdges ? 'border-red-500 text-red-500' : 'border-secondary-700 text-grey-500'"
+          :class="showFailedEdges ? 'border-aruco-edge-failed text-aruco-edge-failed' : 'border-secondary-700 text-grey-500'"
           @click="showFailedEdges = !showFailedEdges"
         >
           Mislukt
@@ -278,7 +278,7 @@ function toPoints(pts: ArucoPoint[]) {
               :y1="e.detection_lines.main_start.y"
               :x2="e.detection_lines.main_end.x"
               :y2="e.detection_lines.main_end.y"
-              stroke="red"
+              class="stroke-aruco-edge-failed"
               stroke-width="6"
             />
             <line
@@ -286,7 +286,7 @@ function toPoints(pts: ArucoPoint[]) {
               :y1="e.detection_lines.upper.origin.y"
               :x2="e.detection_lines.lower.origin.x"
               :y2="e.detection_lines.lower.origin.y"
-              stroke="red"
+              class="stroke-aruco-edge-failed"
               stroke-width="6"
             />
             <line
@@ -294,7 +294,7 @@ function toPoints(pts: ArucoPoint[]) {
               :y1="e.detection_lines.upper.origin.y"
               :x2="e.detection_lines.upper.far_start.x"
               :y2="e.detection_lines.upper.far_start.y"
-              stroke="red"
+              class="stroke-aruco-edge-failed"
               stroke-width="3"
               stroke-dasharray="8 6"
               opacity="0.7"
@@ -304,7 +304,7 @@ function toPoints(pts: ArucoPoint[]) {
               :y1="e.detection_lines.upper.origin.y"
               :x2="e.detection_lines.upper.far_end.x"
               :y2="e.detection_lines.upper.far_end.y"
-              stroke="red"
+              class="stroke-aruco-edge-failed"
               stroke-width="3"
               stroke-dasharray="8 6"
               opacity="0.7"
@@ -314,7 +314,7 @@ function toPoints(pts: ArucoPoint[]) {
               :y1="e.detection_lines.lower.origin.y"
               :x2="e.detection_lines.lower.far_start.x"
               :y2="e.detection_lines.lower.far_start.y"
-              stroke="red"
+              class="stroke-aruco-edge-failed"
               stroke-width="3"
               stroke-dasharray="8 6"
               opacity="0.7"
@@ -324,7 +324,7 @@ function toPoints(pts: ArucoPoint[]) {
               :y1="e.detection_lines.lower.origin.y"
               :x2="e.detection_lines.lower.far_end.x"
               :y2="e.detection_lines.lower.far_end.y"
-              stroke="red"
+              class="stroke-aruco-edge-failed"
               stroke-width="3"
               stroke-dasharray="8 6"
               opacity="0.7"

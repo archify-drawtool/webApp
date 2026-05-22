@@ -48,6 +48,7 @@
     --color-aruco-marker: white;
     --color-aruco-hitbox: #0ffee2;
     --color-aruco-edge:   #fef00f;
+    --color-aruco-edge-failed: #ef4444;
 
     /* --- Alerts --- */
     --color-alert-bg:      #E6DBEB;
