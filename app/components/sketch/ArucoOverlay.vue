@@ -32,14 +32,14 @@ function toPoints(pts: ArucoPoint[]) {
 <template>
   <div class="flex flex-col items-center gap-3">
     <!-- Toggle controls -->
-    <div class="flex items-center gap-4 self-start flex-wrap">
+    <div class="flex flex-col gap-2 self-start py-2">
       <!-- Node toggles -->
       <div class="flex items-center gap-2">
-        <span class="text-xs text-grey-500 font-heading font-bold uppercase tracking-wide">Nodes</span>
+        <span class="text-xs text-grey-200 font-heading font-bold uppercase tracking-wide w-12 shrink-0">Nodes</span>
         <button
           type="button"
           class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-          :class="showNodeMarkers ? 'border-aruco-marker text-aruco-marker' : 'border-secondary-700 text-grey-500'"
+          :class="showNodeMarkers ? 'border-aruco-marker text-aruco-marker' : 'border-white/25 text-white/40'"
           @click="showNodeMarkers = !showNodeMarkers"
         >
           Markers
@@ -47,7 +47,7 @@ function toPoints(pts: ArucoPoint[]) {
         <button
           type="button"
           class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-          :class="showNodeHitboxes ? 'border-aruco-hitbox text-aruco-hitbox' : 'border-secondary-700 text-grey-500'"
+          :class="showNodeHitboxes ? 'border-aruco-hitbox text-aruco-hitbox' : 'border-white/25 text-white/40'"
           @click="showNodeHitboxes = !showNodeHitboxes"
         >
           Hitboxes
@@ -55,11 +55,11 @@ function toPoints(pts: ArucoPoint[]) {
       </div>
       <!-- Edge toggles -->
       <div class="flex items-center gap-2">
-        <span class="text-xs text-grey-500 font-heading font-bold uppercase tracking-wide">Edges</span>
+        <span class="text-xs text-grey-200 font-heading font-bold uppercase tracking-wide w-12 shrink-0">Edges</span>
         <button
           type="button"
           class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-          :class="showEdgeMarkers ? 'border-aruco-marker text-aruco-marker' : 'border-secondary-700 text-grey-500'"
+          :class="showEdgeMarkers ? 'border-aruco-marker text-aruco-marker' : 'border-white/25 text-white/40'"
           @click="showEdgeMarkers = !showEdgeMarkers"
         >
           Markers
@@ -67,7 +67,7 @@ function toPoints(pts: ArucoPoint[]) {
         <button
           type="button"
           class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-          :class="showEdgeHitboxes ? 'border-aruco-hitbox text-aruco-hitbox' : 'border-secondary-700 text-grey-500'"
+          :class="showEdgeHitboxes ? 'border-aruco-hitbox text-aruco-hitbox' : 'border-white/25 text-white/40'"
           @click="showEdgeHitboxes = !showEdgeHitboxes"
         >
           Hitboxes
@@ -75,7 +75,7 @@ function toPoints(pts: ArucoPoint[]) {
         <button
           type="button"
           class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-          :class="showDetectionLines ? 'border-aruco-edge text-aruco-edge' : 'border-secondary-700 text-grey-500'"
+          :class="showDetectionLines ? 'border-aruco-edge text-aruco-edge' : 'border-white/25 text-white/40'"
           @click="showDetectionLines = !showDetectionLines"
         >
           Detectielijnen
@@ -83,7 +83,7 @@ function toPoints(pts: ArucoPoint[]) {
         <button
           type="button"
           class="px-3 py-1 text-xs font-heading font-bold border transition-colors"
-          :class="showFailedEdges ? 'border-aruco-edge-failed text-aruco-edge-failed' : 'border-secondary-700 text-grey-500'"
+          :class="showFailedEdges ? 'border-aruco-edge-failed text-aruco-edge-failed' : 'border-white/25 text-white/40'"
           @click="showFailedEdges = !showFailedEdges"
         >
           Mislukt
