@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ArrowLeft, Download, ChevronDown, FileImage, GitBranch, Pencil, Image as ImageIcon } from 'lucide-vue-next'
+import { ArrowLeft, Download, ChevronDown, FileImage, GitBranch, Pencil, Workflow, Image as ImageIcon } from 'lucide-vue-next'
 
 const props = defineProps<{
   sketchTitle: string
@@ -87,6 +87,18 @@ function onRenameKeydown(e: KeyboardEvent) {
   }
 }
 
+function triggerDownload(content: string, filename: string, mimeType: string) {
+  const blob = new Blob([content], { type: mimeType })
+  const objectUrl = URL.createObjectURL(blob)
+  const anchor = document.createElement('a')
+  anchor.href = objectUrl
+  anchor.download = filename
+  document.body.appendChild(anchor)
+  anchor.click()
+  document.body.removeChild(anchor)
+  URL.revokeObjectURL(objectUrl)
+}
+
 async function exportMermaid() {
   dropdownOpen.value = false
   loading.value = true
@@ -94,18 +106,24 @@ async function exportMermaid() {
 
   try {
     const { nodes, edges, viewport } = toObject()
-
     const text = await post<string>('/api/export/mermaid', { canvas_state: { nodes, edges, viewport } }) ?? ''
+    triggerDownload(text, `${props.sketchTitle || 'schets'}.mmd`, 'text/plain')
+  } catch {
+    error.value = 'Export mislukt. Probeer het opnieuw.'
+  } finally {
+    loading.value = false
+  }
+}
 
-    const blob = new Blob([text], { type: 'text/plain' })
-    const objectUrl = URL.createObjectURL(blob)
-    const anchor = document.createElement('a')
-    anchor.href = objectUrl
-    anchor.download = `${props.sketchTitle || 'schets'}.mmd`
-    document.body.appendChild(anchor)
-    anchor.click()
-    document.body.removeChild(anchor)
-    URL.revokeObjectURL(objectUrl)
+async function exportDrawio() {
+  dropdownOpen.value = false
+  loading.value = true
+  error.value = null
+
+  try {
+    const { nodes, edges, viewport } = toObject()
+    const xml = await post<string>('/api/export/drawio', { canvas_state: { nodes, edges, viewport } }) ?? ''
+    triggerDownload(xml, `${props.sketchTitle || 'schets'}.drawio`, 'application/xml')
   } catch {
     error.value = 'Export mislukt. Probeer het opnieuw.'
   } finally {
@@ -269,6 +287,13 @@ function closePhoto() {
           >
             <GitBranch :size="15" />
             <span>Mermaid</span>
+          </button>
+          <button
+            class="flex items-center gap-2 px-3 py-2 rounded-md w-full text-grey-100 hover:bg-secondary-700 transition-colors text-sm cursor-pointer"
+            @click="exportDrawio"
+          >
+            <Workflow :size="15" />
+            <span>draw.io</span>
           </button>
         </div>
       </div>
