@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { Pencil } from 'lucide-vue-next';
+import { Pencil, Trash2 } from 'lucide-vue-next';
 import type { Project } from '~/types/Project';
 
 const route = useRoute();
@@ -7,7 +7,8 @@ const projectId = Number(route.params.id);
 
 const { get } = useApi();
 const { creating, createSketch } = useCreateSketch()
-const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches();
+const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError: sketchDeleteError, deletePending: sketchDeletePending, onDeleteRequest: onSketchDeleteRequest, onDeleteCancel: onSketchDeleteCancel, onDeleteConfirm: onSketchDeleteConfirm } = useSketches();
+const { projectToDelete, deleteError: projectDeleteError, deletePending: projectDeletePending, onDeleteRequest: onProjectDeleteRequest, onDeleteCancel: onProjectDeleteCancel, onDeleteConfirm: onProjectDeleteConfirm } = useProjects();
 
 const createError = ref<string | null>(null);
 
@@ -22,6 +23,17 @@ try {
 }
 
 await fetchSketches(projectId);
+
+const requestProjectDelete = () => {
+    if (project.value) onProjectDeleteRequest(project.value);
+};
+
+const confirmProjectDelete = async () => {
+    const deleted = await onProjectDeleteConfirm();
+    if (deleted) {
+        await navigateTo({ path: '/projecten', query: { deleted: deleted.title } });
+    }
+};
 </script>
 
 <template>
@@ -31,7 +43,18 @@ await fetchSketches(projectId);
     </p>
 
     <template v-if="project">
-      <h1 class="mb-4">{{ project.title }}</h1>
+      <div class="flex items-start justify-between gap-4 mb-4">
+        <h1>{{ project.title }}</h1>
+        <button
+          type="button"
+          class="flex items-center gap-2 text-grey-600 hover:text-primary-500 transition-colors cursor-pointer"
+          aria-label="Project verwijderen"
+          @click="requestProjectDelete"
+        >
+          <Trash2 :size="18" />
+          <span class="text-small">Verwijderen</span>
+        </button>
+      </div>
 
       <h2 class="mb-4">Schetsen</h2>
       <BaseGrid
@@ -53,7 +76,7 @@ await fetchSketches(projectId);
             v-for="sketch in sketches"
             :key="sketch.id"
             :sketch="sketch"
-            @delete="onDeleteRequest"
+            @delete="onSketchDeleteRequest"
         />
       </BaseGrid>
     </template>
@@ -61,10 +84,19 @@ await fetchSketches(projectId);
     <ConfirmDialog
       v-if="sketchToDelete"
       message="Weet je het zeker? Deze actie kan niet ongedaan worden gemaakt."
-      :error="deleteError"
-      :pending="deletePending"
-      @confirm="onDeleteConfirm"
-      @cancel="onDeleteCancel"
+      :error="sketchDeleteError"
+      :pending="sketchDeletePending"
+      @confirm="onSketchDeleteConfirm"
+      @cancel="onSketchDeleteCancel"
+    />
+
+    <ConfirmDialog
+      v-if="projectToDelete"
+      message="Weet je zeker dat je dit project en alle bijbehorende schetsen wilt verwijderen?"
+      :error="projectDeleteError"
+      :pending="projectDeletePending"
+      @confirm="confirmProjectDelete"
+      @cancel="onProjectDeleteCancel"
     />
   </div>
 </template>
