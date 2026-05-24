@@ -24,7 +24,18 @@ const emit = defineEmits<{
 }>()
 
 const { isDragToolActive } = useDragTool()
+const { user } = useAuth()
 const dragBlocksInteraction = computed(() => isDragToolActive.value && !props.readonly)
+
+const canEditBody = computed(() =>
+  !props.readonly &&
+  props.comment.user_id !== null &&
+  user.value?.id === props.comment.user_id,
+)
+
+function canDeleteReply(reply: Comment): boolean {
+  return !props.readonly && reply.user_id !== null && user.value?.id === reply.user_id
+}
 
 const open = ref(false)
 const popoverRef = ref<HTMLElement | null>(null)
@@ -32,6 +43,7 @@ const textareaRef = ref<HTMLTextAreaElement | null>(null)
 const replyInputRef = ref<HTMLTextAreaElement | null>(null)
 const isDragging = ref(false)
 const isHovered = ref(false)
+const isInitialAutoOpen = ref(false)
 
 const editingBody = ref(false)
 const bodyDraft = ref(props.comment.body)
@@ -56,14 +68,17 @@ watch(() => props.comment.body, body => {
 })
 
 watch(() => props.autoOpen, value => {
-  if (value) openPopover(true)
+  if (value) {
+    isInitialAutoOpen.value = true
+    openPopover(true)
+  }
 })
 
 function openPopover(startInEdit = false) {
   if (open.value) return
   open.value = true
   bodyDraft.value = props.comment.body
-  if (!props.readonly && (startInEdit || props.comment.body === '')) {
+  if (canEditBody.value && (startInEdit || props.comment.body === '')) {
     startBodyEdit()
   }
 }
@@ -73,10 +88,11 @@ function closePopover() {
   if (editingBody.value) commitBodyEdit()
   replyDraft.value = ''
   open.value = false
+  isInitialAutoOpen.value = false
 }
 
 function startBodyEdit() {
-  if (props.readonly) return
+  if (!canEditBody.value) return
   editingBody.value = true
   bodyDraft.value = props.comment.body
   nextTick(() => {
@@ -220,7 +236,10 @@ function isGuest(comment: Comment): boolean {
 onMounted(() => {
   document.addEventListener('mousedown', onDocumentMousedown, true)
   window.addEventListener('keydown', onKeydown)
-  if (props.autoOpen) openPopover(true)
+  if (props.autoOpen) {
+    isInitialAutoOpen.value = true
+    openPopover(true)
+  }
 })
 
 onUnmounted(() => {
@@ -292,7 +311,7 @@ onUnmounted(() => {
 
       <div class="thread-body">
         <textarea
-          v-if="editingBody && !readonly"
+          v-if="editingBody && canEditBody"
           ref="textareaRef"
           v-model="bodyDraft"
           rows="3"
@@ -303,7 +322,7 @@ onUnmounted(() => {
           @blur="commitBodyEdit"
         />
         <div
-          v-else-if="readonly"
+          v-else-if="!canEditBody"
           class="body-display body-display--readonly"
         >
           <p v-if="comment.body" class="body-text">{{ comment.body }}</p>
@@ -332,7 +351,7 @@ onUnmounted(() => {
             </span>
             <span class="entry-time">{{ formatTime(reply.created_at) }}</span>
             <button
-              v-if="!readonly"
+              v-if="canDeleteReply(reply)"
               class="reply-delete"
               :aria-label="`Verwijder reply van ${authorName(reply)}`"
               @click="onDeleteReply(reply.id)"
@@ -344,7 +363,7 @@ onUnmounted(() => {
         </div>
       </div>
 
-      <div v-if="!readonly" class="reply-input">
+      <div v-if="!readonly && !isInitialAutoOpen" class="reply-input">
         <textarea
           ref="replyInputRef"
           v-model="replyDraft"
