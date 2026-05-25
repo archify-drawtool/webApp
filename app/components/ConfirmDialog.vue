@@ -16,10 +16,10 @@ const emit = defineEmits<{
 <template>
   <Teleport to="body">
     <div class="backdrop" @click.self="emit('cancel')">
-      <div class="dialog">
+      <div class="dialog relative">
         <button
           type="button"
-          class="close-btn"
+          class="absolute top-2 right-2 flex items-center justify-center w-7 h-7 bg-transparent border-none cursor-pointer text-grey-600 transition-colors duration-150 hover:text-text disabled:cursor-not-allowed disabled:opacity-50"
           aria-label="Sluiten"
           :disabled="pending"
           @click="emit('cancel')"
@@ -49,36 +49,10 @@ const emit = defineEmits<{
 }
 
 .dialog {
-  position: relative;
   background: white;
   padding: 1.5rem;
   width: 100%;
   max-width: 400px;
-}
-
-.close-btn {
-  position: absolute;
-  top: 0.5rem;
-  right: 0.5rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 1.75rem;
-  height: 1.75rem;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  color: var(--color-grey-600);
-  transition: color 0.15s ease;
-}
-
-.close-btn:hover {
-  color: var(--color-text);
-}
-
-.close-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
 }
 
 .error {
