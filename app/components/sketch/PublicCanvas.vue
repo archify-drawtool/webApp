@@ -141,11 +141,13 @@ function toggleCommentMode() {
 
     <SketchCommentLayer mode="public" :canvas-id="PUBLIC_CANVAS_ID" />
 
-    <div class="public-toolbar">
+    <div class="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-1 p-1 bg-white border border-gray-200 rounded-lg shadow-[0_4px_12px_rgba(0,0,0,0.08)] z-10">
       <button
         type="button"
-        class="tool-button"
-        :class="{ 'tool-button--active': !isCommentMode }"
+        :class="[
+          'flex items-center justify-center w-9 h-9 rounded-md border-none cursor-pointer transition-colors duration-[120ms]',
+          !isCommentMode ? 'bg-primary-500 text-white hover:bg-[#b8005e]' : 'text-gray-600 bg-transparent hover:bg-gray-100',
+        ]"
         title="Selecteren"
         @click="isCommentMode = false"
       >
@@ -153,8 +155,10 @@ function toggleCommentMode() {
       </button>
       <button
         type="button"
-        class="tool-button"
-        :class="{ 'tool-button--active': isCommentMode }"
+        :class="[
+          'flex items-center justify-center w-9 h-9 rounded-md border-none cursor-pointer transition-colors duration-[120ms]',
+          isCommentMode ? 'bg-primary-500 text-white hover:bg-[#b8005e]' : 'text-gray-600 bg-transparent hover:bg-gray-100',
+        ]"
         title="Comment plaatsen"
         @click="toggleCommentMode"
       >
@@ -162,42 +166,50 @@ function toggleCommentMode() {
       </button>
     </div>
 
-    <div v-if="showPlacementModal" class="placement-backdrop" @click.self="cancelPlacement">
-      <div class="placement-dialog">
-        <h2 class="placement-title">Comment plaatsen</h2>
-        <p class="placement-help">
+    <div
+      v-if="showPlacementModal"
+      class="absolute inset-0 bg-[rgba(15,23,42,0.45)] flex items-center justify-center z-[100]"
+      @click.self="cancelPlacement"
+    >
+      <div class="bg-white rounded-[10px] py-5 px-[22px] w-[360px] max-w-[calc(100%-32px)] shadow-[0_12px_32px_rgba(0,0,0,0.2)] flex flex-col gap-3">
+        <h2 class="m-0 text-base font-bold text-gray-900">Comment plaatsen</h2>
+        <p class="m-0 text-xs text-gray-500">
           Je kunt een comment niet meer aanpassen nadat je hem plaatst.
         </p>
-        <label v-if="needsName" class="placement-label">
+        <label v-if="needsName" class="flex flex-col gap-1 text-xs text-gray-700 font-semibold">
           Naam
           <input
             v-model="nameInput"
             type="text"
             maxlength="80"
             placeholder="Bijv. Jan Jansen"
-            class="placement-input"
+            class="w-full py-2 px-2.5 text-sm border border-gray-300 rounded-md outline-none font-body font-normal text-gray-900 focus:border-primary-500"
             autofocus
           >
         </label>
-        <label class="placement-label">
+        <label class="flex flex-col gap-1 text-xs text-gray-700 font-semibold">
           Opmerking
           <textarea
             v-model="bodyInput"
             rows="4"
             maxlength="5000"
             placeholder="Schrijf je opmerking..."
-            class="placement-textarea"
+            class="w-full py-2 px-2.5 text-sm border border-gray-300 rounded-md outline-none font-body font-normal text-gray-900 focus:border-primary-500 resize-y min-h-[80px]"
             :autofocus="!needsName"
             @keydown.escape.prevent="cancelPlacement"
             @keydown.ctrl.enter.prevent="submitPlacement"
             @keydown.meta.enter.prevent="submitPlacement"
           />
         </label>
-        <div class="placement-actions">
-          <button type="button" class="placement-cancel" @click="cancelPlacement">Annuleren</button>
+        <div class="flex justify-end gap-2 mt-1">
           <button
             type="button"
-            class="placement-confirm"
+            class="py-1.5 px-3 text-[13px] rounded-md cursor-pointer border border-gray-300 bg-white text-gray-700 hover:bg-gray-50"
+            @click="cancelPlacement"
+          >Annuleren</button>
+          <button
+            type="button"
+            class="py-1.5 px-3 text-[13px] rounded-md cursor-pointer border border-transparent bg-primary-500 text-white enabled:hover:bg-[#b8005e] disabled:bg-gray-300 disabled:cursor-not-allowed"
             :disabled="!canSubmit"
             @click="submitPlacement"
           >
@@ -212,154 +224,5 @@ function toggleCommentMode() {
 <style scoped>
 .placing-comment :deep(.vue-flow__pane) {
   cursor: crosshair;
-}
-
-.public-toolbar {
-  position: absolute;
-  bottom: 16px;
-  left: 50%;
-  transform: translateX(-50%);
-  display: flex;
-  gap: 4px;
-  padding: 4px;
-  background: white;
-  border: 1px solid #e5e7eb;
-  border-radius: 8px;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-  z-index: 10;
-}
-
-.tool-button {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 36px;
-  height: 36px;
-  border-radius: 6px;
-  color: #4b5563;
-  background: transparent;
-  border: none;
-  cursor: pointer;
-  transition: background-color 120ms, color 120ms;
-}
-
-.tool-button:hover {
-  background: #f3f4f6;
-}
-
-.tool-button--active {
-  background: var(--color-primary-500);
-  color: white;
-}
-
-.tool-button--active:hover {
-  background: var(--color-primary-600, #b8005e);
-}
-
-.placement-backdrop {
-  position: absolute;
-  inset: 0;
-  background: rgba(15, 23, 42, 0.45);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 100;
-}
-
-.placement-dialog {
-  background: white;
-  border-radius: 10px;
-  padding: 20px 22px;
-  width: 360px;
-  max-width: calc(100% - 32px);
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
-}
-
-.placement-title {
-  margin: 0;
-  font-size: 16px;
-  font-weight: 700;
-  color: #111827;
-}
-
-.placement-help {
-  margin: 0;
-  font-size: 12px;
-  color: #6b7280;
-}
-
-.placement-label {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  font-size: 12px;
-  color: #374151;
-  font-weight: 600;
-}
-
-.placement-input,
-.placement-textarea {
-  width: 100%;
-  padding: 8px 10px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  outline: none;
-  font-family: inherit;
-  font-weight: 400;
-  color: #111827;
-}
-
-.placement-textarea {
-  resize: vertical;
-  min-height: 80px;
-}
-
-.placement-input:focus,
-.placement-textarea:focus {
-  border-color: var(--color-primary-500);
-}
-
-.placement-actions {
-  display: flex;
-  justify-content: flex-end;
-  gap: 8px;
-  margin-top: 4px;
-}
-
-.placement-cancel,
-.placement-confirm {
-  padding: 6px 12px;
-  font-size: 13px;
-  border-radius: 6px;
-  cursor: pointer;
-  border: 1px solid transparent;
-}
-
-.placement-cancel {
-  background: white;
-  border-color: #d1d5db;
-  color: #374151;
-}
-
-.placement-cancel:hover {
-  background: #f9fafb;
-}
-
-.placement-confirm {
-  background: var(--color-primary-500);
-  color: white;
-}
-
-.placement-confirm:hover:not(:disabled) {
-  background: var(--color-primary-600, #b8005e);
-}
-
-.placement-confirm:disabled {
-  background: #d1d5db;
-  cursor: not-allowed;
 }
 </style>

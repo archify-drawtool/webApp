@@ -260,7 +260,10 @@ onUnmounted(() => {
   >
     <button
       class="pin-button"
-      :class="{ 'pin-button--active': open, 'pin-button--no-interact': dragBlocksInteraction, 'pin-button--readonly': readonly }"
+      :class="[
+        { 'pin-button--active': open, 'pin-button--no-interact': dragBlocksInteraction },
+        readonly ? 'cursor-pointer!' : '',
+      ]"
       aria-label="Comment"
       @pointerdown="onPointerDown"
       @click.stop="onPinClick"
@@ -323,7 +326,7 @@ onUnmounted(() => {
         />
         <div
           v-else-if="!canEditBody"
-          class="body-display body-display--readonly"
+          class="relative cursor-default pt-0.5 pr-[18px] pb-0.5 pl-0.5 rounded max-h-[140px] overflow-y-auto"
         >
           <p v-if="comment.body" class="body-text">{{ comment.body }}</p>
           <p v-else class="body-placeholder">Geen opmerking</p>
@@ -419,10 +422,6 @@ onUnmounted(() => {
 .pin-button--no-interact {
   cursor: default;
   pointer-events: none;
-}
-
-.pin-button--readonly {
-  cursor: pointer;
 }
 
 .pin-button:hover,
@@ -570,14 +569,6 @@ onUnmounted(() => {
 
 .body-display:hover {
   background: #f9fafb;
-}
-
-.body-display--readonly {
-  cursor: default;
-}
-
-.body-display--readonly:hover {
-  background: transparent;
 }
 
 .body-display:hover .body-edit-icon {
