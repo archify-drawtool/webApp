@@ -47,6 +47,7 @@ const handleLogin = async () => {
     await loginWithMicrosoft();
   } catch (err) {
     error.value = err as Error;
+  } finally {
     pending.value = false;
   }
 };

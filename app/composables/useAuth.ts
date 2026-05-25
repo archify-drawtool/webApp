@@ -57,7 +57,11 @@ export const useAuth = () => {
     } finally {
       token.value = null;
       user.value = null;
-      msalInstance = null;
+      if (msalInstance) {
+        await msalInstance.clearCache();
+        msalInstance = null;
+      }
+      await navigateTo("/login");
     }
   };
 

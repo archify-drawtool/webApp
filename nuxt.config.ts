@@ -19,7 +19,6 @@ export default defineNuxtConfig({
     public: {
       entraTenantId: '',
       entraClientId: '',
-      entraRedirectUri: '',
       apiBaseUrl: '',
     },
   },
