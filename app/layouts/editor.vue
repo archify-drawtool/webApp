@@ -11,6 +11,7 @@ const { topbarState } = useSketchTopbar()
         :back-to="topbarState.backTo"
         :sketch-id="topbarState.sketchId"
         :project-id="topbarState.projectId"
+        :has-photo="topbarState.hasPhoto ?? false"
       />
       <div class="flex-1 overflow-hidden">
         <slot />
