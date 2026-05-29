@@ -2,8 +2,16 @@
 import { useVueFlow } from '@vue-flow/core'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 
+const props = withDefaults(defineProps<{
+  mode?: 'editor' | 'public'
+  canvasId?: string
+}>(), {
+  mode: 'editor',
+  canvasId: SKETCH_CANVAS_ID,
+})
+
 const route = useRoute()
-const { viewport } = useVueFlow(SKETCH_CANVAS_ID)
+const { viewport } = useVueFlow(props.canvasId)
 const {
   comments,
   getReplies,
@@ -78,6 +86,7 @@ function onDeleteReply(id: number) {
       :screen-x="pin.screenX"
       :screen-y="pin.screenY"
       :auto-open="pin.autoOpen"
+      :readonly="mode === 'public'"
       @drag="onDrag"
       @drag-end="onDragEnd"
       @update-body="onUpdateBody"
