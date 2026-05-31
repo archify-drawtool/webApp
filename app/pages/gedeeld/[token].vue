@@ -79,6 +79,7 @@ onUnmounted(() => {
       v-else-if="sketch"
       :nodes="sketch.canvas_state?.nodes ?? []"
       :edges="sketch.canvas_state?.edges ?? []"
+      :token="token"
     />
 
     <button

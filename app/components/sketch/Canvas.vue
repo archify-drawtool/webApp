@@ -1,6 +1,6 @@
 <script setup lang="ts">
   
-import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge, type NodeDragEvent } from '@vue-flow/core'
+import { VueFlow, useVueFlow, useKeyPress, type Connection, type ValidConnectionFunc, Panel, type XYPosition, type GraphEdge, type NodeDragEvent, type NodeMouseEvent } from '@vue-flow/core'
 import { Background, BackgroundVariant } from '@vue-flow/background'
 import { Controls } from '@vue-flow/controls'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
@@ -13,7 +13,7 @@ import { markRaw } from 'vue'
 const { nodeTypes: apiNodeTypes, fetchNodeTypes } = useNodeTypes()
 await fetchNodeTypes()
 const { defaultEdgeOptions } = useEdgeTool()
-const { selectedNodeType, isPlacingNode, stopPlacing } = useNodeTool()
+const { selectedNodeType, isPlacingNode, stopPlacing, pendingFocusNodeId } = useNodeTool()
 const { isDragToolActive } = useDragTool()
 const { isCommentToolActive } = useCommentTool()
 const { addComment } = useComments()
@@ -114,10 +114,25 @@ function onNodeDragStart({ event, node }: NodeDragEvent) {
   addSelectedNodes([node])
 }
 
+
+let suppressNextPaneClick = false
+
+function onWrapperMouseDown() {
+  const active = document.activeElement
+  if (active instanceof HTMLInputElement || active instanceof HTMLTextAreaElement) {
+    suppressNextPaneClick = true
+  }
+}
+
 const route = useRoute()
 
 function onPaneClick(event: MouseEvent) {
   if (isSpacePressed.value) return
+
+  if (suppressNextPaneClick) {
+    suppressNextPaneClick = false
+    return
+  }
 
   if (isCommentToolActive.value) {
     const sketchId = Number(route.params.id)
@@ -137,16 +152,19 @@ function onPaneClick(event: MouseEvent) {
 
   const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
 
+  const nodeId = crypto.randomUUID()
   addNodeWithHistory([{
-    id: crypto.randomUUID(),
+    id: nodeId,
     type: nodeType.type,
     position,
     data: { label: nodeType.name },
   }])
+  pendingFocusNodeId.value = nodeId
 }
 
-function onNodeClick({ event }: { event: MouseEvent }) {
+function onNodeClick({ event }: NodeMouseEvent) {
   if (!isCommentToolActive.value || isSpacePressed.value) return
+  if (!(event instanceof MouseEvent)) return
   const sketchId = Number(route.params.id)
   if (!Number.isFinite(sketchId)) return
   const position: XYPosition = screenToFlowCoordinate({ x: event.clientX, y: event.clientY })
@@ -167,6 +185,7 @@ onNodeClickHook(onNodeClick)
   <div
     class="w-full h-full"
     :class="{ 'drag-tool-active': isDragToolActive }"
+    @mousedown="onWrapperMouseDown"
     @contextmenu="(e: MouseEvent) => { if (e.ctrlKey) { e.preventDefault(); e.stopPropagation() } }"
   >
   <VueFlow
