@@ -21,7 +21,14 @@ export function useSketchHistory() {
     const { nodes, edges } = toObject()
     return {
       nodes: structuredClone(nodes),
-      edges: structuredClone(edges),
+      edges: structuredClone(
+        edges.map(e => ({
+          ...e,
+          markerEnd: e.markerEnd ?? '',
+          markerStart: e.markerStart ?? '',
+          style: e.style ?? {},
+        }))
+      ),
     }
   }
 
