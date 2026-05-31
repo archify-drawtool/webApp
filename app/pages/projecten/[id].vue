@@ -6,6 +6,7 @@ const route = useRoute();
 const projectId = Number(route.params.id);
 
 const { get } = useApi();
+const { renameProject } = useProjects();
 const { creating, createSketch } = useCreateSketch()
 const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches();
 
@@ -22,6 +23,67 @@ try {
 }
 
 await fetchSketches(projectId);
+
+const renaming = ref(false);
+const renameValue = ref('');
+const renameInput = ref<HTMLInputElement | null>(null);
+const renameError = ref<string | null>(null);
+
+function startRename() {
+  renameValue.value = project.value?.title ?? '';
+  renameError.value = null;
+  renaming.value = true;
+  nextTick(() => {
+    renameInput.value?.select();
+  });
+}
+
+function cancelRename() {
+  renaming.value = false;
+  renameError.value = null;
+}
+
+async function confirmRename() {
+  if (!renaming.value) return;
+
+  const newTitle = renameValue.value.trim();
+
+  if (!newTitle) {
+    renameError.value = 'De naam mag niet leeg zijn.';
+    return;
+  }
+
+  if (newTitle === project.value?.title) {
+    renaming.value = false;
+    return;
+  }
+
+  try {
+    await renameProject(projectId, newTitle);
+    project.value!.title = newTitle;
+    renaming.value = false;
+    renameError.value = null;
+  } catch (err: unknown) {
+    const apiErr = err as { data?: { data?: { errors?: { title?: string[] }; message?: string }; message?: string } };
+    const msg =
+      apiErr?.data?.data?.errors?.title?.[0] ??
+      apiErr?.data?.data?.message ??
+      apiErr?.data?.message ??
+      'Opslaan mislukt. Probeer het opnieuw.';
+    renameError.value = msg;
+    renameValue.value = project.value?.title ?? '';
+    renaming.value = false;
+  }
+}
+
+function onRenameKeydown(e: KeyboardEvent) {
+  if (e.key === 'Enter') {
+    e.preventDefault();
+    confirmRename();
+  } else if (e.key === 'Escape') {
+    cancelRename();
+  }
+}
 </script>
 
 <template>
@@ -31,7 +93,28 @@ await fetchSketches(projectId);
     </p>
 
     <template v-if="project">
-      <h1 class="mb-4">{{ project.title }}</h1>
+      <div class="flex items-center gap-1.5 mb-4">
+        <template v-if="renaming">
+          <input
+            ref="renameInput"
+            v-model="renameValue"
+            class="font-heading text-h1 bg-transparent border-b border-primary-500 outline-none min-w-0"
+            @keydown="onRenameKeydown"
+            @blur="confirmRename"
+          >
+        </template>
+        <template v-else>
+          <h1>{{ project.title }}</h1>
+          <button
+            class="text-grey-400 hover:text-secondary-950 transition-colors shrink-0"
+            title="Naam aanpassen"
+            @click="startRename"
+          >
+            <Pencil :size="18" />
+          </button>
+        </template>
+        <p v-if="renameError" class="text-error-text text-sm">{{ renameError }}</p>
+      </div>
 
       <h2 class="mb-4">Schetsen</h2>
       <BaseGrid
