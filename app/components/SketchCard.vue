@@ -10,8 +10,6 @@ const emit = defineEmits<{
   delete: [sketch: SketchSummary];
 }>();
 
-const { user } = useAuth();
-const isOwner = computed(() => user.value?.id === props.sketch.created_by);
 const linkTo = computed(() =>
   props.sketch.project_id
     ? `/projecten/${props.sketch.project_id}/schetsen/${props.sketch.id}`
@@ -65,7 +63,6 @@ const timeAgo = (dateString: string): string => {
       </p>
     </NuxtLink>
     <button
-      v-if="isOwner"
       class="delete-btn"
       aria-label="Schets verwijderen"
       @click.prevent="emit('delete', sketch)"
