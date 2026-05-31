@@ -95,13 +95,16 @@ function onRenameKeydown(e: KeyboardEvent) {
     <template v-if="project">
       <div class="flex items-center gap-1.5 mb-4">
         <template v-if="renaming">
-          <input
-            ref="renameInput"
-            v-model="renameValue"
-            class="font-heading text-h1 bg-transparent border-b border-primary-500 outline-none min-w-0"
-            @keydown="onRenameKeydown"
-            @blur="confirmRename"
-          >
+          <span class="grid">
+            <input
+              ref="renameInput"
+              v-model="renameValue"
+              class="font-heading text-h1 bg-transparent border-b border-primary-500 outline-none min-w-4 [grid-area:1/1]"
+              @keydown="onRenameKeydown"
+              @blur="confirmRename"
+            >
+            <span class="font-heading text-h1 invisible whitespace-pre [grid-area:1/1]">{{ renameValue || ' ' }}</span>
+          </span>
         </template>
         <template v-else>
           <h1>{{ project.title }}</h1>
