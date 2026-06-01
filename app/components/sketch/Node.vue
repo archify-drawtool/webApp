@@ -3,38 +3,21 @@ import { Handle, Position, type NodeProps } from '@vue-flow/core'
 import { resolveIcon } from '~/utils/lucideIcon'
 
 const props = defineProps<NodeProps<{ label?: string }>>()
-defineEmits(['updateNodeInternals'])
 
 const { nodeTypes } = useNodeTypes()
-const { updateNodeLabelWithHistory } = useSketchCanvas()
 const { openMenu } = useNodeContextMenu()
-const { isDragToolActive } = useDragTool()
 
 const icon = computed(() => {
   const iconName = nodeTypes.value.find(t => t.type === props.type)?.icon
   return resolveIcon(iconName ?? '')
 })
 
-const editing = ref(false)
-const editValue = ref('')
 const inputRef = ref<HTMLInputElement | null>(null)
-
-function startEdit() {
-  if (isDragToolActive.value) return
-  editValue.value = props.data.label ?? ''
-  editing.value = true
-  nextTick(() => inputRef.value?.focus())
-}
-
-function confirmEdit() {
-  if (!editing.value) return
-  editing.value = false
-  updateNodeLabelWithHistory(props.id, editValue.value)
-}
-
-function cancelEdit() {
-  editing.value = false
-}
+const { editing, editValue, startEdit, confirmEdit, cancelEdit } = useNodeLabelEditing(
+  props.id,
+  () => props.data.label,
+  inputRef,
+)
 
 function onContextMenu(event: MouseEvent) {
   openMenu(props.id, props.type, event.clientX, event.clientY)
@@ -68,13 +51,3 @@ function onContextMenu(event: MouseEvent) {
   </div>
 </template>
 
-<style scoped>
-:deep(.vue-flow__handle) {
-  width: 10px;
-  height: 10px;
-  background-color: #E5097F;
-  border: 2px solid white;
-  border-radius: 50%;
-  opacity: 1;
-}
-</style>

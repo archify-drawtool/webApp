@@ -13,7 +13,9 @@ import {
   StickyNote,
   Type,
   Hand,
+  MousePointer2,
   Grip,
+  MessageCircle,
 } from 'lucide-vue-next'
 
 const { nodeTypes } = useNodeTypes()
@@ -21,11 +23,26 @@ const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
 type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
 const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing } = useNodeTool()
 const { isDragToolActive, activateDragTool } = useDragTool()
+const { activatePointerTool } = usePointerTool()
+const { isCommentToolActive, activateCommentTool } = useCommentTool()
 const { showDots, toggleDots } = useDotsToggle()
 
-type DropdownId = 'node' | 'edge'
+type DropdownId = 'node' | 'edge' | 'tool'
 const activeDropdown = ref<DropdownId | null>(null)
 const anyOpen = computed(() => activeDropdown.value !== null)
+
+const toolDropdownItems = [
+  { key: 'drag', icon: Hand, label: 'Slepen' },
+  { key: 'pointer', icon: MousePointer2, label: 'Pointer' },
+]
+const selectedToolKey = computed(() => (isDragToolActive.value ? 'drag' : 'pointer'))
+const activeToolIcon = computed(() => (isDragToolActive.value ? Hand : MousePointer2))
+
+function selectTool(key: string) {
+  if (key === 'drag') activateDragTool()
+  else activatePointerTool()
+  activeDropdown.value = null
+}
 
 const iconComponents: Record<string, Component> = {
   server: Server,
@@ -86,40 +103,66 @@ function togglePlacingMode() {
   }
 }
 
-function handleEscape(e: KeyboardEvent) {
+const panelRef = ref<HTMLElement | null>(null)
+
+function handleKeydown(e: KeyboardEvent) {
+  const target = e.target as HTMLElement
+  if (target.tagName === 'INPUT' || target.tagName === 'TEXTAREA' || target.isContentEditable) return
+
   if (e.key === 'Escape') {
-    if (isPlacingNode.value) {
-      activateDragTool()
-    } else {
-      closeAll()
-    }
+    if (isPlacingNode.value) stopPlacing()
+    else if (isCommentToolActive.value) activatePointerTool()
+    else closeAll()
+  } else if (e.key === '1') {
+    activateDragTool()
+  } else if (e.key === '2') {
+    activatePointerTool()
   }
 }
 
-onMounted(() => window.addEventListener('keydown', handleEscape))
-onUnmounted(() => window.removeEventListener('keydown', handleEscape))
+function onDocumentMousedown(e: MouseEvent) {
+  if (!anyOpen.value) return
+  if (panelRef.value?.contains(e.target as Node)) return
+  closeAll()
+}
+
+onMounted(() => {
+  window.addEventListener('keydown', handleKeydown)
+  document.addEventListener('mousedown', onDocumentMousedown, true)
+})
+onUnmounted(() => {
+  window.removeEventListener('keydown', handleKeydown)
+  document.removeEventListener('mousedown', onDocumentMousedown, true)
+})
 </script>
 
 <template>
   <Panel position="bottom-center">
-    <!-- Backdrop to close dropdowns on outside click -->
-    <div v-if="anyOpen" class="fixed inset-0 z-40" @mousedown.stop="closeAll" />
-
+    <div ref="panelRef" class="relative">
     <div class="relative z-50 flex items-center gap-1 rounded-xl bg-secondary-900 shadow-lg px-3 py-2">
 
-      <!-- Drag tool -->
-      <button
-        :class="[
-          'rounded-md p-2 transition-colors',
-          isDragToolActive
-            ? 'bg-primary-500 text-white'
-            : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
-        ]"
-        title="Versleep het canvas"
-        @click.stop="activateDragTool"
-      >
-        <Hand :size="18" />
-      </button>
+      <!-- Tool section (drag / pointer) -->
+      <div class="flex items-center">
+        <button
+          :class="[
+            'rounded-md p-2 transition-colors cursor-pointer',
+            isPlacingNode || isCommentToolActive
+              ? 'hover:bg-secondary-700 text-grey-200'
+              : 'bg-primary-500 text-white',
+          ]"
+          title="Actief gereedschap"
+          @click.stop="selectTool(selectedToolKey)"
+        >
+          <component :is="activeToolIcon" :size="18" />
+        </button>
+        <button
+          class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
+          title="Kies gereedschap"
+          @click.stop="toggle('tool')"
+        >
+          <ChevronUp :size="14" />
+        </button>
+      </div>
 
       <div class="w-px h-5 bg-secondary-700 mx-1" />
 
@@ -133,7 +176,7 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
               : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
           ]"
           :title="isPlacingNode ? 'Klik op het canvas om een node te plaatsen (Escape om te annuleren)' : 'Selecteer een node type'"
-          @click.stop="togglePlacingMode"
+          @click.stop="() => { closeAll(); togglePlacingMode() }"
         >
           <component :is="iconFor(selectedNodeTypeObj?.icon ?? 'square')" :size="18" />
         </button>
@@ -154,19 +197,38 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
         <Type :size="18" />
       </button>
 
+      <!-- Comment placement tool -->
+      <button
+        :class="[
+          'rounded-md p-2 transition-colors',
+          isCommentToolActive
+            ? 'bg-primary-500 text-white cursor-crosshair'
+            : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
+        ]"
+        :title="isCommentToolActive ? 'Klik op het canvas om een comment te plaatsen (Escape om te annuleren)' : 'Plaats een comment'"
+        @click.stop="() => { closeAll(); isCommentToolActive ? activatePointerTool() : activateCommentTool() }"
+      >
+        <MessageCircle :size="18" />
+      </button>
+
       <!-- Edge tool section -->
-      <div class="flex items-center">
-        <div class="rounded-md p-2 text-grey-200">
+      <button
+        :class="[
+          'flex items-center rounded-md transition-colors cursor-pointer',
+          activeDropdown === 'edge'
+            ? 'bg-primary-500 text-white'
+            : 'hover:bg-secondary-700 text-grey-200',
+        ]"
+        title="Kies uit een relatietype"
+        @click.stop="toggle('edge')"
+      >
+        <span class="p-2">
           <component :is="activeEdgeIcon" :size="18" />
-        </div>
-        <button
-          class="rounded-md p-1 hover:bg-secondary-700 text-grey-400 transition-colors"
-          title="Kies uit een relatietype"
-          @click.stop="toggle('edge')"
-        >
+        </span>
+        <span class="p-1" :class="activeDropdown === 'edge' ? 'text-white' : 'text-grey-400'">
           <ChevronUp :size="14" />
-        </button>
-      </div>
+        </span>
+      </button>
 
       <div class="w-px h-5 bg-secondary-700 mx-1" />
 
@@ -179,11 +241,18 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
             : 'hover:bg-secondary-700 text-grey-200',
         ]"
         :title="showDots ? 'Verberg achtergrond stipjes' : 'Toon achtergrond stipjes'"
-        @click.stop="toggleDots"
+        @click.stop="() => { closeAll(); toggleDots() }"
       >
         <Grip :size="18" />
       </button>
     </div>
+
+    <SketchToolbarDropdown
+      v-if="activeDropdown === 'tool'"
+      :items="toolDropdownItems"
+      :selected-key="selectedToolKey"
+      @select="selectTool"
+    />
 
     <SketchToolbarDropdown
       v-if="activeDropdown === 'node'"
@@ -199,5 +268,6 @@ onUnmounted(() => window.removeEventListener('keydown', handleEscape))
       align-right
       @select="key => { setEdgeTool(key as EdgeToolId); activeDropdown = null }"
     />
+    </div>
   </Panel>
 </template>

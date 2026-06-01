@@ -4,15 +4,12 @@ interface PublicNodeType {
 }
 
 export function usePublicNodeTypes() {
-  const config = useRuntimeConfig()
+  const { get } = useApi()
   const nodeTypes = useState<PublicNodeType[]>('public-node-types', () => [])
 
   const fetchNodeTypes = async () => {
     if (nodeTypes.value.length > 0) return
-    const types = await $fetch<PublicNodeType[]>(
-      `${config.public.apiBaseUrl}/api/shared/node-types`,
-      { headers: { Accept: 'application/json' } },
-    )
+    const types = await get<PublicNodeType[]>('/api/shared/node-types')
     if (types) nodeTypes.value = types
   }
 

@@ -132,7 +132,7 @@ function onContextMenu(event: MouseEvent) {
   <EdgeLabelRenderer>
     <div
       :style="{ transform: `translate(-50%, -50%) translate(${pathData[1]}px,${pathData[2]}px)` }"
-      class="absolute pointer-events-auto nodrag nopan"
+      :class="['absolute nodrag nopan', isDragToolActive ? 'pointer-events-none' : 'pointer-events-auto']"
     >
       <input
         v-if="editing"

@@ -25,8 +25,8 @@ export function useSketchCanvas() {
         throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
     }
     if (sketch) {
-      const { setDotsVisible } = useDotsToggle()
-      setDotsVisible(sketch.canvas_state?.show_dots ?? true)
+      const { loadComments } = useComments()
+      void loadComments(sketch.id)
       vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
         // Bouw het edge object opnieuw op zonder ongeldige markers.
@@ -57,11 +57,21 @@ export function useSketchCanvas() {
     saveError.value = null
     vueFlow.setNodes([])
     vueFlow.setEdges([])
-    const { setDotsVisible } = useDotsToggle()
-    setDotsVisible(true)
     const { clearHistory } = useSketchHistory()
-
     clearHistory()
+
+    const { activeTool } = useActiveTool()
+    activeTool.value = 'drag'
+
+    const { selectedNodeType, isPlacingNode } = useNodeTool()
+    selectedNodeType.value = null
+    isPlacingNode.value = false
+
+    const { activeEdgeTool } = useEdgeTool()
+    activeEdgeTool.value = 'none'
+
+    const { clearComments } = useComments()
+    clearComments()
   }
 
   const watchAndSave = (sketchId: string | number) => {
@@ -80,8 +90,7 @@ export function useSketchCanvas() {
         pendingSave = false
 
         const { nodes, edges, viewport } = vueFlow.toObject()
-        const { showDots } = useDotsToggle()
-        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport, show_dots: showDots.value }
+        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport }
         saveStatus.value = 'saving'
         saveError.value = null
 

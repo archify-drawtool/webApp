@@ -1,11 +1,12 @@
 export function useDragTool() {
   const { activeTool } = useActiveTool()
-  const { stopPlacing } = useNodeTool()
+  const { isPlacingNode } = useNodeTool()
 
   const isDragToolActive = computed(() => activeTool.value === 'drag')
 
   function activateDragTool() {
-    stopPlacing()
+    isPlacingNode.value = false
+    activeTool.value = 'drag'
   }
 
   return { isDragToolActive, activateDragTool }
