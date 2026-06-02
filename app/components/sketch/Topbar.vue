@@ -218,15 +218,18 @@ function closePhoto() {
     </NuxtLink>
 
     <div class="absolute left-1/2 -translate-x-1/2 flex flex-col items-center gap-0">
-      <div class="flex items-center gap-1.5 max-w-xs">
+      <div class="flex items-center gap-1.5">
         <template v-if="renaming">
-          <input
-            ref="renameInput"
-            v-model="renameValue"
-            class="font-heading font-bold text-white text-base bg-transparent border-b border-primary-500 outline-none text-center min-w-0 max-w-[220px]"
-            @keydown="onRenameKeydown"
-            @blur="confirmRename"
-          >
+          <span class="grid">
+            <input
+              ref="renameInput"
+              v-model="renameValue"
+              class="font-heading font-bold text-white text-base bg-transparent border-b border-primary-500 outline-none text-center min-w-4 [grid-area:1/1]"
+              @keydown="onRenameKeydown"
+              @blur="confirmRename"
+            >
+            <span class="font-heading font-bold text-base invisible whitespace-pre [grid-area:1/1]">{{ renameValue || ' ' }}</span>
+          </span>
         </template>
         <template v-else>
           <span class="font-heading font-bold text-white text-base truncate">
