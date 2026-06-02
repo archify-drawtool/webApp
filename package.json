@@ -7,7 +7,7 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare && mkdir -p public/auth && cp node_modules/@azure/msal-browser/lib/redirect-bridge/msal-redirect-bridge.min.js public/auth/msal-redirect-bridge.min.js",
+    "postinstall": "nuxt prepare && node scripts/copy-msal-bridge.mjs",
     "lint": "eslint .",
     "test": "vitest run"
   },
