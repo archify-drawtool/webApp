@@ -24,7 +24,7 @@ const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive
 onNodesInitialized(() => {
   if (fitViewPending.value) {
     fitViewPending.value = false
-    fitView({ padding: 0.1, duration: 0 })
+    fitView({ padding: 0.35, duration: 0 })
   }
 })
 
