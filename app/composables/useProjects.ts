@@ -1,7 +1,7 @@
 import type { Project } from '~/types/Project';
 
 export const useProjects = () => {
-    const { get, post } = useApi();
+    const { get, post, patch } = useApi();
 
     const projects = ref<Project[]>([]);
     const loading = ref(false);
@@ -28,5 +28,9 @@ export const useProjects = () => {
         return response;
     };
 
-    return { projects, loading, error, fetchProjects, createProject };
+    const renameProject = async (id: number, title: string): Promise<void> => {
+        await patch(`/api/projects/${id}`, { title });
+    };
+
+    return { projects, loading, error, fetchProjects, createProject, renameProject };
 };
