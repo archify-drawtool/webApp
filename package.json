@@ -7,11 +7,12 @@
     "dev": "nuxt dev",
     "generate": "nuxt generate",
     "preview": "nuxt preview",
-    "postinstall": "nuxt prepare",
+    "postinstall": "nuxt prepare && node scripts/copy-msal-bridge.mjs",
     "lint": "eslint .",
     "test": "vitest run"
   },
   "dependencies": {
+    "@azure/msal-browser": "^5.10.0",
     "@nuxt/eslint": "^1.15.2",
     "@tailwindcss/vite": "^4.2.1",
     "@vue-flow/background": "^1.3.2",
