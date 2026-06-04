@@ -19,7 +19,14 @@ const { isCommentToolActive } = useCommentTool()
 const { addComment } = useComments()
 const { activatePointerTool } = usePointerTool()
 const commentAutoOpenId = useState<number | null>('comment-auto-open-id', () => null)
-const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook, onNodeClick: onNodeClickHook } = useVueFlow(SKETCH_CANVAS_ID)
+const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook, onNodeClick: onNodeClickHook, onNodesInitialized, fitView } = useVueFlow(SKETCH_CANVAS_ID)
+
+onNodesInitialized(() => {
+  if (fitViewPending.value) {
+    fitViewPending.value = false
+    fitView({ padding: 0.35, duration: 0 })
+  }
+})
 
 onSelectionEnd(() => {
   const selected = getSelectedNodes.value
@@ -27,7 +34,7 @@ onSelectionEnd(() => {
   if (selected.length > 0) addSelectedNodes(selected)
 })
   
-const { saveStatus, saveError, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory } = useSketchCanvas()
+const { saveStatus, saveError, fitViewPending, addNodeWithHistory, addEdgeWithHistory, reconnectEdgeWithHistory } = useSketchCanvas()
 const { showDots } = useDotsToggle()
 
 watch(
