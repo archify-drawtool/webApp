@@ -7,6 +7,7 @@ export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error'
 
 const saveStatus = ref<SaveStatus>('idle')
 const saveError = ref<string | null>(null)
+const fitViewPending = ref(false)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSave = false
 let stopWatchers: (() => void) | null = null
@@ -27,7 +28,8 @@ export function useSketchCanvas() {
     if (sketch) {
       const { loadComments } = useComments()
       void loadComments(sketch.id)
-      vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
+      const nodes = sketch.canvas_state?.nodes ?? []
+      vueFlow.setNodes(nodes)
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
         // Bouw het edge object opnieuw op zonder ongeldige markers.
         // VueFlow genereert url('#') als markerEnd/markerStart aanwezig is maar geen geldig type heeft.
@@ -42,6 +44,7 @@ export function useSketchCanvas() {
         if (validMarkerStart) normalized.markerStart = markerStart
         return normalized
       }))
+      if (nodes.length > 0) fitViewPending.value = true
     }
     return sketch
   }
@@ -238,6 +241,7 @@ export function useSketchCanvas() {
     triggerSave,
     saveStatus,
     saveError,
+    fitViewPending,
     addNodeWithHistory,
     addEdgeWithHistory,
     updateEdgeLabelWithHistory,

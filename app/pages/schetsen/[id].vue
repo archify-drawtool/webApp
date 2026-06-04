@@ -8,7 +8,7 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { fetchSketch, clearCanvas, watchAndSave } = useSketchCanvas()
+const { fetchSketch, clearCanvas, watchAndSave, fitViewPending } = useSketchCanvas()
 const { setTopbar, clearTopbar } = useSketchTopbar()
 
 const loading = ref(true)
@@ -24,6 +24,14 @@ async function load(id: string) {
     if (result) {
       sketch.value = result
       watchAndSave(result.id)
+
+      if (fitViewPending.value) {
+        await new Promise<void>(resolve => {
+          const stop = watch(fitViewPending, (val) => {
+            if (!val) { stop(); resolve() }
+          })
+        })
+      }
 
       setTopbar({
         sketchTitle: result.title,
