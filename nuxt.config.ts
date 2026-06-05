@@ -17,8 +17,9 @@ export default defineNuxtConfig({
   // Maak .env variabelen beschikbaar in de app
   runtimeConfig: {
     public: {
-      // De waarde achter de apiBaseUrl wordt overschreven door de .env als die aanwezig is.
-      apiBaseUrl: 'http://localhost:8000',
+      entraTenantId: '',
+      entraClientId: '',
+      apiBaseUrl: '',
     },
   },
 

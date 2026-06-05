@@ -22,3 +22,6 @@ logs
 .env
 .env.*
 !.env.example
+
+# Gegenereerd door postinstall
+/public/auth/msal-redirect-bridge.min.js

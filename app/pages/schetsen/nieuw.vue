@@ -1,6 +1,7 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'editor',
+  ssr: false,
 })
 
 const { clearCanvas } = useSketchCanvas()
