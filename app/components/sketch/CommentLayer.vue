@@ -21,6 +21,7 @@ const {
   resolveThread,
   addReply,
 } = useComments()
+const { success: toastSuccess, error: toastError } = useToast()
 
 const autoOpenId = useState<number | null>('comment-auto-open-id', () => null)
 
@@ -66,9 +67,14 @@ function onReply({ parentId, body }: { parentId: number; body: string }) {
   void addReply(sketchId, parentId, body)
 }
 
-function onResolve(parentId: number) {
-  void resolveThread(parentId)
-  if (autoOpenId.value === parentId) autoOpenId.value = null
+async function onResolve(parentId: number) {
+  try {
+    await resolveThread(parentId)
+    if (autoOpenId.value === parentId) autoOpenId.value = null
+    toastSuccess('Comment succesvol geresolved')
+  } catch {
+    toastError('Het resolven van de comment is mislukt. Probeer het opnieuw.')
+  }
 }
 
 function onDeleteReply(id: number) {
