@@ -72,8 +72,14 @@ export function useComments() {
   }
 
   async function deleteComment(id: number) {
+    const removed = comments.value.filter(c => c.id === id || c.parent_id === id)
     comments.value = comments.value.filter(c => c.id !== id && c.parent_id !== id)
-    await del(`/api/comments/${id}`)
+    try {
+      await del(`/api/comments/${id}`)
+    } catch (error) {
+      comments.value = [...comments.value, ...removed]
+      throw error
+    }
   }
 
   function clearComments() {
