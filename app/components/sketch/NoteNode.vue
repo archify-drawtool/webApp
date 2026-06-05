@@ -70,6 +70,7 @@ function onContextMenu(event: MouseEvent) {
   position: relative;
   width: 180px;
   cursor: default;
+  margin: 8px;
 }
 
 /* Het gele blok met afgesneden rechterbovenhoek */
@@ -136,14 +137,10 @@ function onContextMenu(event: MouseEvent) {
 </style>
 
 <style>
-/* Schakel de generieke selected-overlay uit voor note-nodes */
 .vue-flow__node-note.selected::after {
-  display: none;
-}
-
-/* Eigen selected-indicator: outline op de note-body */
-.vue-flow__node-note.selected .note-body {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 1px;
+  inset: 0;
+  z-index: -1;
+  border-radius: 8px;
 }
 </style>
+
