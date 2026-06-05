@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { BaseEdge, EdgeLabelRenderer, getSmoothStepPath, type EdgeProps } from '@vue-flow/core'
+import { BaseEdge, EdgeLabelRenderer, getStraightPath, type EdgeProps } from '@vue-flow/core'
 
 const props = defineProps<EdgeProps>()
 
@@ -8,13 +8,11 @@ const { isDragToolActive } = useDragTool()
 const { open: openEdgeContextMenu } = useEdgeContextMenu()
 
 const pathData = computed(() =>
-  getSmoothStepPath({
+  getStraightPath({
     sourceX: props.sourceX,
     sourceY: props.sourceY,
-    sourcePosition: props.sourcePosition,
     targetX: props.targetX,
     targetY: props.targetY,
-    targetPosition: props.targetPosition,
   })
 )
 

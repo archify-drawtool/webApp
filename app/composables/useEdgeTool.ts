@@ -19,16 +19,16 @@ export function useEdgeTool() {
 
   const defaultEdgeOptions = computed(() => {
     if (activeEdgeTool.value === 'mono') {
-      return { type: 'smoothstep', markerEnd: { type: MarkerType.ArrowClosed } }
+      return { type: 'straight', markerEnd: { type: MarkerType.ArrowClosed } }
     }
     if (activeEdgeTool.value === 'bi') {
       return {
-        type: 'smoothstep',
+        type: 'straight',
         markerStart: { type: MarkerType.ArrowClosed },
         markerEnd: { type: MarkerType.ArrowClosed },
       }
     }
-    return { type: 'smoothstep' }
+    return { type: 'straight' }
   })
 
   const setEdgeTool = (id: EdgeToolId) => { activeEdgeTool.value = id }
