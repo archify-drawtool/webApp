@@ -73,7 +73,7 @@ async function onResolve(parentId: number) {
     if (autoOpenId.value === parentId) autoOpenId.value = null
     toastSuccess('Comment succesvol opgelost')
   } catch {
-    toastError('Het resolven van de comment is mislukt. Probeer het opnieuw.')
+    toastError('Het oplossen van de comment is mislukt. Probeer het opnieuw.')
   }
 }
 
