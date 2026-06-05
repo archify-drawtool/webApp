@@ -71,7 +71,7 @@ async function onResolve(parentId: number) {
   try {
     await resolveThread(parentId)
     if (autoOpenId.value === parentId) autoOpenId.value = null
-    toastSuccess('Comment succesvol geresolved')
+    toastSuccess('Comment succesvol opgelost')
   } catch {
     toastError('Het resolven van de comment is mislukt. Probeer het opnieuw.')
   }
