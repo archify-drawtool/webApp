@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { Pencil } from 'lucide-vue-next'
 
+useHead({ title: 'Mijn schetsen' })
+
 const { creating, createSketch } = useCreateSketch()
 const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches()
 
