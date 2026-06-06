@@ -112,6 +112,9 @@ function onContextMenu(event: MouseEvent) {
       />
     </marker>
   </defs>
+  <!-- :style="style" is intentional: VueFlow EdgeProps passes SVG presentation
+       attributes (stroke, strokeDasharray, …) that have no Tailwind equivalent.
+       Removing it would break dashed / coloured edges. -->
   <BaseEdge
     :id="id"
     :key="`${id}:${hasMarkerStart ? 's' : ''}${hasMarkerEnd ? 'e' : ''}`"
@@ -131,8 +134,8 @@ function onContextMenu(event: MouseEvent) {
   />
   <EdgeLabelRenderer>
     <div
-      :style="{ transform: `translate(-50%, -50%) translate(${pathData[1]}px,${pathData[2]}px)` }"
-      :class="['absolute nodrag nopan', isDragToolActive ? 'pointer-events-none' : 'pointer-events-auto']"
+      :style="{ '--label-x': `${pathData[1]}px`, '--label-y': `${pathData[2]}px` }"
+      :class="['absolute nodrag nopan [transform:translate(-50%,-50%)_translate(var(--label-x),var(--label-y))]', isDragToolActive ? 'pointer-events-none' : 'pointer-events-auto']"
     >
       <input
         v-if="editing"
@@ -157,3 +160,4 @@ class="text-xs text-center rounded px-1 outline-none min-w-16 border bg-white te
     </div>
   </EdgeLabelRenderer>
 </template>
+
