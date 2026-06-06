@@ -31,8 +31,8 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
     <template v-if="menuState">
       <div class="fixed inset-0 z-90" @mousedown="closeMenu" />
       <div
-        class="fixed z-91"
-        :style="{ top: menuState.y + 'px', left: menuState.x + 'px' }"
+        class="fixed z-91 top-[var(--menu-top)] left-[var(--menu-left)]"
+        :style="{ '--menu-top': `${menuState.y}px`, '--menu-left': `${menuState.x}px` }"
       >
         <SketchToolbarDropdown
           :items="nodeDropdownItems"
@@ -44,3 +44,4 @@ onUnmounted(() => window.removeEventListener('keydown', handleKeydown))
     </template>
   </Teleport>
 </template>
+

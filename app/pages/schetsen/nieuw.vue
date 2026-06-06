@@ -4,6 +4,8 @@ definePageMeta({
   ssr: false,
 })
 
+useHead({ title: 'Nieuwe schets' })
+
 const { clearCanvas } = useSketchCanvas()
 const { setTopbar, clearTopbar } = useSketchTopbar()
 

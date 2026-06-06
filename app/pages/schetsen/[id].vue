@@ -15,6 +15,8 @@ const loading = ref(true)
 const error = ref<string | null>(null)
 const sketch = ref<Sketch | null>(null)
 
+useHead({ title: computed(() => sketch.value?.title ?? 'Schets bewerken') })
+
 async function load(id: string) {
   clearCanvas()
   loading.value = true
