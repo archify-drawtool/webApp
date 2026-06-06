@@ -1,6 +1,8 @@
 <script setup lang="ts">
 const { projects, loading, error, fetchProjects } = useProjects();
 
+useHead({ title: 'Projecten' })
+
 await fetchProjects();
 </script>
 

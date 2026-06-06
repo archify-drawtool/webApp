@@ -32,6 +32,8 @@
 </template>
 
 <script setup lang="ts">
+useHead({ title: 'Project aanmaken' })
+
 const { createProject } = useProjects();
 
 const projectNaam = ref('');
