@@ -52,8 +52,8 @@ function toggleDashed() {
     />
     <div
       ref="menuRef"
-      class="fixed z-[1001] rounded-xl bg-secondary-950 shadow-lg p-1 min-w-44"
-      :style="{ top: `${adjustedY}px`, left: `${adjustedX}px` }"
+      class="fixed z-[1001] rounded-xl bg-secondary-950 shadow-lg p-1 min-w-44 top-[var(--menu-top)] left-[var(--menu-left)]"
+      :style="{ '--menu-top': `${adjustedY}px`, '--menu-left': `${adjustedX}px` }"
       @mousedown.stop
     >
       <button
@@ -94,3 +94,4 @@ function toggleDashed() {
     </div>
   </Teleport>
 </template>
+
