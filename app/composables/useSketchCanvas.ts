@@ -36,7 +36,7 @@ export function useSketchCanvas() {
         const { markerEnd, markerStart, ...rest } = edge
         const normalized: typeof edge = {
           ...rest,
-          type: edge.type ?? 'smoothstep',
+          type: edge.type ?? 'straight',
         }
         const validMarkerEnd = markerEnd && (markerEnd as { type?: string }).type
         const validMarkerStart = markerStart && (markerStart as { type?: string }).type
