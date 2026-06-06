@@ -23,5 +23,11 @@ export default defineNuxtConfig({
     },
   },
 
+  app: {
+    head: {
+      titleTemplate: '%s – Archify',
+    },
+  },
+
   modules: ['@nuxt/eslint'],
 })

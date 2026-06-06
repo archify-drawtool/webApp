@@ -14,6 +14,8 @@ const { fetchShared } = useSharedSketch()
 
 const publicMeta = useState<{ title: string; projectTitle: string } | null>('public-page-meta', () => null)
 
+useHead({ title: computed(() => publicMeta.value?.title ?? 'Gedeelde schets') })
+
 const loading = ref(true)
 const sketch = ref<SharedSketch | null>(null)
 const notFound = ref(false)

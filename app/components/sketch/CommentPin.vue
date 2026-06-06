@@ -254,7 +254,7 @@ onUnmounted(() => {
   <div
     class="comment-pin"
     :class="{ 'comment-pin--no-interact': dragBlocksInteraction }"
-    :style="{ left: screenX + 'px', top: screenY + 'px' }"
+    :style="{ '--pin-left': screenX + 'px', '--pin-top': screenY + 'px' }"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
@@ -391,6 +391,8 @@ onUnmounted(() => {
 <style scoped>
 .comment-pin {
   position: absolute;
+  left: var(--pin-left);
+  top: var(--pin-top);
   transform: translate(-50%, -100%);
   pointer-events: auto;
 }

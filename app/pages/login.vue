@@ -32,6 +32,7 @@
 
 <script setup lang="ts">
 definePageMeta({ layout: "auth" });
+useHead({ title: 'Inloggen' })
 
 const { loginWithMicrosoft } = useAuth();
 
