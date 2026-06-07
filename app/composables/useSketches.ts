@@ -16,7 +16,7 @@ export const useSketches = () => {
         error.value = null;
 
         try {
-            const url = projectId ? `/api/projects/${projectId}/sketches` : '/api/sketches';
+            const url = projectId ? `/api/projects/${projectId}/sketches` : '/api/sketches?projectless=true';
             const response = await get<SketchSummary[]>(url);
             sketches.value = response ?? [];
         } catch (e) {
