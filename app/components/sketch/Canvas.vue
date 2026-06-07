@@ -91,7 +91,7 @@ const nodeTypes = computed(() =>
     ])
   )
 )
-const edgeTypes = { smoothstep: rawSketchEdge }
+const edgeTypes = { straight: rawSketchEdge }
 
 const isValidConnection: ValidConnectionFunc = (connection) =>
   connection.source !== connection.target

@@ -57,7 +57,7 @@ const nodeTypes = computed(() => ({
   ),
 }))
 
-const edgeTypes = { smoothstep: rawSketchEdge }
+const edgeTypes = { straight: rawSketchEdge }
 
 watch(
   () => [props.nodes, props.edges] as [Node[], Edge[]],
@@ -67,7 +67,7 @@ watch(
       const { markerEnd, markerStart, ...rest } = edge
       const normalized: typeof edge = {
         ...rest,
-        type: edge.type ?? 'smoothstep',
+        type: edge.type ?? 'straight',
       }
       const validMarkerEnd = markerEnd && (markerEnd as { type?: string }).type
       const validMarkerStart = markerStart && (markerStart as { type?: string }).type
