@@ -1,14 +1,14 @@
 <script setup lang="ts">
-import { Pencil } from 'lucide-vue-next';
+import { Pencil, Trash2 } from 'lucide-vue-next';
 import type { Project } from '~/types/Project';
 
 const route = useRoute();
 const projectId = Number(route.params.id);
 
 const { get } = useApi();
-const { renameProject } = useProjects();
 const { creating, createSketch } = useCreateSketch()
-const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError, deletePending, onDeleteRequest, onDeleteCancel, onDeleteConfirm } = useSketches();
+const { sketches, loading, error, fetchSketches, sketchToDelete, deleteError: sketchDeleteError, deletePending: sketchDeletePending, onDeleteRequest: onSketchDeleteRequest, onDeleteCancel: onSketchDeleteCancel, onDeleteConfirm: onSketchDeleteConfirm } = useSketches();
+const { renameProject, projectToDelete, deleteError: projectDeleteError, deletePending: projectDeletePending, onDeleteRequest: onProjectDeleteRequest, onDeleteCancel: onProjectDeleteCancel, onDeleteConfirm: onProjectDeleteConfirm } = useProjects();
 
 const createError = ref<string | null>(null);
 
@@ -86,6 +86,17 @@ function onRenameKeydown(e: KeyboardEvent) {
     cancelRename();
   }
 }
+
+const requestProjectDelete = () => {
+    if (project.value) onProjectDeleteRequest(project.value);
+};
+
+const confirmProjectDelete = async () => {
+    const deleted = await onProjectDeleteConfirm();
+    if (deleted) {
+        await navigateTo({ path: '/projecten', query: { deleted: deleted.title } });
+    }
+};
 </script>
 
 <template>
@@ -95,30 +106,44 @@ function onRenameKeydown(e: KeyboardEvent) {
     </p>
 
     <template v-if="project">
-      <div class="flex items-center gap-1.5 mb-4">
-        <template v-if="renaming">
-          <span class="grid">
-            <input
-              ref="renameInput"
-              v-model="renameValue"
-              class="font-heading text-h1 bg-transparent border-b border-primary-500 outline-none min-w-4 [grid-area:1/1]"
-              @keydown="onRenameKeydown"
-              @blur="confirmRename"
+      <div class="flex items-start justify-between gap-4 mb-4">
+        <div class="flex items-center gap-1.5 min-w-0 flex-wrap">
+          <template v-if="renaming">
+            <span class="grid">
+              <input
+                ref="renameInput"
+                v-model="renameValue"
+                class="font-heading text-h1 bg-transparent border-b border-primary-500 outline-none min-w-4 [grid-area:1/1]"
+                @keydown="onRenameKeydown"
+                @blur="confirmRename"
+              >
+              <span class="font-heading text-h1 invisible whitespace-pre [grid-area:1/1]">{{ renameValue || ' ' }}</span>
+            </span>
+          </template>
+          <template v-else>
+            <h1>{{ project.title }}</h1>
+            <button
+              type="button"
+              class="text-grey-400 hover:text-secondary-950 transition-colors shrink-0 cursor-pointer"
+              title="Naam aanpassen"
+              aria-label="Naam aanpassen"
+              @click="startRename"
             >
-            <span class="font-heading text-h1 invisible whitespace-pre [grid-area:1/1]">{{ renameValue || ' ' }}</span>
-          </span>
-        </template>
-        <template v-else>
-          <h1>{{ project.title }}</h1>
-          <button
-            class="text-grey-400 hover:text-secondary-950 transition-colors shrink-0"
-            title="Naam aanpassen"
-            @click="startRename"
-          >
-            <Pencil :size="18" />
-          </button>
-        </template>
-        <p v-if="renameError" class="text-error-text text-sm">{{ renameError }}</p>
+              <Pencil :size="18" />
+            </button>
+          </template>
+          <p v-if="renameError" class="text-error-text text-sm">{{ renameError }}</p>
+        </div>
+
+        <button
+          type="button"
+          class="flex items-center gap-2 text-grey-600 hover:text-primary-500 transition-colors cursor-pointer"
+          aria-label="Project verwijderen"
+          @click="requestProjectDelete"
+        >
+          <Trash2 :size="18" />
+          <span class="text-small">Verwijderen</span>
+        </button>
       </div>
 
       <h2 class="mb-4">Schetsen</h2>
@@ -141,7 +166,7 @@ function onRenameKeydown(e: KeyboardEvent) {
             v-for="sketch in sketches"
             :key="sketch.id"
             :sketch="sketch"
-            @delete="onDeleteRequest"
+            @delete="onSketchDeleteRequest"
         />
       </BaseGrid>
     </template>
@@ -149,10 +174,19 @@ function onRenameKeydown(e: KeyboardEvent) {
     <ConfirmDialog
       v-if="sketchToDelete"
       message="Weet je het zeker? Deze actie kan niet ongedaan worden gemaakt."
-      :error="deleteError"
-      :pending="deletePending"
-      @confirm="onDeleteConfirm"
-      @cancel="onDeleteCancel"
+      :error="sketchDeleteError"
+      :pending="sketchDeletePending"
+      @confirm="onSketchDeleteConfirm"
+      @cancel="onSketchDeleteCancel"
+    />
+
+    <ConfirmDialog
+      v-if="projectToDelete"
+      message="Weet je zeker dat je dit project en alle bijbehorende schetsen wilt verwijderen?"
+      :error="projectDeleteError"
+      :pending="projectDeletePending"
+      @confirm="confirmProjectDelete"
+      @cancel="onProjectDeleteCancel"
     />
   </div>
 </template>

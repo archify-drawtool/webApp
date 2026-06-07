@@ -1,4 +1,6 @@
 <script setup lang="ts">
+import { X } from 'lucide-vue-next';
+
 defineProps<{
   message: string;
   error?: string | null;
@@ -14,7 +16,16 @@ const emit = defineEmits<{
 <template>
   <Teleport to="body">
     <div class="backdrop" @click.self="emit('cancel')">
-      <div class="dialog">
+      <div class="dialog relative">
+        <button
+          type="button"
+          class="absolute top-2 right-2 flex items-center justify-center w-7 h-7 bg-transparent border-none cursor-pointer text-grey-600 transition-colors duration-150 hover:text-text disabled:cursor-not-allowed disabled:opacity-50"
+          aria-label="Sluiten"
+          :disabled="pending"
+          @click="emit('cancel')"
+        >
+          <X :size="18" />
+        </button>
         <p>{{ message }}</p>
         <p v-if="error" class="error">{{ error }}</p>
         <div class="dialog-actions">
