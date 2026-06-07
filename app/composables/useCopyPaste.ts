@@ -102,7 +102,7 @@ export function useCopyPaste() {
         target: idMap.get(e.target)!,
         sourceHandle: e.sourceHandle ?? undefined,
         targetHandle: e.targetHandle ?? undefined,
-        type: e.type ?? 'smoothstep',
+        type: e.type ?? 'straight',
       }
       if (e.label !== undefined && e.label !== '') edge.label = e.label as string
       if (e.markerEnd) edge.markerEnd = e.markerEnd as Edge['markerEnd']

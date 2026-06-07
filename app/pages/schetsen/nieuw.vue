@@ -1,7 +1,10 @@
 <script setup lang="ts">
 definePageMeta({
   layout: 'editor',
+  ssr: false,
 })
+
+useHead({ title: 'Nieuwe schets' })
 
 const { clearCanvas } = useSketchCanvas()
 const { setTopbar, clearTopbar } = useSketchTopbar()

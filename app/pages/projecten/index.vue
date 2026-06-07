@@ -5,6 +5,8 @@ const route = useRoute();
 const router = useRouter();
 const { projects, loading, error, fetchProjects } = useProjects();
 
+useHead({ title: 'Projecten' })
+
 await fetchProjects();
 
 const deletedTitle = computed(() => {

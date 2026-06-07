@@ -2,21 +2,13 @@
 import { Panel } from '@vue-flow/core'
 import {
   ChevronUp,
-  ArrowRight,
-  ArrowLeftRight,
-  Minus,
-  Server,
-  Database,
-  LayoutDashboard,
-  User,
-  Square,
-  StickyNote,
-  Type,
   Hand,
   MousePointer2,
   Grip,
   MessageCircle,
+  Type,
 } from 'lucide-vue-next'
+import { resolveIcon } from '~/utils/lucideIcon'
 
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
@@ -44,20 +36,8 @@ function selectTool(key: string) {
   activeDropdown.value = null
 }
 
-const iconComponents: Record<string, Component> = {
-  server: Server,
-  database: Database,
-  'layout-dashboard': LayoutDashboard,
-  user: User,
-  square: Square,
-  'sticky-note': StickyNote,
-  'arrow-right': ArrowRight,
-  'arrow-left-right': ArrowLeftRight,
-  minus: Minus,
-}
-
 function iconFor(name: string): Component {
-  return iconComponents[name] ?? Square
+  return resolveIcon(name)
 }
 
 const selectedNodeTypeObj = computed(() =>

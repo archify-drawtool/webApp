@@ -19,6 +19,8 @@
   import { useHealth } from '~/composables/useHealth'
   import type { HealthResponse } from '~/types/Health'
 
+  useHead({ title: 'API Health' })
+
   const { checkHealth } = useHealth()
 
   const pending = ref(false)

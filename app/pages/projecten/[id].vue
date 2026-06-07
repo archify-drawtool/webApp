@@ -15,6 +15,8 @@ const createError = ref<string | null>(null);
 const project = ref<Project | null>(null);
 const projectError = ref<string | null>(null);
 
+useHead({ title: computed(() => project.value?.title ?? 'Project') })
+
 try {
     project.value = await get<Project>(`/api/projects/${projectId}`) ?? null;
 } catch (e) {

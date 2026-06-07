@@ -103,7 +103,7 @@ describe('useSketchCanvas – fetchSketch', () => {
     expect(mockSetEdges).not.toHaveBeenCalled()
   })
 
-  it('zet edges standaard op smoothstep als type ontbreekt', async () => {
+  it('zet edges standaard op straight als type ontbreekt', async () => {
     const sketchZonderEdgeType: Sketch = {
       ...sketchFixture,
       canvas_state: {
@@ -117,7 +117,7 @@ describe('useSketchCanvas – fetchSketch', () => {
     await fetchSketch('1')
 
     expect(mockSetEdges).toHaveBeenCalledWith([
-      expect.objectContaining({ id: 'e1', type: 'smoothstep' }),
+      expect.objectContaining({ id: 'e1', type: 'straight' }),
     ])
   })
 })

@@ -124,7 +124,7 @@ function submitReply() {
 }
 
 function onResolve() {
-  if (!window.confirm('Weet je zeker dat je deze thread wilt resolven? De comment en alle replies worden verwijderd.')) return
+  if (!window.confirm('Weet je zeker dat je deze thread wilt oplossen? De comment en alle replies worden verwijderd.')) return
   emit('resolve', props.comment.id)
 }
 
@@ -254,7 +254,7 @@ onUnmounted(() => {
   <div
     class="comment-pin"
     :class="{ 'comment-pin--no-interact': dragBlocksInteraction }"
-    :style="{ left: screenX + 'px', top: screenY + 'px' }"
+    :style="{ '--pin-left': screenX + 'px', '--pin-top': screenY + 'px' }"
     @mouseenter="isHovered = true"
     @mouseleave="isHovered = false"
   >
@@ -308,7 +308,7 @@ onUnmounted(() => {
         </div>
         <button v-if="!readonly" class="thread-resolve" @click="onResolve">
           <Check :size="13" />
-          <span>Resolven</span>
+          <span>Oplossen</span>
         </button>
       </div>
 
@@ -391,6 +391,8 @@ onUnmounted(() => {
 <style scoped>
 .comment-pin {
   position: absolute;
+  left: var(--pin-left);
+  top: var(--pin-top);
   transform: translate(-50%, -100%);
   pointer-events: auto;
 }
