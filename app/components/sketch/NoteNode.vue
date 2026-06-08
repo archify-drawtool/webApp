@@ -4,12 +4,8 @@ import { Handle, Position, type NodeProps } from '@vue-flow/core'
 const props = defineProps<NodeProps<{ label?: string }>>()
 defineEmits(['updateNodeInternals'])
 
-const { updateNodeLabelWithHistory } = useSketchCanvas()
 const { openMenu } = useNodeContextMenu()
-const { isDragToolActive } = useDragTool()
 
-const editing = ref(false)
-const editValue = ref('')
 const inputRef = ref<HTMLTextAreaElement | null>(null)
 
 function autoResize() {
@@ -19,26 +15,15 @@ function autoResize() {
   el.style.height = el.scrollHeight + 'px'
 }
 
-function startEdit() {
-  if (isDragToolActive.value) return
-  editValue.value = props.data.label ?? ''
-  editing.value = true
-  nextTick(() => {
-    inputRef.value?.focus()
+const { editing, editValue, startEdit, confirmEdit, cancelEdit } = useNodeLabelEditing(
+  props.id,
+  () => props.data.label,
+  inputRef,
+  () => {
     inputRef.value?.select()
     autoResize()
-  })
-}
-
-function confirmEdit() {
-  if (!editing.value) return
-  editing.value = false
-  updateNodeLabelWithHistory(props.id, editValue.value)
-}
-
-function cancelEdit() {
-  editing.value = false
-}
+  },
+)
 
 function onContextMenu(event: MouseEvent) {
   openMenu(props.id, props.type, event.clientX, event.clientY)
@@ -55,7 +40,7 @@ function onContextMenu(event: MouseEvent) {
   <Handle id="left-target" type="target" :position="Position.Left" />
   <Handle id="left-source" type="source" :position="Position.Left" />
 
-  <div class="note-wrapper" @dblclick.stop="startEdit" @contextmenu.prevent.stop="onContextMenu">
+  <div class="note-wrapper" :class="{ 'is-selected': selected }" @dblclick.stop="startEdit" @contextmenu.prevent.stop="onContextMenu">
     <!-- Het gele notitieblok met afgesneden hoek -->
     <div class="note-body">
       <textarea
@@ -85,6 +70,19 @@ function onContextMenu(event: MouseEvent) {
   position: relative;
   width: 180px;
   cursor: default;
+  margin: 8px;
+  border-radius: 4px;
+}
+
+.note-wrapper.is-selected::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background-color: var(--color-primary-500);
+  opacity: 0.15;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Het gele blok met afgesneden rechterbovenhoek */
@@ -151,14 +149,8 @@ function onContextMenu(event: MouseEvent) {
 </style>
 
 <style>
-/* Schakel de generieke selected-overlay uit voor note-nodes */
 .vue-flow__node-note.selected::after {
   display: none;
 }
-
-/* Eigen selected-indicator: outline op de note-body */
-.vue-flow__node-note.selected .note-body {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 1px;
-}
 </style>
+

@@ -7,6 +7,7 @@ export type SaveStatus = 'idle' | 'pending' | 'saving' | 'saved' | 'error'
 
 const saveStatus = ref<SaveStatus>('idle')
 const saveError = ref<string | null>(null)
+const fitViewPending = ref(false)
 let debounceTimer: ReturnType<typeof setTimeout> | null = null
 let pendingSave = false
 let stopWatchers: (() => void) | null = null
@@ -25,16 +26,17 @@ export function useSketchCanvas() {
         throw createError({ statusCode: 404, statusMessage: 'Schets niet gevonden' })
     }
     if (sketch) {
-      const { setDotsVisible } = useDotsToggle()
-      setDotsVisible(sketch.canvas_state?.show_dots ?? true)
-      vueFlow.setNodes(sketch.canvas_state?.nodes ?? [])
+      const { loadComments } = useComments()
+      void loadComments(sketch.id)
+      const nodes = sketch.canvas_state?.nodes ?? []
+      vueFlow.setNodes(nodes)
       vueFlow.setEdges((sketch.canvas_state?.edges ?? []).map((edge) => {
         // Bouw het edge object opnieuw op zonder ongeldige markers.
         // VueFlow genereert url('#') als markerEnd/markerStart aanwezig is maar geen geldig type heeft.
         const { markerEnd, markerStart, ...rest } = edge
         const normalized: typeof edge = {
           ...rest,
-          type: edge.type ?? 'smoothstep',
+          type: edge.type ?? 'straight',
         }
         const validMarkerEnd = markerEnd && (markerEnd as { type?: string }).type
         const validMarkerStart = markerStart && (markerStart as { type?: string }).type
@@ -42,6 +44,7 @@ export function useSketchCanvas() {
         if (validMarkerStart) normalized.markerStart = markerStart
         return normalized
       }))
+      if (nodes.length > 0) fitViewPending.value = true
     }
     return sketch
   }
@@ -57,8 +60,6 @@ export function useSketchCanvas() {
     saveError.value = null
     vueFlow.setNodes([])
     vueFlow.setEdges([])
-    const { setDotsVisible } = useDotsToggle()
-    setDotsVisible(true)
     const { clearHistory } = useSketchHistory()
     clearHistory()
 
@@ -71,6 +72,9 @@ export function useSketchCanvas() {
 
     const { activeEdgeTool } = useEdgeTool()
     activeEdgeTool.value = 'none'
+
+    const { clearComments } = useComments()
+    clearComments()
   }
 
   const watchAndSave = (sketchId: string | number) => {
@@ -89,8 +93,7 @@ export function useSketchCanvas() {
         pendingSave = false
 
         const { nodes, edges, viewport } = vueFlow.toObject()
-        const { showDots } = useDotsToggle()
-        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport, show_dots: showDots.value }
+        const state = { nodes: nodes ?? [], edges: edges ?? [], viewport }
         saveStatus.value = 'saving'
         saveError.value = null
 
@@ -238,6 +241,7 @@ export function useSketchCanvas() {
     triggerSave,
     saveStatus,
     saveError,
+    fitViewPending,
     addNodeWithHistory,
     addEdgeWithHistory,
     updateEdgeLabelWithHistory,

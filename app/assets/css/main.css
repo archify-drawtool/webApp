@@ -44,9 +44,18 @@
     --color-grey-400: #9E9DA5;
     --color-grey-600: #86858F;
 
+    /* --- ArUco overlay --- */
+    --color-aruco-marker: white;
+    --color-aruco-hitbox: #0ffee2;
+    --color-aruco-edge:   #fef00f;
+    --color-aruco-edge-failed: #ef4444;
+
     /* --- Alerts --- */
     --color-alert-bg:      #E6DBEB;
     --color-alert-text:    #550C76;
+
+    --color-success-bg:    #ECFDF5;
+    --color-success-text:  #047857;
 
     --color-warning-bg:    #FDF3E1;
     --color-warning-text:  #E57009;

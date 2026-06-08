@@ -2,20 +2,13 @@
 import { Panel } from '@vue-flow/core'
 import {
   ChevronUp,
-  ArrowRight,
-  ArrowLeftRight,
-  Minus,
-  Server,
-  Database,
-  LayoutDashboard,
-  User,
-  Square,
-  StickyNote,
-  Type,
   Hand,
   MousePointer2,
   Grip,
+  MessageCircle,
+  Type,
 } from 'lucide-vue-next'
+import { resolveIcon } from '~/utils/lucideIcon'
 
 const { nodeTypes } = useNodeTypes()
 const { activeEdgeTool, setEdgeTool, EDGE_TOOLS } = useEdgeTool()
@@ -23,6 +16,7 @@ type EdgeToolId = ReturnType<typeof useEdgeTool>['activeEdgeTool']['value']
 const { selectedNodeType, isPlacingNode, setNodeType, stopPlacing } = useNodeTool()
 const { isDragToolActive, activateDragTool } = useDragTool()
 const { activatePointerTool } = usePointerTool()
+const { isCommentToolActive, activateCommentTool } = useCommentTool()
 const { showDots, toggleDots } = useDotsToggle()
 
 type DropdownId = 'node' | 'edge' | 'tool'
@@ -42,20 +36,8 @@ function selectTool(key: string) {
   activeDropdown.value = null
 }
 
-const iconComponents: Record<string, Component> = {
-  server: Server,
-  database: Database,
-  'layout-dashboard': LayoutDashboard,
-  user: User,
-  square: Square,
-  'sticky-note': StickyNote,
-  'arrow-right': ArrowRight,
-  'arrow-left-right': ArrowLeftRight,
-  minus: Minus,
-}
-
 function iconFor(name: string): Component {
-  return iconComponents[name] ?? Square
+  return resolveIcon(name)
 }
 
 const selectedNodeTypeObj = computed(() =>
@@ -109,6 +91,7 @@ function handleKeydown(e: KeyboardEvent) {
 
   if (e.key === 'Escape') {
     if (isPlacingNode.value) stopPlacing()
+    else if (isCommentToolActive.value) activatePointerTool()
     else closeAll()
   } else if (e.key === '1') {
     activateDragTool()
@@ -143,7 +126,7 @@ onUnmounted(() => {
         <button
           :class="[
             'rounded-md p-2 transition-colors cursor-pointer',
-            isPlacingNode
+            isPlacingNode || isCommentToolActive
               ? 'hover:bg-secondary-700 text-grey-200'
               : 'bg-primary-500 text-white',
           ]"
@@ -192,6 +175,20 @@ onUnmounted(() => {
         title="Plaats tekst"
       >
         <Type :size="18" />
+      </button>
+
+      <!-- Comment placement tool -->
+      <button
+        :class="[
+          'rounded-md p-2 transition-colors',
+          isCommentToolActive
+            ? 'bg-primary-500 text-white cursor-crosshair'
+            : 'hover:bg-secondary-700 text-grey-200 cursor-pointer',
+        ]"
+        :title="isCommentToolActive ? 'Klik op het canvas om een comment te plaatsen (Escape om te annuleren)' : 'Plaats een comment'"
+        @click.stop="() => { closeAll(); isCommentToolActive ? activatePointerTool() : activateCommentTool() }"
+      >
+        <MessageCircle :size="18" />
       </button>
 
       <!-- Edge tool section -->

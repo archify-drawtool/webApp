@@ -8,12 +8,14 @@ definePageMeta({
 })
 
 const route = useRoute()
-const { fetchSketch, clearCanvas, watchAndSave } = useSketchCanvas()
+const { fetchSketch, clearCanvas, watchAndSave, fitViewPending } = useSketchCanvas()
 const { setTopbar, clearTopbar } = useSketchTopbar()
 
 const loading = ref(true)
 const error = ref<string | null>(null)
 const sketch = ref<Sketch | null>(null)
+
+useHead({ title: computed(() => sketch.value?.title ?? 'Schets bewerken') })
 
 async function load(id: string) {
   clearCanvas()
@@ -25,11 +27,20 @@ async function load(id: string) {
       sketch.value = result
       watchAndSave(result.id)
 
+      if (fitViewPending.value) {
+        await new Promise<void>(resolve => {
+          const stop = watch(fitViewPending, (val) => {
+            if (!val) { stop(); resolve() }
+          })
+        })
+      }
+
       setTopbar({
         sketchTitle: result.title,
         backTo: result.project_id ? `/projecten/${result.project_id}` : '/mijn-schetsen',
         sketchId: result.id,
         projectId: result.project_id ?? undefined,
+        hasPhoto: result.has_photo ?? false,
       })
     }
   } catch (e) {
