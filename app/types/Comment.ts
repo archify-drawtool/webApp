@@ -7,7 +7,8 @@ export interface CommentAuthor {
 export interface Comment {
   id: number
   sketch_id: number
-  user_id: number
+  user_id: number | null
+  guest_name: string | null
   parent_id: number | null
   x: number
   y: number

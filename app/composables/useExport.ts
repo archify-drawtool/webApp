@@ -1,4 +1,4 @@
-import { toPng } from 'html-to-image'
+// html-to-image is browser-only — lazy import om SSR crash te voorkomen
 import { useVueFlow } from '@vue-flow/core'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 
@@ -55,6 +55,7 @@ export function useExport() {
     }
 
     try {
+      const { toPng } = await import('html-to-image')
       await toPng(el, { backgroundColor: '#ffffff' })
       const dataUrl = await toPng(el, { backgroundColor: '#ffffff' })
 

@@ -2,8 +2,16 @@
 import { useVueFlow } from '@vue-flow/core'
 import { SKETCH_CANVAS_ID } from '~/composables/useSketchCanvas'
 
+const props = withDefaults(defineProps<{
+  mode?: 'editor' | 'public'
+  canvasId?: string
+}>(), {
+  mode: 'editor',
+  canvasId: SKETCH_CANVAS_ID,
+})
+
 const route = useRoute()
-const { viewport } = useVueFlow(SKETCH_CANVAS_ID)
+const { viewport } = useVueFlow(props.canvasId)
 const {
   comments,
   getReplies,
@@ -13,6 +21,7 @@ const {
   resolveThread,
   addReply,
 } = useComments()
+const { success: toastSuccess, error: toastError } = useToast()
 
 const autoOpenId = useState<number | null>('comment-auto-open-id', () => null)
 
@@ -58,9 +67,14 @@ function onReply({ parentId, body }: { parentId: number; body: string }) {
   void addReply(sketchId, parentId, body)
 }
 
-function onResolve(parentId: number) {
-  void resolveThread(parentId)
-  if (autoOpenId.value === parentId) autoOpenId.value = null
+async function onResolve(parentId: number) {
+  try {
+    await resolveThread(parentId)
+    if (autoOpenId.value === parentId) autoOpenId.value = null
+    toastSuccess('Comment succesvol opgelost')
+  } catch {
+    toastError('Het oplossen van de comment is mislukt. Probeer het opnieuw.')
+  }
 }
 
 function onDeleteReply(id: number) {
@@ -78,6 +92,7 @@ function onDeleteReply(id: number) {
       :screen-x="pin.screenX"
       :screen-y="pin.screenY"
       :auto-open="pin.autoOpen"
+      :readonly="mode === 'public'"
       @drag="onDrag"
       @drag-end="onDragEnd"
       @update-body="onUpdateBody"

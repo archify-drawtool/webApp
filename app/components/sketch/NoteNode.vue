@@ -40,7 +40,7 @@ function onContextMenu(event: MouseEvent) {
   <Handle id="left-target" type="target" :position="Position.Left" />
   <Handle id="left-source" type="source" :position="Position.Left" />
 
-  <div class="note-wrapper" @dblclick.stop="startEdit" @contextmenu.prevent.stop="onContextMenu">
+  <div class="note-wrapper" :class="{ 'is-selected': selected }" @dblclick.stop="startEdit" @contextmenu.prevent.stop="onContextMenu">
     <!-- Het gele notitieblok met afgesneden hoek -->
     <div class="note-body">
       <textarea
@@ -70,6 +70,19 @@ function onContextMenu(event: MouseEvent) {
   position: relative;
   width: 180px;
   cursor: default;
+  margin: 8px;
+  border-radius: 4px;
+}
+
+.note-wrapper.is-selected::before {
+  content: '';
+  position: absolute;
+  inset: -8px;
+  background-color: var(--color-primary-500);
+  opacity: 0.15;
+  border-radius: 8px;
+  pointer-events: none;
+  z-index: -1;
 }
 
 /* Het gele blok met afgesneden rechterbovenhoek */
@@ -136,14 +149,8 @@ function onContextMenu(event: MouseEvent) {
 </style>
 
 <style>
-/* Schakel de generieke selected-overlay uit voor note-nodes */
 .vue-flow__node-note.selected::after {
   display: none;
 }
-
-/* Eigen selected-indicator: outline op de note-body */
-.vue-flow__node-note.selected .note-body {
-  outline: 2px solid var(--color-primary-500);
-  outline-offset: 1px;
-}
 </style>
+

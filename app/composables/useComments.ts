@@ -10,8 +10,25 @@ export function useComments() {
     comments.value = result ?? []
   }
 
+  async function loadPublicComments(token: string) {
+    const result = await get<Comment[]>(`/api/shared/${token}/comments`)
+    comments.value = result ?? []
+  }
+
   async function addComment(sketchId: number, x: number, y: number, body = ''): Promise<Comment | undefined> {
     const created = await post<Comment>(`/api/sketches/${sketchId}/comments`, { x, y, body })
+    if (created) comments.value.push(created)
+    return created
+  }
+
+  async function addPublicComment(
+    token: string,
+    x: number,
+    y: number,
+    guestName: string,
+    body = '',
+  ): Promise<Comment | undefined> {
+    const created = await post<Comment>(`/api/shared/${token}/comments`, { x, y, body, guest_name: guestName })
     if (created) comments.value.push(created)
     return created
   }
@@ -55,8 +72,14 @@ export function useComments() {
   }
 
   async function deleteComment(id: number) {
+    const removed = comments.value.filter(c => c.id === id || c.parent_id === id)
     comments.value = comments.value.filter(c => c.id !== id && c.parent_id !== id)
-    await del(`/api/comments/${id}`)
+    try {
+      await del(`/api/comments/${id}`)
+    } catch (error) {
+      comments.value = [...comments.value, ...removed]
+      throw error
+    }
   }
 
   function clearComments() {
@@ -66,7 +89,9 @@ export function useComments() {
   return {
     comments,
     loadComments,
+    loadPublicComments,
     addComment,
+    addPublicComment,
     addReply,
     getReplies,
     resolveThread,

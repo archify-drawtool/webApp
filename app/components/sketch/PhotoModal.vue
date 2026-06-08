@@ -5,9 +5,11 @@ defineProps<{
   src: string | null
   loading?: boolean
   error?: string | null
+  arucoData?: unknown
 }>()
 
 const emit = defineEmits<{ close: [] }>()
+
 
 function onKeydown(e: KeyboardEvent) {
   if (e.key === 'Escape') emit('close')
@@ -20,7 +22,7 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
 <template>
   <Teleport to="body">
     <div
-      class="fixed inset-0 z-[100] flex items-center justify-center bg-black/80 p-6"
+      class="fixed inset-0 z-[100] flex flex-col items-center justify-center bg-black/80 p-6"
       @click.self="emit('close')"
     >
       <button
@@ -32,15 +34,18 @@ onUnmounted(() => window.removeEventListener('keydown', onKeydown))
         <X :size="28" />
       </button>
 
-      <div class="max-w-full max-h-full flex items-center justify-center">
+      <div class="max-w-full max-h-full flex flex-col items-center gap-3">
         <span v-if="loading" class="text-grey-200 text-sm">Foto laden...</span>
         <p v-else-if="error" class="text-error-text text-sm px-6 text-center">{{ error }}</p>
-        <img
-          v-else-if="src"
-          :src="src"
-          alt="Originele foto"
-          class="max-w-[90vw] max-h-[90vh] object-contain shadow-xl"
-        >
+        <template v-else-if="src">
+          <SketchArucoOverlay v-if="arucoData" :src="src" :aruco-data="(arucoData as any)" />
+          <img
+            v-else
+            :src="src"
+            alt="Originele foto"
+            class="max-w-[90vw] max-h-[85vh] object-contain shadow-xl block"
+          >
+        </template>
       </div>
     </div>
   </Teleport>
