@@ -21,6 +21,8 @@ const { activatePointerTool } = usePointerTool()
 const commentAutoOpenId = useState<number | null>('comment-auto-open-id', () => null)
 const { screenToFlowCoordinate, edges: flowEdges, setEdges, nodesSelectionActive, addSelectedNodes, getSelectedNodes, onSelectionEnd, onPaneClick: onPaneClickHook, onConnect: onConnectHook, onNodeDragStart: onNodeDragStartHook, onEdgeUpdate: onEdgeUpdateHook, onNodeClick: onNodeClickHook, onNodesInitialized, fitView } = useVueFlow(SKETCH_CANVAS_ID)
 
+const hasSelectedEdge = computed(() => flowEdges.value.some(e => e.selected))
+
 onNodesInitialized(() => {
   if (fitViewPending.value) {
     fitViewPending.value = false
@@ -191,7 +193,7 @@ onNodeClickHook(onNodeClick)
 <template>
   <div
     class="w-full h-full"
-    :class="{ 'drag-tool-active': isDragToolActive }"
+    :class="{ 'drag-tool-active': isDragToolActive, 'edge-selected': hasSelectedEdge }"
     @mousedown="onWrapperMouseDown"
     @contextmenu="(e: MouseEvent) => { if (e.ctrlKey) { e.preventDefault(); e.stopPropagation() } }"
   >
@@ -205,7 +207,8 @@ onNodeClickHook(onNodeClick)
 :min-zoom="0.1"
 :max-zoom="4"
 :delete-key-code="null"
-:edges-updatable="false"
+:edges-updatable="!isDragToolActive"
+:edge-updater-radius="20"
 :pan-on-drag="panOnDrag"
 :selection-key-code="isDragToolActive || isPlacingNode || isCommentToolActive ? null : true"
 :multi-selection-key-code="'Control'"
@@ -301,23 +304,41 @@ onNodeClickHook(onNodeClick)
 }
 
 .vue-flow__handle {
-  width: 26px !important;
-  height: 26px !important;
-  background: transparent !important;
-  border: none !important;
+  width: 6px !important;
+  height: 6px !important;
+  background-color: #555 !important;
+  border: 1px solid #fff !important;
+  border-radius: 50% !important;
 }
 
-.vue-flow__handle::after {
+/* Vergroot het klikgebied zonder de lijn-eindpunten te beïnvloeden */
+.vue-flow__handle::before {
   content: '';
   position: absolute;
   top: 50%;
   left: 50%;
-  width: 6px;
-  height: 6px;
-  background-color: #555;
-  border: 1px solid #fff;
-  border-radius: 50%;
+  width: 26px;
+  height: 26px;
   transform: translate(-50%, -50%);
-  pointer-events: none;
+  background: transparent;
+}
+
+/* Geselecteerde edge bovenop nodes zodat edgeupdater klikbaar is */
+.vue-flow__edge.selected {
+  z-index: 1001 !important;
+}
+
+.vue-flow__edgeupdater {
+  cursor: move;
+  pointer-events: all;
+}
+
+/* Als een edge geselecteerd is: handles en nodes niet meer klikbaar zodat edgeupdater erdoorheen komt */
+.edge-selected .vue-flow__handle {
+  pointer-events: none !important;
+}
+
+.edge-selected .vue-flow__node {
+  pointer-events: none !important;
 }
 </style>

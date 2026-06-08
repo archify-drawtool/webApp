@@ -139,12 +139,23 @@ function onContextMenu(event: MouseEvent) {
 }
 
 :deep(.vue-flow__handle) {
-  width: 10px;
-  height: 10px;
+  width: 6px;
+  height: 6px;
   background-color: #E5097F;
-  border: 2px solid white;
+  border: 1px solid white;
   border-radius: 50%;
   opacity: 1;
+}
+
+:deep(.vue-flow__handle)::before {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 26px;
+  height: 26px;
+  transform: translate(-50%, -50%);
+  background: transparent;
 }
 </style>
 
