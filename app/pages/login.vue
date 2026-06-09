@@ -34,12 +34,17 @@
 definePageMeta({ layout: "auth" });
 useHead({ title: 'Inloggen' })
 
-const { loginWithMicrosoft } = useAuth();
+const { loginWithMicrosoft, initMsal } = useAuth();
 
 const pending = ref(false);
 const error = ref<Error | null>(null);
 
 const errorMessage = computed(() => error.value?.message || "Inloggen mislukt");
+
+// Warm up MSAL (dynamic import + initialize) before the user clicks, so the
+// first loginPopup() opens synchronously within the click gesture and isn't
+// blocked by the browser (popup_window_error).
+onMounted(initMsal);
 
 const handleLogin = async () => {
   pending.value = true;

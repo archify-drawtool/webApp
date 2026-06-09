@@ -2,6 +2,7 @@ import type { User, LoginResponse } from "~/types/Auth";
 import type { PublicClientApplication, Configuration, AuthenticationResult } from "@azure/msal-browser";
 
 let msalInstance: PublicClientApplication | null = null;
+let msalInstancePromise: Promise<PublicClientApplication> | null = null;
 
 export const useAuth = () => {
   const { post, get } = useApi();
@@ -15,20 +16,30 @@ export const useAuth = () => {
     if (!import.meta.client) {
       throw new Error("MSAL is browser-only");
     }
-    if (!msalInstance) {
-      const { PublicClientApplication } = await import("@azure/msal-browser");
-      const msalConfig: Configuration = {
-        auth: {
-          clientId: config.public.entraClientId as string,
-          authority: `https://login.microsoftonline.com/${config.public.entraTenantId}`,
-          redirectUri: `${window.location.origin}/auth/callback.html`,
-        },
-        cache: { cacheLocation: "sessionStorage" },
-      };
-      msalInstance = new PublicClientApplication(msalConfig);
-      await msalInstance.initialize();
+    if (msalInstance) return msalInstance;
+    // Cache the in-flight init so concurrent callers (warm-up + a fast click)
+    // share one instance instead of each creating + initializing their own.
+    if (!msalInstancePromise) {
+      msalInstancePromise = (async () => {
+        const { PublicClientApplication } = await import("@azure/msal-browser");
+        const msalConfig: Configuration = {
+          auth: {
+            clientId: config.public.entraClientId as string,
+            authority: `https://login.microsoftonline.com/${config.public.entraTenantId}`,
+            redirectUri: `${window.location.origin}/auth/callback.html`,
+          },
+          cache: { cacheLocation: "sessionStorage" },
+        };
+        const instance = new PublicClientApplication(msalConfig);
+        await instance.initialize();
+        msalInstance = instance;
+        return instance;
+      })().catch((err) => {
+        msalInstancePromise = null; // allow retry on next call
+        throw err;
+      });
     }
-    return msalInstance;
+    return msalInstancePromise;
   };
 
   const loginWithMicrosoft = async (): Promise<void> => {
@@ -75,5 +86,14 @@ export const useAuth = () => {
     }
   };
 
-  return { loginWithMicrosoft, logout, fetchCurrentUser, user, token, isLoggedIn };
+  const initMsal = async (): Promise<void> => {
+    if (!import.meta.client) return;
+    try {
+      await getMsalInstance();
+    } catch {
+      // Best-effort warm-up; loginWithMicrosoft will retry/surface errors.
+    }
+  };
+
+  return { loginWithMicrosoft, logout, fetchCurrentUser, initMsal, user, token, isLoggedIn };
 };
