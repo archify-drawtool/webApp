@@ -71,6 +71,7 @@ export const useAuth = () => {
       if (msalInstance) {
         await msalInstance.clearCache();
         msalInstance = null;
+        msalInstancePromise = null;
       }
       await navigateTo("/login");
     }
