@@ -1,4 +1,4 @@
-const PUBLIC_ROUTES = ["/login", "/privacy-policy"]
+const PUBLIC_ROUTES = ["/login"]
 const PUBLIC_PREFIXES = ["/gedeeld/"]
 
 export default defineNuxtRouteMiddleware(async (to) => {
