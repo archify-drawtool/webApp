@@ -12,4 +12,3 @@ const dest = join(destDir, 'msal-redirect-bridge.min.js')
 
 mkdirSync(destDir, { recursive: true })
 copyFileSync(src, dest)
-console.log('Copied MSAL redirect bridge to public/auth/')
