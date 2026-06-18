@@ -33,6 +33,7 @@ export interface ArucoNodeMarker {
   type: 'node'
   hitbox: ArucoHitbox
   hitbox_corners: ArucoPoint[]
+  card_center: ArucoPoint
 }
 
 export interface ArucoEdgeMarker {
@@ -46,6 +47,7 @@ export interface ArucoEdgeMarker {
   type: 'directionless' | 'monodirectional' | 'bidirectional'
   hitbox: ArucoHitbox
   hitbox_corners: ArucoPoint[]
+  card_center: ArucoPoint
   is_detected: boolean
   detection_lines: {
     main_start: ArucoPoint

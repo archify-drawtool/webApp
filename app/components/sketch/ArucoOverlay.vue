@@ -115,6 +115,26 @@ function toPoints(pts: ArucoPoint[]) {
               class="stroke-aruco-marker"
               stroke-width="9"
             />
+            <!-- Card center: dotted line from marker center to card center -->
+            <line
+              :x1="m.center_x"
+              :y1="m.center_y"
+              :x2="m.card_center.x"
+              :y2="m.card_center.y"
+              stroke="white"
+              stroke-width="4"
+              stroke-dasharray="10 8"
+              opacity="0.4"
+            />
+            <!-- Card center dot -->
+            <circle
+              :cx="m.card_center.x"
+              :cy="m.card_center.y"
+              r="14"
+              class="fill-aruco-marker"
+              stroke="black"
+              stroke-width="4"
+            />
             <text
               :x="m.center_x"
               :y="m.center_y - 8"
@@ -163,6 +183,26 @@ function toPoints(pts: ArucoPoint[]) {
               fill="none"
               class="stroke-aruco-marker"
               stroke-width="9"
+            />
+            <!-- Card center: dotted line from marker center to card center -->
+            <line
+              :x1="m.center_x"
+              :y1="m.center_y"
+              :x2="m.card_center.x"
+              :y2="m.card_center.y"
+              stroke="white"
+              stroke-width="4"
+              stroke-dasharray="10 8"
+              opacity="0.4"
+            />
+            <!-- Card center dot -->
+            <circle
+              :cx="m.card_center.x"
+              :cy="m.card_center.y"
+              r="14"
+              class="fill-aruco-marker"
+              stroke="black"
+              stroke-width="4"
             />
             <text
               :x="m.center_x"
