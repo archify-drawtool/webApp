@@ -13,15 +13,13 @@ defineProps<{
   <BaseGrid
       :loading="loading"
       :error="error"
-      :is-empty="projects.length === 0"
-      empty-title="Geen projecten gevonden"
-      empty-message="Je hebt nog geen projecten. Maak een nieuw project aan om te beginnen."
+      :is-empty="false"
       :cols="{ sm: 2, lg: 3, xl: 4 }"
   >
     <!-- New project card -->
     <NuxtLink
         to="/projecten/aanmaken"
-        class="flex items-center justify-center gap-2 border-2 border-dashed border-black p-4 h-full hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer"
+        class="flex flex-row items-center justify-center gap-2 border-2 border-dashed border-black p-4 min-h-28 hover:border-primary-500 hover:text-primary-500 transition-colors cursor-pointer w-full"
     >
       <span class="font-heading text-h3">Nieuw project</span>
       <Pencil :size="20" />

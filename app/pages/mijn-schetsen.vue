@@ -11,7 +11,7 @@ await fetchSketches()
 
 <template>
   <div>
-    <h1 class="mb-4">Mijn Schetsen</h1>
+    <h1 class="mb-6">Mijn Schetsen</h1>
 
     <BaseGrid
       :loading="loading"
