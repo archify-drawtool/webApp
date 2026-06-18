@@ -13,9 +13,6 @@ defineProps<{
   <BaseGrid
       :loading="loading"
       :error="error"
-      :is-empty="projects.length === 0"
-      empty-title="Geen projecten gevonden"
-      empty-message="Je hebt nog geen projecten. Maak een nieuw project aan om te beginnen."
       :cols="{ sm: 2, lg: 3, xl: 4 }"
   >
     <!-- New project card -->
